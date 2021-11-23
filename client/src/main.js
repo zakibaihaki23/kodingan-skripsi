@@ -1,34 +1,35 @@
-import Vue from 'vue';
-import App from './App.vue';
-import vuetify from './plugins/vuetify';
-import router from './router';
-import store from './store';
-import http from './axios';
-import './plugins/vuetify-money';
-import VueMoment from 'vue-moment';
-import Toast from 'vue-toastification';
-const moment = require('moment');
-import { LMap, LTileLayer, LMarker } from 'vue2-leaflet';
-import { Icon } from 'leaflet';
-import 'leaflet/dist/leaflet.css';
+import Vue from "vue";
+import App from "./App.vue";
+import vuetify from "./plugins/vuetify";
+import router from "./router";
+import store from "./store";
+import http from "./axios";
+import "./plugins/vuetify-money";
+import VueMoment from "vue-moment";
+import Toast from "vue-toastification";
+const moment = require("moment");
+import { LMap, LTileLayer, LMarker } from "vue2-leaflet";
+import { Icon } from "leaflet";
+import { BootstrapVue, IconsPlugin } from "bootstrap-vue";
+import "leaflet/dist/leaflet.css";
 
-require('moment/locale/id');
+require("moment/locale/id");
 //leaflet
-Vue.component('l-map', LMap);
-Vue.component('l-tile-layer', LTileLayer);
-Vue.component('l-marker', LMarker);
+Vue.component("l-map", LMap);
+Vue.component("l-tile-layer", LTileLayer);
+Vue.component("l-marker", LMarker);
 
 delete Icon.Default.prototype._getIconUrl;
 
 Icon.Default.mergeOptions({
-  iconRetinaUrl: require('leaflet/dist/images/marker-icon-2x.png'),
-  iconUrl: require('leaflet/dist/images/marker-icon.png'),
-  shadowUrl: require('leaflet/dist/images/marker-shadow.png'),
+  iconRetinaUrl: require("leaflet/dist/images/marker-icon-2x.png"),
+  iconUrl: require("leaflet/dist/images/marker-icon.png"),
+  shadowUrl: require("leaflet/dist/images/marker-shadow.png"),
 });
 
-import 'vue-toastification/dist/index.css';
+import "vue-toastification/dist/index.css";
 Vue.use(Toast, {
-  position: 'top-right',
+  position: "top-right",
   timeout: 4000,
   closeOnClick: true,
   pauseOnFocusLoss: false,
@@ -37,32 +38,34 @@ Vue.use(Toast, {
   draggablePercent: 0.6,
   showCloseButtonOnHover: false,
   hideProgressBar: true,
-  closeButton: 'button',
+  closeButton: "button",
   icon: true,
   rtl: false,
-  transition: 'Vue-Toastification__bounce',
+  transition: "Vue-Toastification__bounce",
 });
 
 Vue.use(VueMoment, {
   moment,
 });
 
-// import { BootstrapVue, IconsPlugin } from 'bootstrap-vue';
-// import 'bootstrap/dist/css/bootstrap.css';
-// import 'bootstrap-vue/dist/bootstrap-vue.css';
+// BOOTSTRAP
+import "bootstrap/dist/css/bootstrap.css";
+import "bootstrap-vue/dist/bootstrap-vue.css";
 
-// Vue.use(BootstrapVue);
-// Vue.use(IconsPlugin);
+Vue.use(BootstrapVue);
+Vue.use(IconsPlugin);
+
+// END BOOTSTRAP
 Vue.use(http);
 
 Vue.config.productionTip = false;
-require('./store/subscriber');
+require("./store/subscriber");
 
-store.dispatch('auth/attempt', localStorage.getItem('token')).then(() => {
+store.dispatch("auth/attempt", localStorage.getItem("token")).then(() => {
   new Vue({
     vuetify,
     store,
     router,
-    render: h => h(App),
-  }).$mount('#app');
+    render: (h) => h(App),
+  }).$mount("#app");
 });

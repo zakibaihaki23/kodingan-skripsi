@@ -89,16 +89,10 @@
         </v-col> -->
       </v-row>
     </v-container>
-    <p
-      class="d-flex d-none d-sm-block"
-      style="font-size: 25px; margin-top: 40px"
-    >
+    <p class="d-flex d-none d-sm-block" style="font-size: 25px; margin-top: 40px">
       Filter
     </p>
-    <v-divider
-      class="d-flex d-none d-sm-block"
-      style="margin-right: 40px"
-    ></v-divider>
+    <v-divider class="d-flex d-none d-sm-block" style="margin-right: 40px"></v-divider>
     <v-col md="12"> </v-col>
     <!-- <v-row style="margin-top: 1px">
       <v-col xl="2" md="2" sm="6" cols="12" lg="2">
@@ -141,46 +135,53 @@
       >
         <template v-slot:header="props">
           <thead>
-            <td colspan="2">{{ props.props.headers.text }}</td>
+            <td>{{ props.props.headers.text }}</td>
+            <td rowspan="2"></td>
+            <td colspan="12" class="card-1">Jumlah Pelayanan Perizinan</td>
+            <td colspan="6" class="card-1">Jumlah Pelayanan Non</td>
+          </thead>
+          <thead>
+            <td>{{ props.props.headers.text }}</td>
+            <td></td>
             <td
               colspan="3"
               style="font-weight: bold; font-size: 15px; text-align: center"
-              class="card card-1"
+              class="card-1"
             >
               Jumlah Penduduk Awal Bulan Lalu
             </td>
             <td
               colspan="3"
               style="font-weight: bold; font-size: 15px; text-align: center"
-              class="card card-1"
+              class="card-1"
             >
               Lahir
             </td>
             <td
               colspan="3"
               style="font-weight: bold; font-size: 15px; text-align: center"
-              class="card card-1"
+              class="card-1"
             >
               Meninggal
             </td>
             <td
               colspan="3"
               style="font-weight: bold; font-size: 15px; text-align: center"
-              class="card card-1"
+              class="card-1"
             >
               Datang
             </td>
             <td
               colspan="3"
               style="font-weight: bold; font-size: 15px; text-align: center"
-              class="card card-1"
+              class="card-1"
             >
               Pindah
             </td>
             <td
               colspan="3"
               style="font-weight: bold; font-size: 15px; text-align: center"
-              class="card card-1"
+              class="card-1"
             >
               Jumlah Penduduk Bulan Ini
             </td>
@@ -245,18 +246,13 @@
                 </template>
                 <v-list>
                   <template class="menu">
-                    <v-list-item
-                      :to="{ path: `/packing-order/${props.item.id_pbb}` }"
-                      link
-                    >
+                    <v-list-item :to="{ path: `/packing-order/${props.item.id_pbb}` }" link>
                       <div>
                         <v-list-item-title>Detail</v-list-item-title>
                       </div>
                     </v-list-item>
                   </template>
-                  <v-divider
-                    style="margin-left: 10px; margin-right: 10px"
-                  ></v-divider>
+                  <v-divider style="margin-left: 10px; margin-right: 10px"></v-divider>
 
                   <v-list-item link @click="openDialog(props.item.id_pbb)">
                     Delete
@@ -270,9 +266,7 @@
       <v-dialog v-model="dialog" persistent max-width="360px">
         <v-card style="height: 200px">
           <v-card-title class="headline"> </v-card-title>
-          <v-card-text
-            style="font-size: 16px; margin-top: 10px"
-            class="text-center"
+          <v-card-text style="font-size: 16px; margin-top: 10px" class="text-center"
             >Apa ada yakin ingin <b>{{ "text" }}</b> data ini?
           </v-card-text>
           <v-card-actions>
@@ -341,414 +335,427 @@
 </template>
 
 <script>
-import { mapGetters } from "vuex";
+  import { mapGetters } from "vuex";
 
-export default {
-  data() {
-    return {
-      page: 1,
-      dialog: false,
-      firstLoad: true,
-      search: "",
-      loadingBtn: false,
-      isLoading: true,
-      loading: false,
-      dialogOverlay: false,
-      headers: [
-        {
-          text: "Desa/Kelurahan",
-          align: "center",
-          value: "kelurahan",
-          width: "190px",
-        },
-        {
-          text: "Periode",
-          align: "center",
-          value: "waktu",
-          width: "190px",
-        },
-        {
-          text: "L",
-          align: "center",
-          value: "jmlh_penduduk_bln_lalu_l",
-          sortable: false,
-        },
-        {
-          text: "P",
-          align: "center",
-          value: "jmlh_penduduk_bln_lalu_p",
-          sortable: false,
-        },
-        {
-          text: "L+P",
-          align: "center",
-          value: "total_penduduk_bln_lalu",
-          sortable: false,
-        },
-
-        {
-          text: "L",
-          align: "center",
-          value: "lahir_l",
-          sortable: false,
-        },
-        {
-          text: "P",
-          align: "center",
-          value: "lahir_p",
-          sortable: false,
-        },
-        {
-          text: "L+P",
-          align: "center",
-          value: "total_lahir",
-          sortable: false,
-        },
-        {
-          text: "L",
-          align: "center",
-          value: "meninggal_l",
-          sortable: false,
-        },
-        {
-          text: "P",
-          align: "center",
-          value: "meninggal_p",
-          sortable: false,
-        },
-        {
-          text: "L+P",
-          align: "center",
-          value: "total_meninggal",
-          sortable: false,
-        },
-        {
-          text: "L",
-          align: "center",
-          value: "datang_l",
-          sortable: false,
-        },
-
-        {
-          text: "P",
-          align: "center",
-          value: "datang_p",
-          sortable: false,
-        },
-        {
-          text: "L+P",
-          align: "center",
-          value: "total_datang",
-          sortable: false,
-        },
-        {
-          text: "L",
-          align: "center",
-          value: "pindah_l",
-          sortable: false,
-        },
-        {
-          text: "P",
-          align: "center",
-          value: "pindah_p",
-          sortable: false,
-        },
-        {
-          text: "L+P",
-          align: "center",
-          value: "total_pindah",
-          sortable: false,
-        },
-
-        {
-          text: "L",
-          align: "center",
-          value: "jmlh_penduduk_bln_ini_l",
-          sortable: false,
-        },
-        {
-          text: "P",
-          align: "center",
-          value: "jmlh_penduduk_bln_ini_p",
-          sortable: false,
-        },
-        {
-          text: "L+P",
-          align: "center",
-          value: "total_penduduk_bln_ini",
-          sortable: false,
-        },
-
-        {
-          align: "center",
-          value: "actions",
-          sortable: false,
-          sortable: false,
-        },
-      ],
-
-      dataTable: [],
-      warehouse: null,
-      warehouse_id: "",
-      type: "",
-      status: null,
-      filterActive: null,
-      kependudukan: [],
-      pbb: [],
-    };
-  },
-  created() {
-    this.renderData();
-  },
-  // mounted() {
-  //   this.renderData('', this.status)
-  // },
-  // watch: {
-  //   status: {
-  //     handler: function(val) {
-  //       this.renderData(this.search, val)
-  //     },
-  //     deep: true,
-  //   },
-  // },
-  computed: {
-    ...mapGetters({
-      user: "auth/user",
-    }),
-  },
-  methods: {
-    openDialog(id) {
-      this.dialog = true;
-      this.idPBB = id;
-      this.text = "Hapus";
-    },
-    renderData() {
-      this.$http
-        .get(`/kependudukan`, {
-          params: {
-            id_instansi: this.user.id_instansi,
+  export default {
+    data() {
+      return {
+        page: 1,
+        dialog: false,
+        firstLoad: true,
+        search: "",
+        loadingBtn: false,
+        isLoading: true,
+        loading: false,
+        dialogOverlay: false,
+        headers: [
+          {
+            text: "Desa/Kelurahan",
+            align: "center",
+            value: "kelurahan",
+            width: "190px",
           },
-        })
-        .then((response) => {
-          this.kependudukan = response.data.data;
-          this.firstLoad = false;
-          this.isLoading = false;
+          {
+            text: "Periode",
+            align: "center",
+            value: "waktu",
+            width: "190px",
+          },
+          {
+            text: "L",
+            align: "center",
+            value: "jmlh_penduduk_bln_lalu_l",
+            sortable: false,
+          },
+          {
+            text: "P",
+            align: "center",
+            value: "jmlh_penduduk_bln_lalu_p",
+            sortable: false,
+          },
+          {
+            text: "L+P",
+            align: "center",
+            value: "total_penduduk_bln_lalu",
+            sortable: false,
+          },
+
+          {
+            text: "L",
+            align: "center",
+            value: "lahir_l",
+            sortable: false,
+          },
+          {
+            text: "P",
+            align: "center",
+            value: "lahir_p",
+            sortable: false,
+          },
+          {
+            text: "L+P",
+            align: "center",
+            value: "total_lahir",
+            sortable: false,
+          },
+          {
+            text: "L",
+            align: "center",
+            value: "meninggal_l",
+            sortable: false,
+          },
+          {
+            text: "P",
+            align: "center",
+            value: "meninggal_p",
+            sortable: false,
+          },
+          {
+            text: "L+P",
+            align: "center",
+            value: "total_meninggal",
+            sortable: false,
+          },
+          {
+            text: "L",
+            align: "center",
+            value: "datang_l",
+            sortable: false,
+          },
+
+          {
+            text: "P",
+            align: "center",
+            value: "datang_p",
+            sortable: false,
+          },
+          {
+            text: "L+P",
+            align: "center",
+            value: "total_datang",
+            sortable: false,
+          },
+          {
+            text: "L",
+            align: "center",
+            value: "pindah_l",
+            sortable: false,
+          },
+          {
+            text: "P",
+            align: "center",
+            value: "pindah_p",
+            sortable: false,
+          },
+          {
+            text: "L+P",
+            align: "center",
+            value: "total_pindah",
+            sortable: false,
+          },
+
+          {
+            text: "L",
+            align: "center",
+            value: "jmlh_penduduk_bln_ini_l",
+            sortable: false,
+          },
+          {
+            text: "P",
+            align: "center",
+            value: "jmlh_penduduk_bln_ini_p",
+            sortable: false,
+          },
+          {
+            text: "L+P",
+            align: "center",
+            value: "total_penduduk_bln_ini",
+            sortable: false,
+          },
+
+          {
+            align: "center",
+            value: "actions",
+            sortable: false,
+            sortable: false,
+          },
+        ],
+
+        dataTable: [],
+        warehouse: null,
+        warehouse_id: "",
+        type: "",
+        status: null,
+        filterActive: null,
+        kependudukan: [],
+        pbb: [],
+      };
+    },
+    created() {
+      this.renderData();
+    },
+    // mounted() {
+    //   this.renderData('', this.status)
+    // },
+    // watch: {
+    //   status: {
+    //     handler: function(val) {
+    //       this.renderData(this.search, val)
+    //     },
+    //     deep: true,
+    //   },
+    // },
+    computed: {
+      ...mapGetters({
+        user: "auth/user",
+      }),
+    },
+    methods: {
+      openDialog(id) {
+        this.dialog = true;
+        this.idPBB = id;
+        this.text = "Hapus";
+      },
+      renderData() {
+        if (this.user.role == "User") {
+          this.$http
+            .get(`/kependudukan`, {
+              params: {
+                id_instansi: this.user.id_instansi,
+              },
+            })
+            .then((response) => {
+              this.kependudukan = response.data.data;
+              this.firstLoad = false;
+              this.isLoading = false;
+            });
+        } else {
+          this.$http.get(`/kependudukan`, {}).then((response) => {
+            this.kependudukan = response.data.data;
+            this.firstLoad = false;
+            this.isLoading = false;
+          });
+        }
+      },
+      deletePBB(id) {
+        this.$http.delete("/pbb/" + id).then((response) => {
+          this.dialog = false;
+          this.renderData();
         });
+      },
+      // openDialog(status, id) {
+      //   this.dialog = true
+      //   this.idUser = id
+      //   this.statusUser = status
+      //   if (status == 1) {
+      //     this.text = 'Inactive'
+      //   } else {
+      //     this.text = 'Active'
+      //   }
+      // },
+      //get data user dari API
+      // renderData() {
+      //   this.dialogOverlay = true
+      //   this.isLoading = true
+      //   this.firstLoad = true
+      //   let isActive = ''
+      //   if (this.filterActive || this.filterActive == 0) {
+      //     isActive = 'user.is_active:' + this.filterActive
+      //   } else {
+      //     isActive = ''
+      //   }
+
+      //   let warehouseId = ''
+      //   if (this.warehouse_id) {
+      //     if (this.filterActive != null) {
+      //       warehouseId = '|warehouse_id.e:' + this.warehouse_id
+      //     } else {
+      //       warehouseId = 'warehouse_id.e:' + this.warehouse_id
+      //     }
+      //   } else {
+      //     warehouseId = ''
+      //   }
+
+      //   this.$http
+      //     .get('/helper', {
+      //       params: {
+      //         embeds: 'user_id,helper_type_id,warehouse_id',
+      //         conditions: isActive + warehouseId,
+      //         orderby: '-id',
+      //       },
+      //     })
+      //     .then((response) => {
+      //       this.dataTable = response.data.data
+      //       this.firstLoad = false
+      //       this.dialog = false
+      //       this.dialogOverlay = false
+      //       // this.overlay = true
+      //       this.isLoading = false
+
+      //       if (this.dataTable === null) {
+      //         this.dataTable = []
+      //       }
+      //   // setTimeout(() => {
+      //   //   if (this.firstLoad) this.firstLoad = false
+      //   //   this.isLoading = false
+      //   // }, 1000)
+      //     })
+      //     .catch((error)=> {
+      //       this.dialogOverlay = false
+      //     })
+      // },
+
+      //fungsi untuk unarchive
+      // archive(id) {
+      //   this.firstLoad = true
+      //   this.isLoading = true
+      //   this.dialog = true
+      //   this.dialogOverlay = true
+      //   // this.isLoading = true
+      //   this.$http
+      //     .put('/helper/' + id + '/archive', {})
+      //     .then((response) => {
+      //       let self = this
+      //         this.dialog = false
+      //       setTimeout(function() {
+      //         self.renderData()
+      //         self.dialogOverlay = false
+      //         self.$toast.success('User Not Active')
+      //         self.loadingBtn = false
+      //         self.renderData()
+      //       }, 1000)
+      //     })
+      //     .catch((error) => {
+      //       this.dialog = false
+      //       this.$toast.error(error.response.data.errors.id)
+      //       this.firstLoad = false
+      //       this.isLoading = false
+      //       this.dialogOverlay = false
+      //     })
+      //   setTimeout(() => {
+      //     if (this.firstLoad) this.firstLoad = false
+      //     this.isLoading = false
+      //   }, 1000)
+      // },
+
+      //fungsi untuk archive
+      // unarchive(id) {
+      //   this.isLoading = true
+      //   this.firstLoad = true
+      //   this.dialog = true
+      //   // this.firstLoad = true
+      //   this.dialogOverlay = true
+      //   // this.isLoading = true
+      //   this.$http
+      //     .put('/helper/' + id + '/unarchive', {})
+      //     .then((response) => {
+      //       this.dialog = false
+      //       let self = this
+      //       setTimeout(function() {
+      //         self.renderData()
+      //         self.dialogOverlay = false
+      //         self.$toast.success('User Active')
+      //         self.renderData()
+      //       }, 1000)
+      //     })
+      //     .catch((error) => {
+      //       this.dialog = false
+      //       this.dialogOverlay = false
+      //     })
+      //   setTimeout(() => {
+      //     if (this.firstLoad) this.firstLoad = false
+      //     this.isLoading = false
+      //   }, 1000)
+      // },
+
+      // warehouseSelected(warehouse) {
+      //   this.warehouse = ''
+      //   this.warehouse_id = ''
+      //   if (warehouse) {
+      //     this.warehouse = warehouse
+      //     this.warehouse_id = warehouse.value
+      //   }
+      //   this.renderData()
+      // },
+      // statusSelected(status) {
+      //   this.status = ''
+      //   this.filterActive = null
+      //   if (status) {
+      //     this.status = status
+      //     this.filterActive = status.value
+      //   }
+      //   this.renderData()
+      // },
     },
-    deletePBB(id) {
-      this.$http.delete("/pbb/" + id).then((response) => {
-        this.dialog = false;
-        this.renderData();
-      });
-    },
-    // openDialog(status, id) {
-    //   this.dialog = true
-    //   this.idUser = id
-    //   this.statusUser = status
-    //   if (status == 1) {
-    //     this.text = 'Inactive'
-    //   } else {
-    //     this.text = 'Active'
-    //   }
-    // },
-    //get data user dari API
-    // renderData() {
-    //   this.dialogOverlay = true
-    //   this.isLoading = true
-    //   this.firstLoad = true
-    //   let isActive = ''
-    //   if (this.filterActive || this.filterActive == 0) {
-    //     isActive = 'user.is_active:' + this.filterActive
-    //   } else {
-    //     isActive = ''
-    //   }
-
-    //   let warehouseId = ''
-    //   if (this.warehouse_id) {
-    //     if (this.filterActive != null) {
-    //       warehouseId = '|warehouse_id.e:' + this.warehouse_id
-    //     } else {
-    //       warehouseId = 'warehouse_id.e:' + this.warehouse_id
-    //     }
-    //   } else {
-    //     warehouseId = ''
-    //   }
-
-    //   this.$http
-    //     .get('/helper', {
-    //       params: {
-    //         embeds: 'user_id,helper_type_id,warehouse_id',
-    //         conditions: isActive + warehouseId,
-    //         orderby: '-id',
-    //       },
-    //     })
-    //     .then((response) => {
-    //       this.dataTable = response.data.data
-    //       this.firstLoad = false
-    //       this.dialog = false
-    //       this.dialogOverlay = false
-    //       // this.overlay = true
-    //       this.isLoading = false
-
-    //       if (this.dataTable === null) {
-    //         this.dataTable = []
-    //       }
-    //   // setTimeout(() => {
-    //   //   if (this.firstLoad) this.firstLoad = false
-    //   //   this.isLoading = false
-    //   // }, 1000)
-    //     })
-    //     .catch((error)=> {
-    //       this.dialogOverlay = false
-    //     })
-    // },
-
-    //fungsi untuk unarchive
-    // archive(id) {
-    //   this.firstLoad = true
-    //   this.isLoading = true
-    //   this.dialog = true
-    //   this.dialogOverlay = true
-    //   // this.isLoading = true
-    //   this.$http
-    //     .put('/helper/' + id + '/archive', {})
-    //     .then((response) => {
-    //       let self = this
-    //         this.dialog = false
-    //       setTimeout(function() {
-    //         self.renderData()
-    //         self.dialogOverlay = false
-    //         self.$toast.success('User Not Active')
-    //         self.loadingBtn = false
-    //         self.renderData()
-    //       }, 1000)
-    //     })
-    //     .catch((error) => {
-    //       this.dialog = false
-    //       this.$toast.error(error.response.data.errors.id)
-    //       this.firstLoad = false
-    //       this.isLoading = false
-    //       this.dialogOverlay = false
-    //     })
-    //   setTimeout(() => {
-    //     if (this.firstLoad) this.firstLoad = false
-    //     this.isLoading = false
-    //   }, 1000)
-    // },
-
-    //fungsi untuk archive
-    // unarchive(id) {
-    //   this.isLoading = true
-    //   this.firstLoad = true
-    //   this.dialog = true
-    //   // this.firstLoad = true
-    //   this.dialogOverlay = true
-    //   // this.isLoading = true
-    //   this.$http
-    //     .put('/helper/' + id + '/unarchive', {})
-    //     .then((response) => {
-    //       this.dialog = false
-    //       let self = this
-    //       setTimeout(function() {
-    //         self.renderData()
-    //         self.dialogOverlay = false
-    //         self.$toast.success('User Active')
-    //         self.renderData()
-    //       }, 1000)
-    //     })
-    //     .catch((error) => {
-    //       this.dialog = false
-    //       this.dialogOverlay = false
-    //     })
-    //   setTimeout(() => {
-    //     if (this.firstLoad) this.firstLoad = false
-    //     this.isLoading = false
-    //   }, 1000)
-    // },
-
-    // warehouseSelected(warehouse) {
-    //   this.warehouse = ''
-    //   this.warehouse_id = ''
-    //   if (warehouse) {
-    //     this.warehouse = warehouse
-    //     this.warehouse_id = warehouse.value
-    //   }
-    //   this.renderData()
-    // },
-    // statusSelected(status) {
-    //   this.status = ''
-    //   this.filterActive = null
-    //   if (status) {
-    //     this.status = status
-    //     this.filterActive = status.value
-    //   }
-    //   this.renderData()
-    // },
-  },
-};
+  };
 </script>
 
 <style scoped lang="scss">
-.mytable table tr {
-  border: none;
-}
-.v-data-table > .v-data-table__wrapper > table > tbody > tr > td {
-  font-size: 17px;
-}
-.helper {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
-    Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
-  padding-left: 30px;
-  padding-right: 20px;
-}
+  .mytable table tr {
+    border: none;
+  }
+  .v-data-table > .v-data-table__wrapper > table > tbody > tr > td {
+    font-size: 17px;
+  }
+  .helper {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell,
+      "Open Sans", "Helvetica Neue", sans-serif;
+    padding-left: 30px;
+    padding-right: 20px;
+  }
 
-// .v-btn:not(.v-btn--round).v-size--default {
-//   position: absolute;
-//   width: 200px;
-//   height: 50px;
-//   background: #4662d4;
-//   color: white;
-//   border-radius: 30px;
-//   font-size: 16px;
-//   margin-top: 50px;
-//   font-weight: bold;
-//   text-transform: capitalize;
-//   cursor: pointer;
-//   padding: 5px;
-// }
-.search {
-  padding-left: 100px;
-  padding-right: 50px;
-  margin-top: 50px;
-}
-.search2 {
-  margin-top: 150px;
-  margin-right: 150px;
-  box-sizing: content-box;
-  width: 150px;
-}
-.v-menu__content {
-  border-radius: 8px;
-  border: 1px solid #c4c4c4;
-  outline-style: inherit;
-  outline-color: white;
-  box-shadow: none;
+  // .v-btn:not(.v-btn--round).v-size--default {
+  //   position: absolute;
+  //   width: 200px;
+  //   height: 50px;
+  //   background: #4662d4;
+  //   color: white;
+  //   border-radius: 30px;
+  //   font-size: 16px;
+  //   margin-top: 50px;
+  //   font-weight: bold;
+  //   text-transform: capitalize;
+  //   cursor: pointer;
+  //   padding: 5px;
+  // }
+  .search {
+    padding-left: 100px;
+    padding-right: 50px;
+    margin-top: 50px;
+  }
+  .search2 {
+    margin-top: 150px;
+    margin-right: 150px;
+    box-sizing: content-box;
+    width: 150px;
+  }
+  .v-menu__content {
+    border-radius: 8px;
+    border: 1px solid #c4c4c4;
+    outline-style: inherit;
+    outline-color: white;
+    box-shadow: none;
 
-  outline-color: #e8eff2;
-}
-.v-sheet.v-list {
-  background: #e8eff2;
-}
-.card {
-  background: #fff;
-}
+    outline-color: #e8eff2;
+  }
+  .v-sheet.v-list {
+    background: #e8eff2;
+  }
+  .card {
+    background: #fff;
+  }
 
-.card-1 {
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
-  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-}
+  .card-1 {
+    border: solid 1px #ddeeee;
+    border-collapse: collapse;
+    border-spacing: 0;
+    width: 80%;
+    text-align: center;
+    vertical-align: middle;
+    font-weight: bold;
+  }
 
-// .card-1:hover {
-//   box-shadow: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
-// }
+  // .card-1:hover {
+  //   box-shadow: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
+  // }
 </style>

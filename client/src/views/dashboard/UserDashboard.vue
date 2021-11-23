@@ -1,6 +1,42 @@
 <template>
   <div>
-    <v-row no-gutters style="margin-top: 30px">
+    <div>
+      <b-row>
+        <b-col>
+          <b-skeleton-wrapper :loading="loading">
+            <template #loading>
+              <b-skeleton></b-skeleton>
+            </template>
+            <b-card
+              border-variant="primary"
+              header="Total Kelurahan"
+              header-bg-variant="primary"
+              header-text-variant="white"
+              align="center"
+            >
+              <b-card-text>{{ this.kelurahan }} Kelurahan</b-card-text>
+            </b-card>
+          </b-skeleton-wrapper>
+        </b-col>
+        <b-col>
+          <b-skeleton-wrapper :loading="loading">
+            <template #loading>
+              <b-skeleton></b-skeleton>
+            </template>
+            <b-card
+              border-variant="primary"
+              header="Total Data yang belum divalidasi"
+              header-bg-variant="primary"
+              header-text-variant="white"
+              align="center"
+            >
+              <b-card-text>{{ this.kelurahan }} Data</b-card-text>
+            </b-card>
+          </b-skeleton-wrapper>
+        </b-col>
+      </b-row>
+    </div>
+    <!-- <v-row no-gutters style="margin-top: 30px">
       <v-col cols="12" sm="3" md="3" lg="3">
         <v-card class="text-center" color="blue" dark max-width="300">
           <v-card-text>
@@ -67,7 +103,7 @@
           </v-card-text>
         </v-card>
       </v-col>
-    </v-row>
+    </v-row> -->
   </div>
 </template>
 
@@ -77,12 +113,13 @@
     data() {
       return {
         pbb: [],
-        total_pbb: [],
-        kelurahan: [],
+        total_pbb: "",
+        kelurahan: "",
         sekarang: "",
         waktu_lama: "",
         interval: null,
         waktu: new Date().toISOString().substr(0, 7) + "-01",
+        loading: false,
       };
     },
     destroyed() {
@@ -101,12 +138,11 @@
       getDate() {
         this.waktu_lama = new Date();
         this.interval = setInterval(() => {
-          this.sekarang = this.$moment(this.waktu_lama)
-            .endOf("day")
-            .format("MMMM");
+          this.sekarang = this.$moment(this.waktu_lama).endOf("day").format("MMMM");
         });
       },
       renderData() {
+        this.loading = true;
         //GET DATA FOR TOTAL
         this.$http
           .get("/pbb", {
@@ -122,14 +158,14 @@
             this.dialog = false;
             this.dialogOverlay = false;
             this.overlay = true;
-            this.isLoading = false;
+            this.loading = false;
           })
           .catch((error) => {
             if (error) {
               window.localStorage.clear();
               window.location.reload();
             }
-            this.isLoading = false;
+            this.loading = false;
           });
 
         //GET DATA TOTAL KELURAHAN
@@ -145,14 +181,14 @@
             this.dialog = false;
             this.dialogOverlay = false;
             this.overlay = true;
-            this.isLoading = false;
+            this.loading = false;
           })
           .catch((error) => {
             if (error) {
               window.localStorage.clear();
               window.location.reload();
             }
-            this.isLoading = false;
+            this.loading = false;
           });
       },
     },

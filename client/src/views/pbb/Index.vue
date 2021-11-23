@@ -3,69 +3,44 @@
     <h1>Laporan Realisasi PBB</h1>
     <!-- FOR ALL DEVICE -->
     <v-container>
-      <v-row>
-        <v-col cols="3" sm="6" md="6" lg="7">
-          <div class="d-flex d-none d-sm-block" v-if="user.role == 'User'">
-            <v-btn
-              :to="{ path: '/pbb/create' }"
-              style="
-                position: absolute;
-                width: 200px;
-                height: 50px;
-                background: #4662d4;
-                color: white;
-                border-radius: 30px;
-                font-size: 16px;
-                margin-top: 20px;
-                font-weight: bold;
-                text-transform: capitalize;
-                cursor: pointer;
-                padding: 5px;
-              "
-              >Input Data</v-btn
-            >
-          </div>
-        </v-col>
-        <v-col>
-          <div>
-            <v-tooltip bottom>
-              <template v-slot:activator="{ on, attrs }">
-                <v-text-field
-                  v-bind="attrs"
-                  v-on="on"
-                  v-model="searchBox"
-                  append-icon="mdi-magnify"
-                  rounded
-                  label="Search...."
-                  solo
-                  hide-details
-                  class="search d-none d-sm-none d-sm-flex"
-                >
-                </v-text-field>
-              </template>
-              <span>search by helper code, name, or phone number</span>
-            </v-tooltip>
-          </div>
-          <div>
-            <v-tooltip bottom>
-              <template v-slot:activator="{ on, attrs }">
-                <v-text-field
-                  v-bind="attrs"
-                  v-on="on"
-                  v-model="search"
-                  append-icon="mdi-magnify"
-                  rounded
-                  label="Search...."
-                  solo
-                  hide-details
-                  class="search2 d-sm-none d-md-none d-lg-none d-xl-none"
-                >
-                </v-text-field>
-              </template>
-              <span>search by helper code, name, or phone number</span>
-            </v-tooltip>
-          </div>
-        </v-col>
+      <b-row class="mb-10">
+        <b-col>
+          <v-btn
+            :to="{ path: '/pbb/create' }"
+            style="
+              width: 200px;
+              height: 50px;
+              background: #4662d4;
+              color: white;
+              border-radius: 30px;
+              font-size: 16px;
+              font-weight: bold;
+              text-transform: capitalize;
+              cursor: pointer;
+              padding: 5px;
+            "
+            v-if="user.role == 'User'"
+            >Input Data</v-btn
+          >
+        </b-col>
+        <b-col>
+          <v-tooltip bottom>
+            <template v-slot:activator="{ on, attrs }">
+              <v-text-field
+                v-bind="attrs"
+                v-on="on"
+                v-model="search"
+                append-icon="mdi-magnify"
+                rounded
+                label="Search...."
+                solo
+                hide-details
+              >
+              </v-text-field>
+            </template>
+            <span>Cari Berdasarkan Kelurahan</span>
+          </v-tooltip>
+        </b-col>
         <!-- <v-col>
           <div>
             <v-tooltip bottom>
@@ -87,11 +62,9 @@
             </v-tooltip>
           </div>
         </v-col> -->
-      </v-row>
+      </b-row>
     </v-container>
-    <p class="d-flex d-none d-sm-block" style="font-size: 25px; margin-top: 40px">
-      Filter
-    </p>
+    <p class="mt-10" style="font-size: 25px">Filter</p>
     <v-divider class="d-flex d-none d-sm-block" style="margin-right: 40px"></v-divider>
 
     <v-row style="margin-top: 1px">
@@ -184,9 +157,7 @@
             scrollable
           >
             <v-spacer></v-spacer>
-            <v-btn text color="primary" @click="date_filter = false">
-              Cancel
-            </v-btn>
+            <v-btn text color="primary" @click="date_filter = false"> Cancel </v-btn>
             <v-btn text color="primary" @click="(date_filter = false), renderData(search)">
               OK
             </v-btn>
@@ -257,13 +228,16 @@
                     <template class="menu">
                       <v-list-item :to="{ path: `/pbb/${props.item.id}` }" link>
                         <div>
-                          <v-list-item-title>Detail</v-list-item-title>
+                          <v-list-item-title>Edit</v-list-item-title>
                         </div>
                       </v-list-item>
                     </template>
                     <v-divider style="margin-left: 10px; margin-right: 10px"></v-divider>
 
-                    <v-list-item link @click="openDialog(props.item.id, props.item.kelurahan)">
+                    <v-list-item
+                      link
+                      @click="openDialog(props.item.id, props.item.kelurahan, props.item.waktu)"
+                    >
                       Delete
                     </v-list-item>
                   </v-list>
@@ -298,12 +272,41 @@
                     {{ props.item.keterangan }}
                   </li>
                 </ul>
+                <v-menu offset-y>
+                  <template v-slot:activator="{ on, attrs }">
+                    <v-btn v-bind="attrs" v-on="on" icon>
+                      <v-icon dark> mdi-dots-horizontal </v-icon>
+                    </v-btn>
+                  </template>
+                  <v-list>
+                    <template class="menu">
+                      <v-list-item :to="{ path: `/pbb/${props.item.id}` }" link>
+                        <div>
+                          <v-list-item-title>Edit</v-list-item-title>
+                        </div>
+                      </v-list-item>
+                    </template>
+                    <v-divider style="margin-left: 10px; margin-right: 10px"></v-divider>
+
+                    <v-list-item
+                      link
+                      @click="openDialog(props.item.id, props.item.kelurahan, props.item.waktu)"
+                    >
+                      Delete
+                    </v-list-item>
+                  </v-list>
+                </v-menu>
               </td>
             </tr>
           </template>
         </v-data-table>
       </v-layout>
-      <v-dialog v-model="dialog" persistent max-width="360px">
+      <b-modal v-model="dialog" centered no-close-on-backdrop @ok="deletePBB()">
+        Apakah anda ingin menghapus data dari <b>{{ this.kel }}</b
+        ><br />Pada Periode Laporan <b>{{ this.period }}</b
+        >?
+      </b-modal>
+      <!-- <v-dialog v-model="dialog" persistent max-width="360px">
         <v-card style="height: 200px">
           <v-card-title class="headline"> </v-card-title>
           <v-card-text style="font-size: 16px; margin-top: 10px" class="text-center"
@@ -335,7 +338,7 @@
               <v-col xl="5" cols="6" md="6" sm="6" lg="6">
                 <v-btn
                   text
-                  @click="deletePBB(idPBB)"
+                  @click="deletePBB(id)"
                   style="
                     margin-bottom: 10px;
                     margin-top: 5px;
@@ -358,7 +361,7 @@
             </v-row>
           </v-card-actions>
         </v-card>
-      </v-dialog>
+      </v-dialog> -->
     </div>
   </div>
 </template>
@@ -386,6 +389,10 @@
         dialogOverlay: false,
         overlay: false,
         kelurahans: "",
+        kel: "",
+        idData: "",
+        id: "",
+        period: "",
         table: [
           {
             text: "Desa/Kelurahan",
@@ -442,7 +449,7 @@
     },
     watch: {
       search: {
-        handler: function(val) {
+        handler: function (val) {
           this.renderData(val);
         },
         deep: true,
@@ -462,7 +469,7 @@
     // },
     watch: {
       clearable: {
-        handler: function(val) {
+        handler: function (val) {
           this.renderData("");
         },
         deep: true,
@@ -473,10 +480,16 @@
         user: "auth/user",
       }),
       format_date() {
-        if (this.date) return this.$moment(this.date).format("MMMM/YYYY");
+        if (this.date) return this.$moment(this.date).format("MMMM - YYYY");
       },
     },
     methods: {
+      openDialog(id, kelurahan, waktu) {
+        this.dialog = true;
+        this.idData = id;
+        this.kel = kelurahan;
+        this.period = this.$moment(waktu).format("MMMM - YYYY");
+      },
       formatPrice(value) {
         let val = (value / 1).toFixed(0).replace(".", ",");
         return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
@@ -651,8 +664,8 @@
         }
       },
 
-      deletePBB(id) {
-        this.$http.delete("/pbb/" + id).then((response) => {
+      deletePBB() {
+        this.$http.delete("/pbb/" + this.idData).then((response) => {
           this.dialog = false;
           this.renderData();
         });
