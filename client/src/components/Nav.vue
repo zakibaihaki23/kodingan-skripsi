@@ -1,5 +1,6 @@
 <template>
   <div>
+    <!-- USER -->
     <v-app-bar class="appbar" color="white" flat v-if="user.role == 'User'">
       <v-app-bar-nav-icon @click="toggleDrawer()" />
 
@@ -34,7 +35,7 @@
           </v-avatar>
         </v-badge>
       </v-btn>
-      <!-- NON ADMIN -->
+
       <v-list class="d-none d-sm-none d-sm-flex" style="margin-left: 20px">
         <v-list-item-title style="cursor: pointer" @click="logout">
           <v-icon left style="margin-left: 12px; color: grey">mdi-logout</v-icon>
@@ -84,9 +85,7 @@
                 {{ user.instansi }}
               </p>
               <v-divider class="my-3"></v-divider>
-              <v-btn depressed rounded text :to="{ path: '/profile' }">
-                Profile
-              </v-btn>
+              <v-btn depressed rounded text :to="{ path: '/profile' }"> Profile </v-btn>
               <v-divider class="my-3"></v-divider>
               <v-btn depressed rounded text @click="logout"> Keluar </v-btn>
             </div>
@@ -95,7 +94,8 @@
       </v-menu>
     </v-app-bar>
 
-    <v-app-bar class="appbar" color="white" flat v-else>
+    <!-- ADMIN -->
+    <v-app-bar class="appbar" color="white" flat v-if="user.role == 'Admin'">
       <v-app-bar-nav-icon @click="toggleDrawer()" />
 
       <v-spacer />
@@ -129,7 +129,7 @@
           </v-avatar>
         </v-badge>
       </v-btn>
-      <!-- ADMIN -->
+
       <v-list class="d-none d-sm-none d-sm-flex" style="margin-left: 20px">
         <v-list-item-title style="cursor: pointer" @click="logout">
           <v-icon left style="margin-left: 12px; color: grey">mdi-logout</v-icon>
@@ -179,9 +179,101 @@
                 {{ user.instansi }}
               </p>
               <v-divider class="my-3"></v-divider>
-              <v-btn depressed rounded text :to="{ path: '/profile' }">
-                Profile
-              </v-btn>
+              <v-btn depressed rounded text :to="{ path: '/profile' }"> Profile </v-btn>
+              <v-divider class="my-3"></v-divider>
+              <v-btn depressed rounded text @click="logout"> Logout </v-btn>
+            </div>
+          </v-list-item-content>
+        </v-card>
+      </v-menu>
+    </v-app-bar>
+
+    <!-- CAMAT -->
+    <v-app-bar class="appbar" color="white" flat v-if="user.role == 'Camat'">
+      <v-app-bar-nav-icon @click="toggleDrawer()" />
+
+      <v-spacer />
+      <v-list style="margin-right: 30px">
+        <v-list-item-title style="font-weight: bold; text-transform: uppercase">
+          {{ user.name }}
+        </v-list-item-title>
+        <v-list-item-title style="text-align: right">
+          {{ user.instansi }}
+        </v-list-item-title>
+      </v-list>
+      <v-btn dense icon :to="{ path: '/profile' }" class="d-none d-sm-none d-sm-flex" small>
+        <v-badge
+          bordered
+          color="green"
+          content="6"
+          dot
+          offset-x="25"
+          offset-y="9"
+          class="d-none d-sm-none d-sm-flex"
+        >
+          <v-avatar color="orange" style="margin-right: 15px" class="d-none d-sm-none d-sm-flex">
+            <span class="white--text text-h5">{{
+              user.name
+                .split(" ")
+                .map((x) => x.charAt(0))
+                .join("")
+                .substr(0, 2)
+                .toUpperCase()
+            }}</span>
+          </v-avatar>
+        </v-badge>
+      </v-btn>
+
+      <v-list class="d-none d-sm-none d-sm-flex" style="margin-left: 20px">
+        <v-list-item-title style="cursor: pointer" @click="logout">
+          <v-icon left style="margin-left: 12px; color: grey">mdi-logout</v-icon>
+
+          <v-list-item-title>Keluar</v-list-item-title>
+        </v-list-item-title>
+      </v-list>
+
+      <v-menu left offset-y transition="slide-x-transition">
+        <template v-slot:activator="{ on, attrs }">
+          <v-btn
+            dense
+            v-bind="attrs"
+            v-on="on"
+            icon
+            class="d-sm-none d-md-none d-lg-none d-xl-none"
+          >
+            <v-badge bordered color="green" content="6" dot offset-x="21" offset-y="9">
+              <v-avatar color="orange" style="margin-right: 10px">
+                <span class="white--text text-h5">{{
+                  user.name
+                    .split(" ")
+                    .map((x) => x.charAt(0))
+                    .join("")
+                    .substr(0, 2)
+                    .toUpperCase()
+                }}</span>
+              </v-avatar>
+            </v-badge>
+          </v-btn>
+        </template>
+        <v-card width="150px">
+          <v-list-item-content class="justify-center">
+            <div class="mx-auto text-center">
+              <v-avatar color="orange" style="margin-right: 10px">
+                <span class="white--text text-h5">{{
+                  user.name
+                    .split(" ")
+                    .map((x) => x.charAt(0))
+                    .join("")
+                    .substr(0, 2)
+                    .toUpperCase()
+                }}</span>
+              </v-avatar>
+              <h5 style="margin-top: 10px">{{ user.name }}</h5>
+              <p class="text-caption mt-1">
+                {{ user.instansi }}
+              </p>
+              <v-divider class="my-3"></v-divider>
+              <v-btn depressed rounded text :to="{ path: '/profile' }"> Profile </v-btn>
               <v-divider class="my-3"></v-divider>
               <v-btn depressed rounded text @click="logout"> Logout </v-btn>
             </div>
@@ -197,21 +289,22 @@
       color="#42A5F5"
       height="100%"
       :dark="false"
+      style="border-bottom-right-radius: 25px; border-top-right-radius: 25px"
     >
       <v-list>
         <v-list-item-group>
           <v-list-item>
             <v-img src="@/assets/pandeglang_logo.png" class="text-start" max-width="60"></v-img>
             <v-list-item-content>
-              <h1 style="color: white;" class="text-center">SIMAK</h1>
-              <h2 style="color: white; font-size: 15px;" class="text-center">
+              <h1 style="color: white" class="text-center">SIMAK</h1>
+              <h2 style="color: white; font-size: 15px" class="text-center">
                 Kabupaten Pandeglang
               </h2>
             </v-list-item-content>
           </v-list-item>
         </v-list-item-group>
       </v-list>
-
+      <!-- USER -->
       <v-list class="nav" v-if="user.role == 'User'">
         <v-list-item-group>
           <v-list-item v-for="(userRoute, usr) in users" :key="usr" :to="userRoute.path" link>
@@ -230,8 +323,8 @@
         </v-list-item-group>
       </v-list>
 
-      <!-- IS ADMIN == 1 -->
-      <v-list class="nav" v-else>
+      <!-- ADMIN-->
+      <v-list class="nav" v-if="user.role == 'Admin'">
         <v-list-item-group>
           <v-list-item v-for="(adminroute, adm) in adminNav" :key="adm" :to="adminroute.path" link>
             <v-list-item-icon>
@@ -243,6 +336,25 @@
             <v-list-item-content>
               <v-list-item-title class="text" style="color: white">{{
                 adminroute.name
+              }}</v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
+        </v-list-item-group>
+      </v-list>
+
+      <!-- CAMAT -->
+      <v-list class="nav" v-if="user.role == 'Camat'">
+        <v-list-item-group>
+          <v-list-item v-for="(camatroute, cmt) in camatNav" :key="cmt" :to="camatroute.path" link>
+            <v-list-item-icon>
+              <v-icon style="color: white; padding-left: 20px">
+                {{ camatroute.icon }}
+              </v-icon>
+            </v-list-item-icon>
+
+            <v-list-item-content>
+              <v-list-item-title class="text" style="color: white">{{
+                camatroute.name
               }}</v-list-item-title>
             </v-list-item-content>
           </v-list-item>
@@ -320,6 +432,38 @@
           icon: "mdi-account-multiple-outline",
         },
       ],
+      camatNav: [
+        {
+          name: "Dashboard",
+          path: "/dashboard",
+          icon: "mdi-view-dashboard",
+        },
+        {
+          name: "PBB",
+          path: "/pbb",
+          icon: "mdi-city",
+        },
+        {
+          name: "Paten",
+          path: "/paten",
+          icon: "mdi-note-multiple",
+        },
+        {
+          name: "Kependudukan",
+          path: "/kependudukan",
+          icon: "mdi-account",
+        },
+        {
+          name: "Akta",
+          path: "/akta",
+          icon: "mdi-contacts",
+        },
+        {
+          name: "Kelola User",
+          path: "/user",
+          icon: "mdi-account-multiple-outline",
+        },
+      ],
     }),
     methods: {
       toggleDrawer() {
@@ -357,8 +501,8 @@
     z-index: 2;
   }
   .elevation-1 {
-    border-top-right-radius: 5px;
-    border-bottom-right-radius: 5px;
+    border-top-right-radius: 20px;
+    border-bottom-right-radius: 20px;
   }
 
   /* .v-list-item.v-list-item:active {
