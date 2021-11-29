@@ -2,7 +2,7 @@
   <div>
     <div>
       <b-row>
-        <b-col>
+        <b-col lg="6">
           <b-skeleton-wrapper :loading="loading">
             <template #loading>
               <b-skeleton></b-skeleton>
@@ -14,7 +14,90 @@
               header-text-variant="white"
               align="center"
             >
-              <b-card-text>{{ this.kelurahan }} Kelurahan</b-card-text>
+              <b-card-text>{{ this.total_kelurahan }} Kelurahan</b-card-text>
+            </b-card>
+          </b-skeleton-wrapper>
+        </b-col>
+        <b-col lg="6">
+          <b-skeleton-wrapper :loading="loading">
+            <template #loading>
+              <b-skeleton></b-skeleton>
+            </template>
+            <b-card
+              border-variant="primary"
+              header-html="Total Data yang belum divalidasi <br>(Bulan Ini)"
+              header-bg-variant="primary"
+              header-text-variant="white"
+              align="center"
+            >
+              <b-card-text>{{ this.total_data }} Data</b-card-text>
+            </b-card>
+          </b-skeleton-wrapper>
+        </b-col>
+        <b-col lg="6">
+          <b-skeleton-wrapper :loading="loading">
+            <template #loading>
+              <b-skeleton></b-skeleton>
+            </template>
+            <b-card
+              border-variant="primary"
+              header-html="Informasi Seluruh Kecamatan"
+              header-bg-variant="primary"
+              header-text-variant="white"
+              header-tag="header"
+              align="center"
+            >
+              <template #header>
+                <v-badge inline :content="notif_all" :value="notif_all" color="red">
+                  <p class="mt-0 mb-0">Informasi untuk seluruh Kecamatan</p>
+                </v-badge>
+              </template>
+              <b-list-group v-for="(item, index) in all_informasi" :key="item.id">
+                <b-list-group-item active class="text-left">
+                  <p class="mb-1">
+                    {{ item.informasi }}
+                  </p>
+                  <div class="d-flex w-100 justify-content-between">
+                    <small class="text-right">{{
+                      item.waktu | moment("dddd / DD - MMMM - YYYY")
+                    }}</small>
+                  </div>
+                </b-list-group-item>
+                <v-divider :key="index"></v-divider>
+              </b-list-group>
+            </b-card>
+          </b-skeleton-wrapper>
+        </b-col>
+        <b-col lg="6">
+          <b-skeleton-wrapper :loading="loading">
+            <template #loading>
+              <b-skeleton></b-skeleton>
+            </template>
+            <b-card
+              border-variant="primary"
+              header-tag="header"
+              header-bg-variant="primary"
+              header-text-variant="white"
+              align="center"
+            >
+              <template #header>
+                <v-badge inline :content="notif" :value="notif" color="red">
+                  <p class="mt-0 mb-0">Informasi untuk {{ user.nama_instansi }}</p>
+                </v-badge>
+              </template>
+              <b-list-group v-for="(item, index) in informasi" :key="item.id">
+                <b-list-group-item active class="text-left">
+                  <p class="mb-1">
+                    {{ item.informasi }}
+                  </p>
+                  <div class="d-flex w-100 justify-content-between">
+                    <small class="text-right">{{
+                      item.waktu | moment("dddd / DD - MMMM - YYYY")
+                    }}</small>
+                  </div>
+                </b-list-group-item>
+                <v-divider :key="index"></v-divider>
+              </b-list-group>
             </b-card>
           </b-skeleton-wrapper>
         </b-col>
@@ -23,160 +106,119 @@
             <template #loading>
               <b-skeleton></b-skeleton>
             </template>
+
             <b-card
               border-variant="primary"
-              header="Total Data yang belum divalidasi"
+              header-html="Total Data yang Diinput dan Sudah Divalidasi<br> (Tahun Ini)"
               header-bg-variant="primary"
               header-text-variant="white"
               align="center"
             >
-              <b-card-text>{{ this.kelurahan }} Data</b-card-text>
+              <!-- <column-chart
+                :download="{ background: '#fff' }"
+                :library="barchartOptions"
+                loading="loading"
+                label="Total Data yang Diinputkan dan Sudah Divalidasi"
+                :data="[
+                  ['PBB', 1],
+                  ['PATEN', 2],
+                  ['Kependudukan', 1],
+                  ['Akta', 3],
+                  ['Bencana Alam', 2],
+                ]"
+              ></column-chart> -->
+              <column-chart :options="barchartOptions" v-if="loaded" :chartdata="datacollection" />
             </b-card>
           </b-skeleton-wrapper>
         </b-col>
       </b-row>
     </div>
-    <!-- <v-row no-gutters style="margin-top: 30px">
-      <v-col cols="12" sm="3" md="3" lg="3">
-        <v-card class="text-center" color="blue" dark max-width="300">
-          <v-card-text>
-            <div class="text-h6">Total Kelurahan di {{ this.user.instansi }}</div>
-          </v-card-text>
-
-          <v-card-text>
-            <div class="text-h4 font-weight-thin">{{ this.kelurahan }} Kelurahan</div>
-          </v-card-text>
-        </v-card>
-      </v-col>
-      <v-col cols="12" sm="3" md="3" lg="3">
-        <v-card class="text-center" color="aqua" dark max-width="300">
-          <v-card-text>
-            <div class="text-h6">Total Laporan PBB Bulan {{ this.sekarang }}</div>
-          </v-card-text>
-
-          <v-card-text>
-            <div class="text-h4 font-weight-thin">{{ this.total_pbb }} Laporan</div>
-          </v-card-text>
-        </v-card>
-      </v-col>
-      <v-col cols="12" sm="3" md="3" lg="3">
-        <v-card class="text-center" color="cyan" dark max-width="300">
-          <v-card-text>
-            <div class="text-h6">Total Laporan PATEN Bulan {{ this.sekarang }}</div>
-          </v-card-text>
-
-          <v-card-text>
-            <div class="text-h4 font-weight-thin">{{ this.total_pbb }} Laporan</div>
-          </v-card-text>
-        </v-card>
-      </v-col>
-      <v-col cols="12" sm="3" md="3" lg="3">
-        <v-card class="text-center" color="deep-purple" dark max-width="300">
-          <v-card-text>
-            <div class="text-h6">Total Laporan Kependudukan Bulan {{ this.sekarang }}</div>
-          </v-card-text>
-
-          <v-card-text>
-            <div class="text-h4 font-weight-thin">{{ this.total_pbb }} Laporan</div>
-          </v-card-text>
-        </v-card>
-      </v-col>
-      <v-col cols="12" sm="3" md="3" lg="3" style="margin-top: 30px">
-        <v-card class="text-center" color="teal" dark max-width="300">
-          <v-card-text>
-            <div class="text-h6">Total Laporan Akta Bulan {{ this.sekarang }}</div>
-          </v-card-text>
-
-          <v-card-text>
-            <div class="text-h4 font-weight-thin">{{ this.total_pbb }} Laporan</div>
-          </v-card-text>
-        </v-card>
-      </v-col>
-      <v-col cols="12" sm="3" md="3" lg="3" style="margin-top: 30px">
-        <v-card class="text-center" color="light-green" dark max-width="300">
-          <v-card-text>
-            <div class="text-h6">Total Laporan PATEN Bulan {{ this.sekarang }}</div>
-          </v-card-text>
-
-          <v-card-text>
-            <div class="text-h4 font-weight-thin">{{ this.total_pbb }} Laporan</div>
-          </v-card-text>
-        </v-card>
-      </v-col>
-    </v-row> -->
   </div>
 </template>
 
 <script>
   import { mapGetters } from "vuex";
+  import ColumnChart from "../../components/BarChart.vue";
+
   export default {
+    components: {
+      ColumnChart,
+    },
     data() {
       return {
         pbb: [],
+        notif: 0,
         total_pbb: "",
+        total_kelurahan: "",
         kelurahan: "",
         sekarang: "",
         waktu_lama: "",
+        loaded: false,
         interval: null,
-        waktu: new Date().toISOString().substr(0, 7) + "-01",
+        waktu: new Date(),
         loading: false,
+        total_data: "",
+        total_valid: "",
+        informasi: "",
+        notif_all: "",
+        all_informasi: "",
+        barchartOptions: {
+          responsive: true,
+          lineTension: 1,
+          maintainAspectRatio: false,
+          scales: {
+            yAxes: [
+              {
+                ticks: {
+                  beginAtZero: true,
+                  stepSize: 1,
+                },
+              },
+            ],
+            // xAxes: [
+            //   {
+            //     stacked: true,
+            //     barPercentage: 0.7,
+            //   },
+            // ],
+          },
+          datasets: {
+            bar: {
+              categoryPercentage: 0.4,
+            },
+          },
+        },
       };
+    },
+    computed: {
+      ...mapGetters({
+        authenticated: "auth/authenticated",
+        user: "auth/user",
+      }),
     },
     destroyed() {
       clearInterval(this.interval);
     },
     created() {
       this.renderData();
-      this.getDate();
-    },
-    computed: {
-      ...mapGetters({
-        user: "auth/user",
-      }),
     },
     methods: {
-      getDate() {
-        this.waktu_lama = new Date();
-        this.interval = setInterval(() => {
-          this.sekarang = this.$moment(this.waktu_lama).endOf("day").format("MMMM");
-        });
-      },
       renderData() {
         this.loading = true;
+        this.loaded = false;
         //GET DATA FOR TOTAL
-        this.$http
-          .get("/pbb", {
-            params: {
-              id_instansi: `${this.user.id_instansi}`,
-              waktu: this.waktu,
-            },
-          })
-          .then((response) => {
-            this.pbb = response.data.data;
-            this.total_pbb = response.data.total;
-            this.firstLoad = false;
-            this.dialog = false;
-            this.dialogOverlay = false;
-            this.overlay = true;
-            this.loading = false;
-          })
-          .catch((error) => {
-            if (error) {
-              window.localStorage.clear();
-              window.location.reload();
-            }
-            this.loading = false;
-          });
 
         //GET DATA TOTAL KELURAHAN
         this.$http
           .get("/kelurahan", {
             params: {
-              id_instansi: `${this.user.id_instansi}`,
+              instansi_id: this.user.id,
             },
           })
           .then((response) => {
-            this.kelurahan = response.data.total;
+            this.total_kelurahan = response.data.total;
+            // console.log(this.total_kelurahan);
+            // this.kelurahan = response.data.data;
             this.firstLoad = false;
             this.dialog = false;
             this.dialogOverlay = false;
@@ -185,10 +227,67 @@
           })
           .catch((error) => {
             if (error) {
-              window.localStorage.clear();
-              window.location.reload();
+              console.log(error);
             }
             this.loading = false;
+          });
+
+        // INFORMASI
+        this.$http
+          .get("/informasi", {
+            params: {
+              instansi_id: this.user.instansi_id,
+            },
+          })
+          .then((response) => {
+            this.informasi = response.data.data;
+            this.notif = response.data.total;
+          });
+
+        this.$http
+          .get("/informasi", {
+            params: {
+              instansi_id: 0,
+            },
+          })
+          .then((response) => {
+            console.log(response.data.data);
+            this.all_informasi = response.data.data;
+            this.notif_all = response.data.total;
+          });
+
+        // TOTAL UNTUK CHART
+        this.$http
+          .get("/pbb/notvalid", {
+            params: {
+              periode: this.$moment(this.waktu).format("YYYY-MM-" + "01"),
+              instansi_id: this.user.instansi_id,
+            },
+          })
+          .then((response) => {
+            this.total_data = response.data.data[0].not_valid;
+            this.total_valid = response.data.data[1].valid;
+            this.loaded = true;
+
+            // UNTUK INFORMASI
+            // console.log(this.$moment(test).fromNow());
+            this.datacollection = {
+              labels: ["PBB", "PATEN"],
+              datasets: [
+                {
+                  label: "Belum Divalidasi",
+                  backgroundColor: "rgba(54, 162, 235, 1)",
+                  data: [`${this.total_data}`],
+                  borderWidth: 1,
+                },
+                {
+                  label: "Sudah Divalidasi",
+                  backgroundColor: "rgba(255, 206, 86, 1)",
+                  data: [`${this.total_valid}`],
+                  borderWidth: 1,
+                },
+              ],
+            };
           });
       },
     },

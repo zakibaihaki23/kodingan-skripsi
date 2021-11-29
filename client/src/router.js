@@ -226,6 +226,80 @@ const routes = [
       },
     ],
   },
+  {
+    name: "User CRUD",
+    icon: "mdi-view-dashboard",
+    component: MainLayout,
+    path: "/pbb-page",
+    open: false,
+    beforeEnter: (to, from, next) => {
+      if (!store.getters["auth/authenticated"]) {
+        return next({
+          name: "Login",
+        });
+      }
+      next();
+    },
+    children: [
+      {
+        name: "Kelola User",
+        component: () => import("./views/user/Index"),
+        path: "/user",
+      },
+      {
+        name: "Input Data User",
+        component: () => import("./views/user/Create"),
+        path: "/user/create",
+      },
+      {
+        name: "Edit Data User",
+        component: () => import("./views/user/Detail"),
+        path: "/user/update",
+      },
+      // {
+      //   name: "DELETE PBB",
+      //   component: () => import("./views/pbb/Index"),
+      //   path: "/pbb/delete/:id",
+      // },
+    ],
+  },
+  {
+    name: "Informasi Page",
+    icon: "mdi-view-dashboard",
+    component: MainLayout,
+    path: "/pbb-page",
+    open: false,
+    beforeEnter: (to, from, next) => {
+      if (!store.getters["auth/authenticated"]) {
+        return next({
+          name: "Login",
+        });
+      }
+      next();
+    },
+    children: [
+      {
+        name: "Kelola Informasi",
+        component: () => import("./views/user/Index"),
+        path: "/informasi",
+      },
+      {
+        name: "Input Data Informasi",
+        component: () => import("./views/informasi/Create"),
+        path: "/informasi/add",
+      },
+      {
+        name: "Edit Informasi",
+        component: () => import("./views/user/Detail"),
+        path: "/informasi/update",
+      },
+      // {
+      //   name: "DELETE PBB",
+      //   component: () => import("./views/pbb/Index"),
+      //   path: "/pbb/delete/:id",
+      // },
+    ],
+  },
   // {
   //   name: 'Dashboard Admin',
   //   icon: 'mdi-view-dashboard',

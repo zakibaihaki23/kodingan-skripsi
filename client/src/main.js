@@ -13,6 +13,29 @@ import { Icon } from "leaflet";
 import { BootstrapVue, IconsPlugin } from "bootstrap-vue";
 import "leaflet/dist/leaflet.css";
 
+//CHART
+import Chartkick from "vue-chartkick";
+import Chart from "chart.js";
+
+Vue.use(Chartkick.use(Chart));
+
+Chartkick.options = {
+  options: {
+    responsive: true,
+    lineTension: 1,
+    scales: {
+      yAxes: [
+        {
+          ticks: {
+            beginAtZero: true,
+            padding: 1,
+          },
+        },
+      ],
+    },
+  },
+};
+
 require("moment/locale/id");
 //leaflet
 Vue.component("l-map", LMap);

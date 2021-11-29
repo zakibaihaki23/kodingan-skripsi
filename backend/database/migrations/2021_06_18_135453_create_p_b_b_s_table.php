@@ -15,9 +15,7 @@ class CreatePBBSTable extends Migration
     {
         Schema::create('db_realisasi_pbb', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('id_instansi');
-            $table->unsignedBigInteger('id_kelurahan');
-            $table->string('kecamatan');
+            $table->foreignId('instansi_id');
             $table->string('kelurahan');
             $table->double('target_pbb');
             $table->double('realisasi_bln_lalu');
@@ -25,8 +23,11 @@ class CreatePBBSTable extends Migration
             $table->double('jmlh_realisasi');
             $table->double('sisa_target');
             $table->string('keterangan');
-            $table->date('waktu');
+            $table->date('periode');
+            $table->double('is_verified')->default(0);
             $table->timestamps();
+
+    
         });
     }
 
@@ -37,6 +38,6 @@ class CreatePBBSTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('db_realisasi_pbb');
+        // Schema::dropIfExists('db_realisasi_pbb');
     }
 }

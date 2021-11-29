@@ -1,31 +1,33 @@
 <template>
   <div class="regist">
     <h1>Input Data PBB</h1>
-
     <v-row></v-row>
     <v-form>
       <v-row>
         <v-col cols="12" sm="6" lg="6" md="6">
           <div class="form-right-1">
-            <p>Kelurahan <span style="color: red">*</span></p>
+            <p>
+              Kelurahan
+              <span style="color: red">*</span>
+            </p>
             <v-select
               single-line
               outlined
-              clearable
-              @click:clear="(kelurahan = ''), renderData('')"
               class="form"
               item-text="name"
               item-value="id"
               v-model="kelurahan_id"
               :items="kelurahan"
               return-object
-            >
-            </v-select>
+            ></v-select>
           </div>
         </v-col>
         <v-col cols="12" sm="6" lg="6" md="6">
           <div class="form-right-1">
-            <p>Periode <span style="color: red">*</span></p>
+            <p>
+              Periode
+              <span style="color: red">*</span>
+            </p>
             <v-menu
               ref="menu"
               v-model="menu"
@@ -51,15 +53,18 @@
               </template>
               <v-date-picker locale="id" v-model="date" type="month" no-title scrollable>
                 <v-spacer></v-spacer>
-                <v-btn text color="primary" @click="menu = false"> Batalkan </v-btn>
-                <v-btn text color="primary" @click="$refs.menu.save(date)"> Ok </v-btn>
+                <v-btn text color="primary" @click="menu = false">Batalkan</v-btn>
+                <v-btn text color="primary" @click="$refs.menu.save(date)">Ok</v-btn>
               </v-date-picker>
             </v-menu>
           </div>
         </v-col>
         <v-col cols="12" sm="6" lg="6" md="6">
           <div class="form-right">
-            <p>Target PBB <span style="color: red">*</span></p>
+            <p>
+              Target PBB
+              <span style="color: red">*</span>
+            </p>
             <!-- <v-text-field
               single-line
               label="Target PBB"
@@ -67,7 +72,7 @@
               class="form"
               v-model="form.target_pbb"
             >
-            </v-text-field> -->
+            </v-text-field>-->
             <vuetify-money
               v-model="form.target_pbb"
               v-bind:placeholder="placeholder"
@@ -83,7 +88,10 @@
         </v-col>
         <v-col cols="12" sm="6" lg="6" md="6">
           <div class="form-right">
-            <p>Realisasi Bulan Lalu <span style="color: red">*</span></p>
+            <p>
+              Realisasi Bulan Lalu
+              <span style="color: red">*</span>
+            </p>
             <!-- <v-text-field
               single-line
               label="Realisasi Bulan Lalu"
@@ -91,7 +99,7 @@
               class="form"
               v-model="form.realisasi_lalu"
             >
-            </v-text-field> -->
+            </v-text-field>-->
             <vuetify-money
               v-model="form.realisasi_lalu"
               v-bind:placeholder="placeholder"
@@ -107,7 +115,10 @@
         </v-col>
         <v-col cols="12" sm="6" lg="6" md="6">
           <div class="form-right">
-            <p>Realisasi Bulan Ini <span style="color: red">*</span></p>
+            <p>
+              Realisasi Bulan Ini
+              <span style="color: red">*</span>
+            </p>
             <!-- <v-text-field
               single-line
               label="Realisasi Bulan Ini"
@@ -115,7 +126,7 @@
               class="form"
               v-model="form.realisasi_sekarang"
             >
-            </v-text-field> -->
+            </v-text-field>-->
             <vuetify-money
               v-model="form.realisasi_sekarang"
               v-bind:placeholder="placeholder"
@@ -131,8 +142,11 @@
         </v-col>
         <v-col cols="12" sm="6" lg="6" md="6">
           <div class="form-right">
-            <p>Jumlah Realisasi <span style="color: red">*</span></p>
-            <v-text-field outlined class="form" v-model="form.jumlah_realisasi"> </v-text-field>
+            <p>
+              Jumlah Realisasi
+              <span style="color: red">*</span>
+            </p>
+            <v-text-field outlined class="form" v-model="form.jumlah_realisasi"></v-text-field>
             <!-- <vuetify-money
               label="Jumlah Realisasi"
               v-model="form.jumlah_realisasi"
@@ -144,12 +158,15 @@
               v-bind:valueWhenIsEmpty="kosong"
               v-bind:options="options"
               class="form"
-            /> -->
+            />-->
           </div>
         </v-col>
         <v-col cols="12" sm="6" lg="6" md="6">
           <div class="form-right">
-            <p>Sisa Target <span style="color: red">*</span></p>
+            <p>
+              Sisa Target
+              <span style="color: red">*</span>
+            </p>
             <!-- <v-text-field
               single-line
               label="Sisa Target"
@@ -157,7 +174,7 @@
               class="form"
               v-model="form.sisa_target"
             >
-            </v-text-field> -->
+            </v-text-field>-->
             <vuetify-money
               v-model="form.sisa_target"
               v-bind:placeholder="placeholder"
@@ -173,7 +190,10 @@
         </v-col>
         <v-col cols="12" sm="6" lg="6" md="6">
           <div class="form-right">
-            <p>Keterangan <span style="color: red">*</span></p>
+            <p>
+              Keterangan
+              <span style="color: red">*</span>
+            </p>
             <v-textarea
               clearable
               clear-icon="mdi-close-circle"
@@ -181,14 +201,14 @@
               outlined
               class="form"
               v-model="form.keterangan"
-            >
-            </v-textarea>
+            ></v-textarea>
           </div>
         </v-col>
       </v-row>
 
       <br />
-      <br /><br />
+      <br />
+      <br />
 
       <v-divider></v-divider>
       <div>
@@ -227,12 +247,11 @@
                     margin-left: 10px;
                   "
                   class="save"
+                  >Simpan</v-btn
                 >
-                  Simpan
-                </v-btn>
               </template>
               <v-card>
-                <v-card-title class="text-h5"> Apakah data di bawah ini sudah benar? </v-card-title>
+                <v-card-title class="text-h5">Apakah data di bawah ini sudah benar?</v-card-title>
                 <v-card-text style="margin-top: 20px">
                   <v-row style="margin-top: -20px">
                     <v-col md="2">
@@ -248,7 +267,7 @@
                       <h3>Periode</h3>
                     </v-col>
                     <v-col>
-                      <b> : {{ date }}</b>
+                      <b>: {{ date }}</b>
                     </v-col>
                   </v-row>
 
@@ -308,10 +327,8 @@
                 </v-card-text>
                 <v-card-actions>
                   <v-spacer></v-spacer>
-                  <v-btn color="blue darken-1" text @click="confirmDialog = false">
-                    Batalkan
-                  </v-btn>
-                  <v-btn color="blue darken-1" text @click="save"> Simpan </v-btn>
+                  <v-btn color="blue darken-1" text @click="confirmDialog = false">Batalkan</v-btn>
+                  <v-btn color="blue darken-1" text @click="save">Simpan</v-btn>
                 </v-card-actions>
               </v-card>
               <v-overlay :value="overlay">
@@ -358,6 +375,7 @@
         warehouse_id: "",
         kelurahan_id: "",
         kelurahan: [],
+        kecamatan: [],
         error: {},
         placeholder: " ",
         readonly: false,
@@ -376,6 +394,9 @@
 
     created() {
       this.renderData("");
+      if (this.user.role != "User") {
+        this.$router.push("/dashboard");
+      }
     },
     watch: {
       search: {
@@ -410,32 +431,23 @@
         return `${day}/${month}/${year}`;
       },
 
-      // addKelurahan(val) {
-      //   if (val) {
-      //     this.kelurahan = val;
-      //     for (let i = 0; i < val.length; i++) {
-      //       arr.push(val[i].id);
-      //     }
-      //   }
-      // },
-      //untuk mendapatkan list warehouse dari API
       renderData() {
-        //untuk mendapatkan list type Helper dari API
         this.$http
-          .get(`/kelurahan`, {
+          .get(`/kecamatan`, {
             params: {
-              id_instansi: this.user.id_instansi,
+              id: this.user.id,
             },
           })
           .then((response) => {
             this.kelurahan = [];
-            let array = response.data.data;
-
+            let array = response.data.data.kelurahan;
+            // console.log(array);
             for (let i = 0; i < array.length; i++) {
               this.kelurahan.push({
-                name: array[i].kelurahan,
+                name: array[i].nama_kelurahan,
                 id: array[i].id,
               });
+              // console.log(this.kelurahan);
               // this.itemSelected(response.data.data)
             }
           });

@@ -13,11 +13,15 @@ class CreateKecamatanTable extends Migration
      */
     public function up()
     {
-        Schema::create('instansi', function (Blueprint $table) {
-            $table->id();
-            $table->string('instansi');
-            $table->timestamps();
-        });
+        // Schema::create('instansi', function (Blueprint $table) {
+        //     $table->id();
+        //     $table->string('nama_instansi');
+        //     $table->string('pimpinan');
+        //     $table->float('lat' ,10,6);
+        //     $table->float('long', 10,6);
+        //     $table->enum('instansi', ['Kecamatan', 'Pemkab'])->default('Kecamatan');
+        //     $table->timestamps();
+        // });
     }
 
     /**
@@ -27,6 +31,6 @@ class CreateKecamatanTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('instansi');
+        // Schema::dropIfExists('instansi');
     }
 }

@@ -15,16 +15,35 @@ class InstansiController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        $instansi = Instansi::select()
-            ->where('role', '=', 'User')
-            ->orderBy('instansi', 'asc')
-            ->get();
-        $count = Instansi::select()
-            ->where('role', '=', 'User')
+        if ($request->input()) {
+            $instansi = Instansi::where('instansi', '=', 'Kecamatan')
+            ->where('id','=', $request->id)
+            ->with('kelurahan')
+            ->orderBy('nama_instansi', 'asc')
+            ->first();
+             $count = Instansi::select()
+            ->where('instansi', '=', 'Kecamatan')
+            ->where('id','=', $request->id)
             ->count();
-        return response(['data' => $instansi, 'total' => $count], 200);
+                    } 
+        else {
+            $instansi = Instansi::where('instansi', '=', 'Kecamatan')
+            ->with('kelurahan')
+            ->orderBy('nama_instansi', 'asc')
+            ->get();
+            $count = Instansi::select()
+            ->where('instansi', '=', 'Kecamatan')
+            ->count();
+        }
+
+        $response = [
+            'data' => $instansi,
+            'count' => $count,
+
+        ];
+        return response($response, 200);
     }
 
     /**
@@ -46,48 +65,56 @@ class InstansiController extends Controller
     public function addInstansi(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'instansi' => 'required|string'
+            'nama_instansi' => 'required|string',
+            'pimpinan' => 'required',
+            'lat' => ['regex:/^[-]?(([0-8]?[0-9])\.(\d+))|(90(\.0+)?)$/'],
+            'lng' => 'numeric'
         ]);
 
         if ($validator->fails()) {
             return response(['errors' => $validator->errors()->all()], 400);
         }
 
-        $response = Instansi::create($request->all());
-        return response($response, 200);
+        Instansi::create($request->all());
+        $response = ["message" => "Data berhasil disimpan"];
+        return response($response, 201);
+
     }
 
     public function addKelurahan(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'id_instansi' => 'required',
-            'kelurahan' => 'required|string'
+            'instansi_id' => 'required',
+            'nama_kelurahan' => 'required|string'
         ]);
 
         if ($validator->fails()) {
             return response(['errors' => $validator->errors()->all()], 400);
         }
 
-        $response = Kelurahan::create($request->all());
-        return response($response, 200);
+        Kelurahan::create($request->all());
+        $response = ["message" => "Data berhasil disimpan"];
+        return response($response, 201);
     }
-    public function viewCount(Request $request)
+    public function totalData(Request $request)
     {
-        if ($request->filled('waktu')) {
+        if ($request->filled('periode')) {
             $realisasi = DB::table('db_realisasi_pbb')
                 ->select(
-                    'id_instansi',
+                    'instansi_id',
                     DB::raw('COUNT(db_realisasi_pbb.id) as total_pbb')
                 )
-                ->where('waktu', '=', $request->waktu)
+                ->where('periode', '=', $request->periode)
+                ->where('is_verified', '=', '1')
                 ->groupBy(
-                    'id_instansi'
+                    'instansi_id'
                 );
-            $penduduk = DB::table('db_kependudukan')
-                ->select('id_instansi', DB::raw('COUNT(db_kependudukan.id) as total_penduduk'))
-                ->where('waktu', '=', $request->waktu)
+            $paten = DB::table('rekapitulasi_paten')
+                ->select('instansi_id', DB::raw('COUNT(rekapitulasi_paten.id) as total_paten'))
+                ->where('periode', '=', $request->periode)
+                ->where('is_verified', '=', '1')
                 ->groupBy(
-                    'id_instansi'
+                    'instansi_id'
                 );
             $instansi = DB::table('instansi')
                 ->select(
@@ -96,107 +123,82 @@ class InstansiController extends Controller
                     'lat',
                     'lng',
                     'realisasi.total_pbb',
-                    'penduduk.total_penduduk'
+                    'paten.total_paten'
                 )
                 ->leftJoinSub($realisasi, 'realisasi', function ($join) {
-                    $join->on('instansi.id', 'realisasi.id_instansi');
+                    $join->on('instansi.id', 'realisasi.instansi_id');
                 })
-                ->leftJoinSub($penduduk, 'penduduk', function ($join) {
-                    $join->on('instansi.id', 'penduduk.id_instansi');
+                ->leftJoinSub($paten, 'paten', function ($join) {
+                    $join->on('instansi.id', 'paten.instansi_id');
                 })
-                ->where('role', '=', 'User')
+                ->where('instansi', '=', 'Kecamatan')
                 ->get();
-            // $instansi = DB::table('instansi')
-            //     ->select(
-            //         'instansi',
-            //         'instansi.instansi',
-            //         'lat',
-            //         'lng',
-            //         DB::raw("count(distinct db_realisasi_pbb.id) as total_pbb")
-            //     )
-            //     ->leftJoinSub('db_realisasi_pbb', 'instansi.id', '=', 'db_realisasi_pbb.id_instansi')
-            //     ->where('role', '=', 'User')
-            //     ->where('waktu', '=', '2021-11-01')
-            //     ->get();
-
-            // $pbb = DB::table('db_realisasi_pbb')
-            //     ->select('instansi.id', 'instansi.instansi', 'instansi.lat', 'instansi.lng')
-            //     ->selectRaw(DB::raw("count(distinct db_realisasi_pbb.id) as total_pbb"))
-            //     ->join('instansi', 'db_realisasi_pbb.id_instansi', '=', 'instansi.id')
-            //     ->groupBy('instansi.id')
-            //     // ->where('id_instansi', '=', $request->id_instansi)
-            //     ->where('waktu', '=', '2021-11-01')
-            //     ->get();
-            // $pbb = DB::table('db_realisasi_pbb')
-            //     ->select('id_instansi', DB::raw("count(distinct db_realisasi_pbb.id) as total_pbb"))
-            //     ->join('instansi', 'db_realisasi_pbb.id_instansi', '=', 'instansi.id')
-            //     ->groupBy('instansi.id')
-            //     ->get();
+            } 
+            else {
+                // $instansi = DB::table('db_realisasi_pbb')
+                // ->select(DB::raw('count(*) as total_pbb'))
+                // ->where('is_verified','=', 0)
+                // ->get();
+                // $realisasi = DB::table('db_realisasi_pbb')
+                // ->select(
+                //     DB::raw('count(*) as total_pbb')
+                // )
+                // ->where('is_verified' ,'=','1')
+                // ->get();
+                // $paten = DB::table('rekapitulasi_paten')
+                // ->select(
+                //     DB::raw('count(*) as total_paten')
+                // )
+                // ->where('is_verified' ,'=','1')
+                // ->get();
+                
+                // $instansi = $realisasi->merge($paten);
+            }
             return response()->json(['data' => $instansi]);
-        }
-        // if (!$request->filled('waktu')) {
-        //     $kelurahan = DB::table('kelurahan')
-        //         ->select(DB::raw("count(distinct kelurahan.id) as total_kelurahan"))
-        //         ->groupBy('id_instansi')
-        //         ->where('id_instansi', '=', $request->id_instansi)
-        //         ->count();
-        //     return response()->json(['kelurahan' => $kelurahan]);
-        // }
-        // if ($request->filled('id_instansi', 'waktu')) {
-        //     // $kelurahan = DB::table('instansi')
-        //     //     ->join('db_realisasi_pbb', 'instansi.id', '=', 'db_realisasi_pbb.id_instansi')
-        //     //     ->join('db_kependudukan', 'instansi.id', '=', 'db_kependudukan.id_instansi')
-        //     //     ->where('instansi.id', '=', $request->id_instansi)
-        //     //     ->where('waktu', '=', $request->waktu)
-        //     //     ->count();
+    }
+    public function totalSemua(Request $request) {
+        if($request->filled('periode')) {
+            $realisasi = DB::table('db_realisasi_pbb')
+                ->select(
+                    DB::raw('count(*) as total_pbb')
+                )
+                ->where('is_verified' ,'=','1')
+                ->where(DB::raw('YEAR(periode)'), '=', $request->periode)
+                ->get();
+                $paten = DB::table('rekapitulasi_paten')
+                ->select(
+                    DB::raw('count(*) as total_paten')
+                )
+                ->where('is_verified' ,'=','1')
+                ->where(DB::raw('YEAR(periode)'), '=', $request->periode)
+                ->get();
+                
+                $instansi = $realisasi->merge($paten);
 
-        //     $pbb = DB::table('db_realisasi_pbb')
-        //         ->select(DB::raw("count(distinct db_realisasi_pbb.id) as total_pbb"))
-        //         ->groupBy('id_instansi')
-        //         ->where('id_instansi', '=', $request->id_instansi)
-        //         ->where('waktu', '=', $request->waktu)
-        //         ->count();
-        //     $kep = DB::table('db_kependudukan')
-        //         ->select(DB::raw("count(distinct db_kependudukan.id) as total_kep"))
-        //         ->groupBy('id_instansi')
-        //         ->where('id_instansi', '=', $request->id_instansi)
-        //         ->where('waktu', '=', $request->waktu)
-        //         ->count();
-        //     $paten = DB::table('db_paten')
-        //         ->select(DB::raw("count(distinct db_paten.id) as total_paten"))
-        //         ->groupBy('id_instansi')
-        //         ->where('id_instansi', '=', $request->id_instansi)
-        //         ->where('waktu', '=', $request->waktu)
-        //         ->count();
-        //     // $akta = DB::table('db_akta')
-        //     //     ->select(DB::raw("count(distinct db_akta.id) as total_akta"))
-        //     //     ->groupBy('id_instansi')
-        //     //     ->where('id_instansi', '=', $request->id_instansi)
-        //     //     ->where('waktu', '=', $request->waktu)
-        //     //     ->count();
-        //     // $bencana = DB::table('db_bencana')
-        //     //     ->select(DB::raw("count(distinct db_bencana.id) as total_akta"))
-        //     //     ->groupBy('id_instansi')
-        //     //     ->where('id_instansi', '=', $request->id_instansi)
-        //     //     ->where('waktu', '=', $request->waktu)
-        //     //     ->count();
-        //     return response()->json(['pbb' => $pbb, 'kependudukan' => $kep, 'paten' => $paten]);
-        // }
+                return response()->json(['data' => $instansi]);
+        }
     }
 
     public function kelurahan(Request $request)
     {
-        $kelurahan = Kelurahan::query();
-        if ($request->input()) {
-
-            $kelurahan = Kelurahan::where('id_instansi', '=', $request->id_instansi)->get();
-            $count = Kelurahan::where('id_instansi', '=', $request->id_instansi)->get()->count();
+        if($request->input()) {
+            $count = DB::table('kelurahan')
+            ->where('instansi_id', '=', $request->get('instansi_id'))
+            ->count();
         } else {
-            $kelurahan = DB::table('kelurahan')->get();
-            $count = DB::table('kelurahan')->get()->count();
+            $count = DB::table('kelurahan')
+            ->count();
         }
+        // if ($request->input()) {
+        //     $kelurahan = Kelurahan::where('id_instansi', '=', $request->id_instansi)->get();
+        //     $count = Kelurahan::where('id_instansi', '=', $request->id_instansi)->get()->count();
+        // } 
+        // if (!$request->input()) {
+        //     $kelurahan = DB::table('kelurahan')->get();
+        //     $count = DB::table('kelurahan')->get()->count();
+        // }
 
-        return response(['data' => $kelurahan, 'total' => $count], 200);
+        return response(['total' => $count], 200);
     }
 
     /**

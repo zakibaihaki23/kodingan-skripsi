@@ -35,10 +35,10 @@ class PbbController extends Controller
             $pbb = DB::table('db_realisasi_pbb')->get();
             $count = DB::table('db_realisasi_pbb')->get()->count();
         } else {
-            if ($request->filled('id_instansi')) {
-                $pbb = PBB::where('id_instansi', '=', $request->get('id_instansi'))->orderBy('id', 'DESC')
+            if ($request->filled('instansi_id')) {
+                $pbb = PBB::where('instansi_id', '=', $request->get('instansi_id'))->orderBy('id', 'DESC')
                     ->get();
-                $count = PBB::where('id_instansi', '=', $request->get('id_instansi'))->orderBy('id', 'DESC')
+                $count = PBB::where('instansi_id', '=', $request->get('instansi_id'))->orderBy('id', 'DESC')
                     ->get()->count();
             }
             if ($request->filled('waktu')) {
@@ -53,23 +53,23 @@ class PbbController extends Controller
                 $count = PBB::where('id_kelurahan', '=', $request->get('id_kelurahan'))->orderBy('id', 'DESC')
                     ->get()->count();
             }
-            if ($request->filled(['id_instansi', 'waktu'])) {
-                $pbb = PBB::where('id_instansi', '=', $request->get('id_instansi'))
+            if ($request->filled(['instansi_id', 'waktu'])) {
+                $pbb = PBB::where('instansi_id', '=', $request->get('instansi_id'))
                     ->where('waktu', '=', $request->get('waktu'))
                     ->orderBy('id', 'DESC')
                     ->get();
-                $count = PBB::where('id_instansi', '=', $request->get('id_instansi'))
+                $count = PBB::where('instansi_id', '=', $request->get('instansi_id'))
                     ->where('waktu', '=', $request->get('waktu'))
                     ->orderBy('id', 'DESC')
                     ->get()->count();
             }
-            if ($request->filled(['id_instansi', 'waktu', 'id_kelurahan'])) {
-                $pbb = PBB::where('id_instansi', '=', $request->get('id_instansi'))
+            if ($request->filled(['instansi_id', 'waktu', 'id_kelurahan'])) {
+                $pbb = PBB::where('instansi_id', '=', $request->get('instansi_id'))
                     ->where('waktu', '=', $request->get('waktu'))
                     ->where('id_kelurahan', '=', $request->get('id_kelurahan'))
                     ->orderBy('id', 'DESC')
                     ->get();
-                $count = PBB::where('id_instansi', '=', $request->get('id_instansi'))
+                $count = PBB::where('instansi_id', '=', $request->get('instansi_id'))
                     ->where('waktu', '=', $request->get('waktu'))
                     ->where('id_kelurahan', '=', $request->get('id_kelurahan'))
                     ->orderBy('id', 'DESC')
@@ -141,7 +141,7 @@ class PbbController extends Controller
             'realisasi_bln_lalu' => 'required',
             'realisasi_bln_ini' => 'required',
             'jmlh_realisasi' => 'required',
-            'keterangan' => 'required|string',
+            'keterangan' => 'string',
 
         ]);
         $valid = Validator::make($request->all(), [
@@ -348,7 +348,35 @@ class PbbController extends Controller
         //     ->stream();
     }
 
-
+    public function dataBelumValid(Request $request) {
+         if($request->filled(['periode','instansi_id'])) {
+            $notvalid = DB::table('db_realisasi_pbb')
+                ->select(
+                    DB::raw('count(*) as not_valid')
+                )
+                ->where('periode', '=', $request->periode)
+                ->where('instansi_id','=',$request->instansi_id)
+                ->where('is_verified', '=', '0')
+                ->get();
+                $valid = DB::table('db_realisasi_pbb')
+                ->select(
+                    DB::raw('count(*) as valid')
+                )
+                ->where('periode', '=', $request->periode)
+                ->where('instansi_id','=',$request->instansi_id)
+                ->where('is_verified', '=', '1')
+                ->get();
+                $valid2 = DB::table('rekapitulasi_paten')
+                ->select(
+                    DB::raw('count(*) as lidva')
+                )
+                ->where('periode', '=', $request->periode)
+                ->where('instansi_id','=',$request->instansi_id)
+                ->get();
+                $realisasi = $notvalid->merge($valid)->merge($valid2);
+                return response()->json(['data' => $realisasi]);
+        }
+    }
 
     /**
      * Show the form for editing the specified resource.

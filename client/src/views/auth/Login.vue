@@ -16,8 +16,8 @@
         <div class="card flex-row my-5 border-0 shadow rounded-3 overflow-hidden">
           <div class="card-body p-4 p-sm-5">
             <h3 class="text-center fw-bold">
-              SIMAK <br />
-              KABUPATEN PANDEGLANG
+              SIMAK
+              <br />KABUPATEN PANDEGLANG
             </h3>
 
             <v-form ref="loginForm" v-model="valid" lazy-validation>
@@ -47,8 +47,7 @@
                   class="form"
                   outlined
                   single-line
-                >
-                </v-text-field>
+                ></v-text-field>
               </div>
 
               <div class="d-grid mb-2">
@@ -58,10 +57,9 @@
                   elevation="1"
                   @click="userLogin"
                   :loading="loading"
-                  :disabled="!validated"
+                  :disabled="!validated || loading == true"
+                  >Login</v-btn
                 >
-                  Login
-                </v-btn>
               </div>
             </v-form>
           </div>
@@ -109,9 +107,11 @@
         this.loading = true;
         this.signIn(this.user)
           .then((response) => {
-            this.$router.push("/dashboard");
-            window.location.reload();
-            this.loading = false;
+            let self = this;
+            setTimeout(function () {
+              self.$router.push("/dashboard");
+              window.location.reload();
+            }, 10 * 10 * 10);
           })
           .catch((error) => {
             if (error.response.status == 401) {

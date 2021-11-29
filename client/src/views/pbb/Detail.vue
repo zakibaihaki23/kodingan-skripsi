@@ -306,6 +306,9 @@
 
     created() {
       this.renderData();
+      if (this.user.role != "Admin") {
+        this.$router.push("/dashboard");
+      }
     },
 
     methods: {

@@ -19,37 +19,41 @@ use Illuminate\Support\Facades\Route;
 // });
 
 Route::group(['middleware' => ['json.response']], function () {
-    // public routes
+    // USER
+    Route::get('/admin', 'AdminController@index');
+    Route::get('/user', 'AuthController@index');
+    Route::post('/logout', 'AuthController@logout');
+    Route::post('/register', 'AuthController@register');
     Route::post('/login', 'AuthController@login');
     Route::post('/admin', 'AdminController@adminlogin');
     Route::post('/admin/register', 'AdminController@adminregister');
-    Route::get('/pbb/report', 'PbbController@export')->name('drc.export');
-    Route::get('/kependudukan/report', 'KependudukanController@export');
-    Route::post('/logout', 'AuthController@logout');
-    Route::post('/register', 'AuthController@register');
 
-    // GET PROFILE
-    Route::get('/admin', 'AdminController@index');
-    Route::get('/user', 'AuthController@index');
 
+    //INFORMASI
+    Route::post('/informasi', 'InformasiController@addInformasi');
+    Route::get('/informasi', 'InformasiController@filterInformasi');
 
     // INSTANSI
     Route::post('/kecamatan', 'InstansiController@addInstansi');
     Route::post('/kelurahan', 'InstansiController@addKelurahan');
     Route::get('/kelurahan', 'InstansiController@kelurahan');
     Route::get('/kecamatan', 'InstansiController@index');
-    Route::get('/counter', 'InstansiController@viewCount');
+    Route::get('/result', 'InstansiController@totalData');
+    Route::get('/total', 'InstansiController@totalSemua');
 
     //PBB
     Route::get('/pbb', 'PbbController@index');
+    Route::get('/pbb/notvalid', 'PbbController@dataBelumValid');
     Route::post('/pbb', 'PbbController@createPbb');
     Route::delete('/pbb/{id}', 'PbbController@destroy');
     Route::get('/pbb/{id}', 'PbbController@show');
     Route::put('/pbb/{id}', 'PbbController@updatePBB');
+    Route::get('/pbb/report', 'PbbController@export')->name('drc.export');
 
     //KEPENDUDUKAN
     Route::get('/kependudukan', 'KependudukanController@index');
     Route::post('/kependudukan', 'KependudukanController@createKependudukan');
+    Route::get('/kependudukan/report', 'KependudukanController@export');
 });
 
 Route::middleware('auth:api')->group(function () {

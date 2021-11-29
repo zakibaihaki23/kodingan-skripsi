@@ -3,17 +3,32 @@
     <l-marker v-for="item in instansi" :key="item.id" :lat-lng="item">
       <div>
         <l-popup style="height: 200px">
-          <span>Total data yang diinput {{ item.instansi }} Bulan ini: </span>
+          <span>Total data yang diinput {{ item.nama_instansi }} Bulan ini:</span>
           <div v-if="item.total_pbb != null">
-            <div><b>PBB:</b> {{ item.total_pbb }}</div>
+            <div>
+              <b>PBB:</b>
+              {{ item.total_pbb }}
+            </div>
           </div>
           <div v-else>
             <div><b>PBB:</b> 0</div>
           </div>
-          <div><b>PATEN:</b> {{ item.total_paten }}</div>
-          <div><b>Kependudukan:</b> {{ item.total_penduduk }}</div>
-          <div><b>Akta:</b> {{ item.total_pbb }}</div>
-          <div><b>Bencana Alam:</b> {{ item.total_pbb }}</div>
+          <div>
+            <b>PATEN:</b>
+            {{ item.total_paten }}
+          </div>
+          <div>
+            <b>Kependudukan:</b>
+            {{ item.total_penduduk }}
+          </div>
+          <div>
+            <b>Akta:</b>
+            {{ item.total_pbb }}
+          </div>
+          <div>
+            <b>Bencana Alam:</b>
+            {{ item.total_pbb }}
+          </div>
         </l-popup>
       </div>
     </l-marker>
@@ -32,9 +47,13 @@
     },
     data() {
       return {
-        waktu: new Date().toISOString().substr(0, 7) + "-01",
+        waktu:
+          this.$moment(new Date(Date.now() + 3600 * 1000 * 24).toISOString().substr(0, 10)).format(
+            "YYYY-MM"
+          ) + "-01",
         instansi: [],
         total: [],
+        tes: new Date(Date.now() + 3600 * 1000 * 24).toISOString().substr(0, 10),
       };
     },
     created() {
@@ -42,16 +61,32 @@
     },
     methods: {
       renderData() {
+        let uah = this.$moment(this.tes);
+
+        console.log(uah);
+        // this.$http
+        //   .get("/counter", {
+        //     params: {
+        //       waktu: this.waktu,
+        //     },
+        //   })
+        //   .then((response) => {
+        //     this.instansi = response.data.data;
+        //     this.total = response.data.pbb;
+        //     // console.log(response.data);
+        // //   });
+        // this.$http.get("/kecamatan").then((response) => {
+        //   this.instansi = response.data.data;
+        //   // console.log(response.data.data);
+        // });
         this.$http
-          .get("/counter", {
+          .get("/result", {
             params: {
-              waktu: this.waktu,
+              periode: this.waktu,
             },
           })
           .then((response) => {
             this.instansi = response.data.data;
-            this.total = response.data.pbb;
-            // console.log(response.data);
           });
       },
     },
