@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css" integrity="sha384-B0vP5xmATw1+K9KRQjQERJvTumQW0nPEzvF6L/Z6nronJ3oUOFUFpCjEUQouq2+l" crossorigin="anonymous">
-    <title>SIMAK Kabupaten Pandeglang</title>
+    <title>Download Laporan PBB - SIMAK Kabupaten Pandeglang</title>
 </head>
 <body>
     <style type="text/css">
@@ -61,10 +61,9 @@
 		</center>
 		<br/>
         <div style="list-style-type: none; font-weight: bold; ">
-            @foreach ($pbb as $instansi => $itm)
-            @if ($instansi == 0)
+            @foreach ($kecamatan as $kec)
             <li>Pemerintah Kabupaten Pandeglang</li>
-            <li>{{$itm->instansi}}</li>
+            <li>{{$kec->nama_instansi}}</li>
 
     </div>
 <div class="table-responsive" style="margin-top: 20px">
@@ -125,37 +124,36 @@
     </table>
 </div>
 <div></div>
-<div class="row">
-    <div class="col">
-
-        <ul style="list-style-type: none;margin-left: 30px">
-            <li>Mengetahui,</li>
-        </ul>
-        <p style="margin-left: 15px; margin-bottom: 30px">Camat {{$itm->instansi}}</p>
-
-        <br>
-        <ul style="list-style-type: none; margin-left: 15px">
-            <li>NAMANYA Siapa</li>
-            <li>NIP 198918291829128</li>
-        </ul>
-    </div>
-
-    <div class="col" style="margin-left: 60%">
-        <ul style="list-style-type: none;">
-            <li>{{$itm->instansi}},  &nbsp; &nbsp; &nbsp;   {{$bln[$per->bulan]. ' ' . $per->tahun }}</li>
-            @endif
-
-            @endforeach
-        </ul>
-        <p style="margin-left: 45%; margin-bottom: 30px">PAD</p>
-        <br>
-        <ul style="list-style-type: none; margin-left: 20%">
-            <li>NAMANYA Siapa</li>
-            <li>NIP 198918291829128</li>
-            @endif
-            @endforeach
-        </ul>
-    </div>
 </div>
+    <div style="clear:both; position:relative;">
+    <div style="position:absolute; left:0pt; width:192pt" class="text-center">
+            <p>Mengetahui</p>
+            <p>Camat {{$kec->nama_instansi}}</p>
+        <br>
+        <p style="text-decoration: underline;margin-top: 20px;">
+        ..................................................
+        </p>
+        <div class="text-center">
+        <p>
+        NIP..................................................
+        </p>
+        </div>
+        </div>
+        <div class="col text-right">
+            <p>{{$kec->nama_instansi}}, {{$bln[$per->bulan]}} {{$per->tahun}}</p>
+            <p style="margin-right: 100px">PAD</p>
+            <br>
+            <p style="margin-top: 20px; text-decoration: underline; margin-right: 4px">
+            ..................................................
+            </p>
+        <div class="text-right">
+        <p style="margin-right: 8px">
+        NIP..................................................
+        </p>
+        </div>
+    </div>
+@endforeach
+@endif
+@endforeach
 </body>
 </html>

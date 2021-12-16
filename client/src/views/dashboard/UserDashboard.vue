@@ -30,7 +30,7 @@
               header-text-variant="white"
               align="center"
             >
-              <b-card-text>{{ this.total_data }} Data</b-card-text>
+              <b-card-text>{{ this.notvalid }} Data</b-card-text>
             </b-card>
           </b-skeleton-wrapper>
         </b-col>
@@ -48,9 +48,9 @@
               align="center"
             >
               <template #header>
-                <v-badge inline :content="notif_all" :value="notif_all" color="red">
-                  <p class="mt-0 mb-0">Informasi untuk seluruh Kecamatan</p>
-                </v-badge>
+                <!-- <v-badge inline :content="notif_all" :value="notif_all" color="red"> -->
+                <p class="mt-0 mb-0">Informasi untuk seluruh Kecamatan</p>
+                <!-- </v-badge> -->
               </template>
               <b-list-group v-for="(item, index) in all_informasi" :key="item.id">
                 <b-list-group-item active class="text-left">
@@ -81,9 +81,9 @@
               align="center"
             >
               <template #header>
-                <v-badge inline :content="notif" :value="notif" color="red">
-                  <p class="mt-0 mb-0">Informasi untuk {{ user.nama_instansi }}</p>
-                </v-badge>
+                <!-- <v-badge inline :content="notif" :value="notif" color="red"> -->
+                <p class="mt-0 mb-0">Informasi untuk {{ user.nama_instansi }}</p>
+                <!-- </v-badge> -->
               </template>
               <b-list-group v-for="(item, index) in informasi" :key="item.id">
                 <b-list-group-item active class="text-left">
@@ -109,7 +109,7 @@
 
             <b-card
               border-variant="primary"
-              header-html="Total Data yang Diinput dan Sudah Divalidasi<br> (Tahun Ini)"
+              header-html="Total Data yang Sudah Diinput<br>(Bulan Ini)"
               header-bg-variant="primary"
               header-text-variant="white"
               align="center"
@@ -127,7 +127,11 @@
                   ['Bencana Alam', 2],
                 ]"
               ></column-chart> -->
-              <column-chart :options="barchartOptions" v-if="loaded" :chartdata="datacollection" />
+              <column-chart
+                :options="barchartOptions"
+                v-if="loaded"
+                :chartdata="this.datacollection"
+              />
             </b-card>
           </b-skeleton-wrapper>
         </b-col>
@@ -157,8 +161,15 @@
         interval: null,
         waktu: new Date(),
         loading: false,
-        total_data: "",
-        total_valid: "",
+        pbb_invalid: "",
+        pbb_valid: "",
+        paten_invalid: "",
+        paten_valid: "",
+        kependudukan_invalid: "",
+        kependudukan_valid: "",
+        bencana_invalid: "",
+        bencana_valid: "",
+        notvalid: "",
         informasi: "",
         notif_all: "",
         all_informasi: "",
@@ -223,13 +234,11 @@
             this.dialog = false;
             this.dialogOverlay = false;
             this.overlay = true;
-            this.loading = false;
           })
           .catch((error) => {
             if (error) {
               console.log(error);
             }
-            this.loading = false;
           });
 
         // INFORMASI
@@ -251,39 +260,67 @@
             },
           })
           .then((response) => {
-            console.log(response.data.data);
             this.all_informasi = response.data.data;
             this.notif_all = response.data.total;
           });
 
-        // TOTAL UNTUK CHART
+        //DATA BELUM VALID
         this.$http
-          .get("/pbb/notvalid", {
+          .get("/notvalid", {
             params: {
-              periode: this.$moment(this.waktu).format("YYYY-MM-" + "01"),
+              periode: this.$moment(this.waktu).format("YYYY-MM"),
               instansi_id: this.user.instansi_id,
             },
           })
           .then((response) => {
-            this.total_data = response.data.data[0].not_valid;
-            this.total_valid = response.data.data[1].valid;
+            this.notvalid = response.data.data;
+            this.loading = false;
+          });
+        // TOTAL UNTUK CHART
+
+        this.$http
+          .get("/chart", {
+            params: {
+              periode: this.$moment(this.waktu).format("YYYY-MM"),
+              instansi_id: this.user.instansi_id,
+            },
+          })
+          .then((response) => {
+            this.pbb_invalid = response.data.data[0].pbb_invalid;
+            this.pbb_valid = response.data.data[1].pbb_valid;
+            this.paten_invalid = response.data.data[2].paten_invalid;
+            this.paten_valid = response.data.data[3].paten_valid;
+            this.kependudukan_invalid = response.data.data[4].kependudukan_invalid;
+            this.kependudukan_valid = response.data.data[5].kependudukan_valid;
+            this.bencana_invalid = response.data.data[6].bencana_invalid;
+            this.bencana_valid = response.data.data[7].bencana_valid;
             this.loaded = true;
 
             // UNTUK INFORMASI
             // console.log(this.$moment(test).fromNow());
             this.datacollection = {
-              labels: ["PBB", "PATEN"],
+              labels: ["PBB", "PATEN", "Kependudukan", "Bencana Alam"],
               datasets: [
                 {
                   label: "Belum Divalidasi",
                   backgroundColor: "rgba(54, 162, 235, 1)",
-                  data: [`${this.total_data}`],
+                  data: [
+                    `${this.pbb_invalid}`,
+                    `${this.paten_invalid}`,
+                    `${this.kependudukan_invalid}`,
+                    `${this.bencana_invalid}`,
+                  ],
                   borderWidth: 1,
                 },
                 {
                   label: "Sudah Divalidasi",
                   backgroundColor: "rgba(255, 206, 86, 1)",
-                  data: [`${this.total_valid}`],
+                  data: [
+                    `${this.pbb_valid}`,
+                    `${this.paten_valid}`,
+                    `${this.kependudukan_valid}`,
+                    `${this.bencana_valid}`,
+                  ],
                   borderWidth: 1,
                 },
               ],

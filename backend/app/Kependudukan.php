@@ -10,7 +10,14 @@ class Kependudukan extends Model
 {
     use HasApiTokens, Notifiable;
 
-    protected $fillable = ['id_instansi', 'id_kelurahan', 'instansi', 'kelurahan', 'jmlh_penduduk_bln_lalu_l', 'kelurahan', 'jmlh_penduduk_bln_lalu_p', 'kelurahan', 'jmlh_penduduk_bln_lalu_l_p', 'lahir_l', 'lahir_p', 'lahir_l_p', 'meninggal_l', 'meninggal_p', 'meninggal_l_p', 'datang_l', 'datang_p', 'datang_l_p', 'pindah_l', 'pindah_p', 'pindah_l_p', 'jmlh_penduduk_bln_ini_l', 'jmlh_penduduk_bln_ini_p', 'jmlh_penduduk_bln_ini_l_p', 'waktu'];
+    protected $fillable = [
+        'instansi_id', 'kelurahan', 
+        'jmlh_penduduk_bln_lalu_l', 'jmlh_penduduk_bln_lalu_p', 'total_penduduk_bln_lalu', 
+        'lahir_l', 'lahir_p', 'total_lahir',
+        'meninggal_l', 'meninggal_p',  'total_meninggal',
+        'datang_l', 'datang_p', 'total_datang',
+        'pindah_l', 'pindah_p', 'total_pindah',
+        'jmlh_penduduk_bln_ini_l', 'jmlh_penduduk_bln_ini_p', 'total_penduduk_bln_ini', 'periode', 'is_verified'];
     protected $hidden = ['created_at', 'updated_at'];
 
     protected $table = 'db_kependudukan';

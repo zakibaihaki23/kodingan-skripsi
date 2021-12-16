@@ -23,7 +23,7 @@
 
 <script>
   export default {
-    name: "AddPackableItem",
+    name: "KecamatanSelected",
     data() {
       return {
         search: null,
@@ -38,7 +38,7 @@
     },
     watch: {
       search: {
-        handler: function(val) {
+        handler: function (val) {
           if (val) {
             this.renderData(val);
           }
@@ -46,7 +46,7 @@
         deep: true,
       },
       clear: {
-        handler: function(val) {
+        handler: function (val) {
           this.renderData("");
           if (val == true) {
             this.item_list = "";
@@ -65,7 +65,7 @@
 
           for (let i = 0; i < array.length; i++) {
             this.items.push({
-              name: array[i].instansi,
+              name: array[i].nama_instansi,
               value: array[i].id,
             });
             // this.itemSelected(response.data.data)

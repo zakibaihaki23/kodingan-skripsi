@@ -18,4 +18,8 @@ Route::get('/', function () {
 });
 
 
-Route::get('/api/report/pbb', 'PbbController@export')->name('reportPBB');
+Route::get('/api/report/pbb', 'PbbController@export')->name('reportPbb');
+Route::get('/api/report/paten', 'PatenController@export')->name('reportPaten');
+Route::get('/api/report/kependudukan', 'KependudukanController@export')->name('reportKependudukan');
+Route::get('/api/report/bencana', 'BencanaController@export')->name('reportBencana');
+

@@ -13,9 +13,54 @@ class InformasiController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
+        $informasi = Informasi::query();
+        if (!$request->input()) {
+            $informasi = Informasi::select('db_informasi.id','db_informasi.instansi_id','instansi.nama_instansi',
+            'db_informasi.informasi','db_informasi.waktu')
+            ->leftJoin('instansi','instansi.id','db_informasi.instansi_id')
+            ->orderBy('db_informasi.waktu','DESC')
+            ->get();
+            $count = Informasi::select()->get()->count();
+        } else {
+            if ($request->filled('instansi_id')) {
+                $informasi = Informasi::select('db_informasi.id','db_informasi.instansi_id','instansi.nama_instansi',
+                 'db_informasi.informasi','db_informasi.waktu')
+                ->leftJoin('instansi','instansi.id','db_informasi.instansi_id')
+                ->where('instansi_id', '=', $request->get('instansi_id'))
+                ->orderBy('db_informasi.waktu', 'DESC')
+                ->get();
+                $count = Informasi::where('instansi_id', '=', $request->get('instansi_id'))->orderBy('id', 'DESC')
+                    ->get()->count();
+            }
+            if ($request->filled('waktu')) {
+                $informasi = Informasi::select('db_informasi.id','db_informasi.instansi_id','instansi.nama_instansi',
+                'db_informasi.informasi','db_informasi.waktu')
+                ->leftJoin('instansi','instansi.id','db_informasi.instansi_id')
+                ->where('waktu', '=', $request->get('waktu'))
+                ->orderBy('db_informasi.waktu', 'DESC')
+                ->get();
+                $count = Informasi::where('waktu', '=', $request->get('waktu'))
+                ->orderBy('id', 'DESC')
+                ->get()->count();
+            }
+            if ($request->filled(['instansi_id', 'waktu'])) {
+                $informasi = Informasi::select('db_informasi.id','db_informasi.instansi_id','instansi.nama_instansi',
+                'db_informasi.informasi','db_informasi.waktu')
+                ->where('instansi_id', '=', $request->get('instansi_id'))
+                ->leftJoin('instansi','instansi.id','db_informasi.instansi_id')
+                ->where('waktu', '=', $request->get('waktu'))
+                ->orderBy('db_informasi.waktu', 'DESC')
+                ->get();
+                $count = Informasi::where('instansi_id', '=', $request->get('instansi_id'))
+                    ->where('waktu', '=', $request->get('waktu'))
+                    ->orderBy('id', 'DESC')
+                    ->get()->count();
+            }
+             
+        }
+        return response(['data' => $informasi, 'total' => $count], 200);
     }
 
     /**

@@ -55,15 +55,16 @@
                 >
                   <template v-slot:activator="{ on, attrs }">
                     <v-text-field
-                      v-model="tanggal_informasi"
                       label="Tanggal Informasi"
                       prepend-inner-icon="mdi-calendar"
-                      readonly
                       single-line
                       outlined
                       return-object
                       v-bind="attrs"
+                      clearable
                       v-on="on"
+                      @click:clear="tanggal_informasi = ''"
+                      :value="format_date"
                     ></v-text-field>
                   </template>
                   <v-date-picker
@@ -99,7 +100,7 @@
           <b-row no-gutters>
             <b-col class="text-right">
               <v-btn
-                :to="{ path: '/pbb' }"
+                :to="{ path: '/informasi' }"
                 color="#4FC3F7"
                 class="button"
                 outlined
@@ -124,11 +125,18 @@
                 "
                 class="save"
                 @click="save()"
-                :disabled="!kecamatan && seluruh_informasi == 0 && !tanggal_informasi && !informasi"
+                :disabled="
+                  overlay == true ||
+                  (!kecamatan && seluruh_informasi == 0) ||
+                  (!tanggal_informasi && !informasi)
+                "
                 >Simpan</v-btn
               >
             </b-col>
           </b-row>
+          <v-overlay :value="overlay">
+            <v-progress-circular indeterminate color="blue"></v-progress-circular>
+          </v-overlay>
 
           <!-- <b-modal
             v-model="dialog"
@@ -161,6 +169,7 @@
   export default {
     data() {
       return {
+        overlay: false,
         menu: false,
         tanggal_informasi: null,
         date: "",
@@ -202,6 +211,10 @@
       ...mapGetters({
         user: "auth/user",
       }),
+      format_date() {
+        if (this.tanggal_informasi)
+          return this.$moment(this.tanggal_informasi).format("DD - MMMM - YYYY");
+      },
     },
     methods: {
       renderData() {
@@ -213,6 +226,7 @@
       },
       //untuk menyimpan data registrasi ke dalam API
       save() {
+        this.overlay = true;
         if (this.seluruh_informasi == 1) {
           this.$http
             .post("/informasi", {
@@ -220,8 +234,12 @@
               informasi: this.informasi,
             })
             .then((response) => {
-              this.$toast.success("Data Berhasil Disimpan");
-              window.location.reload();
+              let self = this;
+              setTimeout(function () {
+                self.$toast.success("Data Berhasil Disimpan");
+                self.overlay = false;
+                self.$router.push("/informasi");
+              }, 10 * 10 * 10);
             })
             .catch((error) => {
               this.error = error.response.data;
@@ -232,9 +250,11 @@
               } else if (this.tanggal_informasi && this.informasi == "") {
                 this.$toast.error("Isi informasi yang ingin disampaikan");
               }
+              this.overlay = false;
             });
         }
         if (this.kecamatan) {
+          this.overlay = true;
           this.$http
             .post("/informasi", {
               instansi_id: this.kecamatan.id,
@@ -242,8 +262,12 @@
               informasi: this.informasi,
             })
             .then((response) => {
-              this.$toast.success("Data Berhasil Disimpan");
-              window.location.reload();
+              let self = this;
+              setTimeout(function () {
+                self.$toast.success("Data Berhasil Disimpan");
+                self.overlay = false;
+                self.$router.push("/informasi");
+              }, 10 * 10 * 10);
             })
             .catch((error) => {
               this.error = error.response.data;
@@ -254,6 +278,7 @@
               } else if (this.tanggal_informasi && this.informasi == "") {
                 this.$toast.error("Isi informasi yang ingin disampaikan");
               }
+              this.overlay = false;
             });
         }
       },

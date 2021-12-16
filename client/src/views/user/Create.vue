@@ -1,7 +1,7 @@
 <template>
   <div class="regist">
     <h1>Input Data User</h1>
-    <v-form>
+    <v-form v-model="isFormValid">
       <div class="row">
         <div class="col-md-10 mx-auto">
           <form>
@@ -21,6 +21,7 @@
                   v-model="form.kecamatan"
                   :items="kecamatan"
                   clearable
+                  :rules="[rules.required]"
                 ></v-select>
               </div>
               <div class="col-sm-6">
@@ -28,41 +29,69 @@
                   Nama
                   <span style="color: red">*</span>
                 </p>
-                <v-text-field single-line label="Nama" outlined class="form"></v-text-field>
+                <v-text-field
+                  v-model="form.name"
+                  single-line
+                  label="Nama"
+                  outlined
+                  class="form"
+                  :rules="[rules.required]"
+                ></v-text-field>
               </div>
             </div>
             <div class="form-group row">
-              <div class="col-sm-4">
+              <div class="col-lg-4">
                 <p>
                   Username
                   <span style="color: red">*</span>
                 </p>
-                <v-text-field single-line label="Username" outlined class="form"></v-text-field>
+                <v-text-field
+                  v-model="form.username"
+                  single-line
+                  label="Username"
+                  outlined
+                  class="form"
+                  :rules="[rules.required, rules.username]"
+                  @keydown.space.prevent
+                ></v-text-field>
               </div>
-              <div class="col-sm-4">
+              <div class="col-lg-4">
                 <p>
                   Password
                   <span style="color: red">*</span>
                 </p>
                 <v-text-field
+                  v-model="form.password"
+                  :rules="[rules.required, rules.password]"
                   single-line
                   label="Password"
-                  type="password"
+                  :type="value ? 'password' : 'text'"
+                  :append-icon="value ? 'mdi-eye' : 'mdi-eye-off'"
+                  @click:append="() => (value = !value)"
                   outlined
                   class="form"
                 ></v-text-field>
               </div>
-              <div class="col-sm-4">
+              <div class="col-lg-4">
                 <p>
                   Konfirmasi Password
                   <span style="color: red">*</span>
                 </p>
                 <v-text-field
+                  v-model="form.konfirmasi_password"
                   single-line
                   label="Konfirmasi Password"
-                  type="password"
+                  :type="val_confirm ? 'password' : 'text'"
+                  :append-icon="val_confirm ? 'mdi-eye' : 'mdi-eye-off'"
+                  @click:append="() => (val_confirm = !val_confirm)"
                   outlined
                   class="form"
+                  :rules="[
+                    rules.required,
+                    rules.password,
+                    form.password === form.konfirmasi_password ||
+                      'Konfirmasi Password tidak sesuai',
+                  ]"
                 ></v-text-field>
               </div>
             </div>
@@ -72,7 +101,14 @@
                   Email
                   <span style="color: red">*</span>
                 </p>
-                <v-text-field single-line label="Email" outlined class="form"></v-text-field>
+                <v-text-field
+                  v-model="form.email"
+                  single-line
+                  label="Email"
+                  outlined
+                  class="form"
+                  :rules="[rules.required, rules.email]"
+                ></v-text-field>
               </div>
               <div class="col-sm-6">
                 <p>
@@ -88,6 +124,7 @@
                   item-value="name"
                   :items="role"
                   v-model="form.role"
+                  :rules="[rules.required]"
                 ></v-select>
               </div>
             </div>
@@ -96,7 +133,7 @@
           <b-row no-gutters>
             <b-col class="text-right">
               <v-btn
-                :to="{ path: '/pbb' }"
+                :to="{ path: '/user' }"
                 color="#4FC3F7"
                 class="button"
                 outlined
@@ -121,11 +158,14 @@
                 "
                 class="save"
                 @click="save()"
+                :disabled="!isFormValid || overlay == true"
                 >Simpan</v-btn
               >
             </b-col>
           </b-row>
-
+          <v-overlay :value="overlay">
+            <v-progress-circular indeterminate color="blue"></v-progress-circular>
+          </v-overlay>
           <!-- <b-modal
             v-model="dialog"
             centered
@@ -164,11 +204,18 @@
         menu: false,
         search: null,
         saveDisabled: true,
+        isFormValid: false,
         loading: false,
         check: "",
         rules: {
-          required: (value) => !!value || "Required",
-          counter: (value) => value.length <= 12 || "Max 30 Characters",
+          required: (value) => !!value || "Required.",
+          password: (v) => (v && v.length >= 8) || "Minimal 8 karakter",
+          username: (v) => (v && v.length >= 5) || "Minimal 5 karakter",
+          email: (v) =>
+            !v ||
+            /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(v) ||
+            "E-Mail tidak valid" ||
+            true,
         },
         form: {
           kecamatan: "",
@@ -238,6 +285,14 @@
       }),
     },
     methods: {
+      checkPassword(invalid) {
+        // correct: false
+        if (true == invalid) {
+          this.validPassword = false;
+        } else {
+          this.validPassword = true;
+        }
+      },
       openDialog() {
         this.dialog = true;
       },
@@ -249,7 +304,36 @@
         });
       },
       //untuk menyimpan data registrasi ke dalam API
-      save() {},
+      save() {
+        this.overlay = true;
+        this.$http
+          .post("/register", {
+            instansi_id: this.form.kecamatan.id,
+            name: this.form.name,
+            username: this.form.username,
+            email: this.form.email,
+            password: this.form.password,
+            password_confirmation: this.form.konfirmasi_password,
+            role: this.form.role.name,
+          })
+          .then((response) => {
+            let self = this;
+            setTimeout(function () {
+              self.overlay = false;
+              self.$router.push("/user");
+              self.$toast.success("Data Berhasil Disimpan");
+            }, 10 * 10 * 10);
+          })
+          .catch((error) => {
+            this.overlay = false;
+            if (error.response.status == 422) {
+              this.$toast.error("Periksa Form Kembali");
+            } else {
+              this.$toast.error("Role Sudah Tersedia di Kecamatan Tersebut");
+            }
+          });
+        // console.log(Number(this.form.username) + Number(this.form.password));
+      },
     },
   };
 </script>

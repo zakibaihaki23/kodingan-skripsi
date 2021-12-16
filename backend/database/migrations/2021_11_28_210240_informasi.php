@@ -31,6 +31,6 @@ class Informasi extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('db_informasi');
+        // Schema::dropIfExists('db_informasi');
     }
 }

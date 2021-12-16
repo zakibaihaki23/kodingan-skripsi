@@ -15,26 +15,26 @@ class Paten extends Migration
     {
         Schema::create('rekapitulasi_paten', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('kecamatan_id');
+            $table->foreignId('instansi_id');
             $table->string('kelurahan');
-            $table->double('perekaman_ktp');
-            $table->double('pengantar_kk');
-            $table->double('ket_pindah');
-            $table->double('ket_domisili');
-            $table->double('pengantar_akta_lahir');
-            $table->double('pengantar_akta_mati');
-            $table->double('pencatatan_perkawinan');
-            $table->double('pencatatan_perceraian');
-            $table->double('skck');
-            $table->double('sktm');
-            $table->double('rekomendasi');
-            $table->double('legalisasi');
-            $table->double('ket_lain');
-            $table->double('imb');
-            $table->double('situ_siup');
-            $table->double('izin_merobohkan_bangunan');
-            $table->double('izin_keramaian');
-            $table->double('izin_partai');
+            $table->double('perekaman_ktp')->default(0);
+            $table->double('pengantar_kk')->default(0);
+            $table->double('ket_pindah')->default(0);
+            $table->double('ket_domisili')->default(0);
+            $table->double('pengantar_akta_lahir')->default(0);
+            $table->double('pengantar_akta_mati')->default(0);
+            $table->double('pencatatan_perkawinan')->default(0);
+            $table->double('pencatatan_perceraian')->default(0);
+            $table->double('skck')->default(0);
+            $table->double('sktm')->default(0);
+            $table->double('rekomendasi')->default(0);
+            $table->double('legalisasi')->default(0);
+            $table->double('ket_lain')->default(0);
+            $table->double('imb')->default(0);
+            $table->double('situ_siup')->default(0);
+            $table->double('izin_merobohkan_bangunan')->default(0);
+            $table->double('izin_keramaian')->default(0);
+            $table->double('izin_partai')->default(0);
             $table->string('keterangan');
             $table->date('periode');
             $table->double('is_verified')->default(0);
@@ -51,6 +51,6 @@ class Paten extends Migration
      */
     public function down()
     {
-        // Schema::dropIfExists('rekapitulasi_paten');
+        Schema::dropIfExists('rekapitulasi_paten');
     }
 }

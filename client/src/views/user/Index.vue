@@ -1,11 +1,12 @@
 <template>
-  <div class="helper" v-if="this.user.role == 'Admin'">
+  <div id="app" style="margin-left: 25px; margin-right: 25px" v-if="this.user.role == 'Admin'">
     <h1>Kelola User</h1>
     <!-- FOR ALL DEVICE -->
     <v-container>
       <b-row class="mb-10">
-        <b-col>
+        <b-col lg="6">
           <v-btn
+            v-show="!firstLoad"
             :to="{ path: '/user/create' }"
             style="
               width: 200px;
@@ -22,7 +23,7 @@
             >Input Data</v-btn
           >
         </b-col>
-        <b-col>
+        <b-col lg="6">
           <v-tooltip bottom>
             <template v-slot:activator="{ on, attrs }">
               <v-text-field
@@ -36,116 +37,82 @@
                 hide-details
               ></v-text-field>
             </template>
-            <span>Cari Berdasarkan Kelurahan</span>
+            <span>Cari Data</span>
           </v-tooltip>
         </b-col>
       </b-row>
     </v-container>
-    <p class="mt-10" style="font-size: 25px">Filter</p>
+
     <v-divider class="d-flex d-none d-sm-block" style="margin-right: 40px"></v-divider>
     <br />
-    <div id="app">
-      <v-data-table :headers="table" :items="userTable" class="elevation-1">
-        <!-- <template v-slot:item="props"> -->
-        <template>
-          <!-- <tr v-if="!isMobile"> -->
-          <tr>
-            <!-- <td>{{ props.item.kelurahan }}</td>
-              <td>{{ props.item.waktu | moment("MMM - YYYY") }}</td>
-              <td>Rp. {{ formatPrice(props.item.target_pbb) }}</td>
-              <td>Rp. {{ formatPrice(props.item.realisasi_bln_lalu) }}</td>
-              <td>Rp. {{ formatPrice(props.item.realisasi_bln_ini) }}</td>
-              <td>{{ props.item.jmlh_realisasi }}</td>
-              <td>Rp. {{ formatPrice(props.item.sisa_target) }}</td>
-            <td>{{ props.item.keterangan }}</td>-->
-            <!-- <td>
-                <v-menu offset-y>
-                  <template v-slot:activator="{ on, attrs }">
-                    <v-btn v-bind="attrs" v-on="on" icon>
-                      <v-icon dark>mdi-dots-horizontal</v-icon>
-                    </v-btn>
-                  </template>
-                  <v-list>
-                    <template class="menu">
-                      <v-list-item :to="{ path: `/pbb/${props.item.id}` }" link>
-                        <div>
-                          <v-list-item-title>Edit</v-list-item-title>
-                        </div>
-                      </v-list-item>
-                    </template>
-                    <v-divider style="margin-left: 10px; margin-right: 10px"></v-divider>
 
-                    <v-list-item
-                      link
-                      @click="openDialog(props.item.id, props.item.kelurahan, props.item.waktu)"
-                    >Delete</v-list-item>
-                  </v-list>
-                </v-menu>
-            </td>-->
-          </tr>
-          <!-- <tr v-else>
-              <td>
-                <ul class="flex-content">
-                  <li class="flex-item" data-label="Kelurahan">{{ props.item.kelurahan }}</li>
-                  <li
-                    class="flex-item"
-                    data-label="Periode"
-                  >{{ props.item.waktu | moment("MMM - YYYY") }}</li>
-                  <li
-                    class="flex-item"
-                    data-label="Target PBB"
-                  >Rp. {{ formatPrice(props.item.target_pbb) }}</li>
-                  <li
-                    class="flex-item"
-                    data-label="Tealisasi Bulan Lalu"
-                  >Rp. {{ formatPrice(props.item.realisasi_bln_lalu) }}</li>
-                  <li
-                    class="flex-item"
-                    data-label="Realisasi Bulan Ini"
-                  >Rp. {{ formatPrice(props.item.realisasi_bln_ini) }}</li>
-                  <li
-                    class="flex-item"
-                    data-label="Jumlah Realisasi"
-                  >{{ props.item.jmlh_realisasi }}</li>
-                  <li
-                    class="flex-item"
-                    data-label="Sisa Target"
-                  >Rp. {{ formatPrice(props.item.sisa_target) }}</li>
-                  <li class="flex-item" data-label="Keterangan">{{ props.item.keterangan }}</li>
-                </ul>
-                <v-menu offset-y>
-                  <template v-slot:activator="{ on, attrs }">
-                    <v-btn v-bind="attrs" v-on="on" icon>
-                      <v-icon dark>mdi-dots-horizontal</v-icon>
-                    </v-btn>
-                  </template>
-                  <v-list>
-                    <template class="menu">
-                      <v-list-item :to="{ path: `/pbb/${props.item.id}` }" link>
-                        <div>
-                          <v-list-item-title>Edit</v-list-item-title>
-                        </div>
-                      </v-list-item>
-                    </template>
-                    <v-divider style="margin-left: 10px; margin-right: 10px"></v-divider>
-
-                    <v-list-item
-                      link
-                      @click="openDialog(props.item.id, props.item.kelurahan, props.item.waktu)"
-                    >Delete</v-list-item>
-                  </v-list>
-                </v-menu>
-              </td>
-          </tr>-->
-        </template>
-      </v-data-table>
-      <!-- <b-modal v-model="dialog" centered no-close-on-backdrop @ok="deletePBB()">
-        Apakah anda ingin menghapus data dari
-        <b>{{ this.kel }}</b>
-        <br />Pada Periode Laporan
-        <b>{{ this.period }}</b>?
-      </b-modal>-->
-    </div>
+    <v-skeleton-loader
+      v-if="firstLoad"
+      :loading="isLoading"
+      type="table-tbody"
+      :types="{ 'table-row': 'table-cell@8' }"
+    ></v-skeleton-loader>
+    <v-data-table
+      v-show="!firstLoad"
+      :loading="isLoading"
+      :search="search"
+      :headers="table"
+      :items="userTable"
+      class="elevation-1"
+    >
+      <template v-slot:[`item.actions`]="{ item }">
+        <v-menu offset-y>
+          <template v-slot:activator="{ on, attrs }">
+            <v-btn v-bind="attrs" v-on="on" icon>
+              <v-icon dark>mdi-dots-horizontal</v-icon>
+            </v-btn>
+          </template>
+          <v-list>
+            <template class="menu">
+              <v-list-item
+                :to="{
+                  path: `/user/update/${item.id}`,
+                }"
+                link
+              >
+                Edit
+              </v-list-item>
+              <v-list-item @click="hapusDialog(item)" link> Hapus </v-list-item>
+            </template>
+          </v-list>
+        </v-menu>
+      </template>
+    </v-data-table>
+    <b-modal v-model="dialog" centered no-close-on-backdrop @ok="hapusData(idData)">
+      Apakah anda ingin menghapus data user berikut:
+      <div class="row">
+        <div class="col mx-auto">
+          <div class="form-group row">
+            <div class="col-md-3">Nama</div>
+            <div class="col-md-6" style="font-weight: bold">{{ this.nama }}</div>
+          </div>
+          <div class="form-group row">
+            <div class="col-md-3">Username</div>
+            <div class="col-md-6" style="font-weight: bold">{{ this.username }}</div>
+          </div>
+          <div class="form-group row">
+            <div class="col-md-3">E-mail</div>
+            <div class="col-md-6" style="font-weight: bold">{{ this.email }}</div>
+          </div>
+          <div class="form-group row">
+            <div class="col-md-3">Role</div>
+            <div class="col-md-6" style="font-weight: bold">{{ this.role }}</div>
+          </div>
+          <div class="form-group row">
+            <div class="col-md-3">Kecamatan</div>
+            <div class="col-md-6" style="font-weight: bold">{{ this.kecamatan }}</div>
+          </div>
+        </div>
+      </div>
+    </b-modal>
+    <v-overlay :value="overlay">
+      <v-progress-circular indeterminate color="blue"></v-progress-circular>
+    </v-overlay>
   </div>
 </template>
 
@@ -155,7 +122,17 @@
   export default {
     data() {
       return {
+        dialog: false,
         userTable: [],
+        firstLoad: true,
+        overlay: false,
+        isLoading: true,
+        idData: "",
+        nama: "",
+        username: "",
+        email: "",
+        role: "",
+        kecamatan: "",
         search: "",
         table: [
           {
@@ -220,15 +197,40 @@
     },
     methods: {
       renderData(search) {
+        this.firstLoad = true;
         this.$http
           .get("/user")
           .then((response) => {
             this.userTable = response.data.data;
-            //   console.log(this.userTable);
+            this.firstLoad = false;
+            this.isLoading = false;
           })
           .catch((error) => {
             //   this.dialogOverlay = false;
           });
+      },
+      hapusDialog(item) {
+        this.dialog = true;
+        this.idData = item.id;
+        this.nama = item.name;
+        this.username = item.username;
+        this.email = item.email;
+        this.role = item.role;
+        this.kecamatan = item.nama_instansi;
+      },
+      hapusData(idData) {
+        this.overlay = true;
+        this.firstLoad = true;
+        this.$http.delete("/user/" + idData).then((response) => {
+          let self = this;
+          setTimeout(function () {
+            self.dialog = false;
+            self.renderData();
+            self.overlay = false;
+            self.$toast.success("Data Berhasil Dihapus");
+            self.isLoading = false;
+          });
+        });
       },
     },
   };

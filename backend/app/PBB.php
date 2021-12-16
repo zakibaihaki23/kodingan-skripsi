@@ -12,7 +12,7 @@ class PBB extends Authenticatable
 {
     use HasApiTokens, Notifiable;
 
-    protected $fillable = ['id_instansi', 'id_kelurahan', 'instansi', 'kelurahan', 'target_pbb', 'realisasi_bln_lalu', 'realisasi_bln_ini', 'jmlh_realisasi', 'sisa_target', 'keterangan', 'waktu'];
+    protected $fillable = ['instansi_id', 'kelurahan', 'target_pbb', 'realisasi_bln_lalu', 'realisasi_bln_ini', 'jmlh_realisasi', 'sisa_target', 'keterangan', 'periode'];
     protected $hidden = ['created_at', 'updated_at'];
 
     protected $table = 'db_realisasi_pbb';

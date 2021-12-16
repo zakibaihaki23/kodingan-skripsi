@@ -8,6 +8,9 @@ use App\Exports\PbbIdExport;
 use App\Exports\PbbWaktuExport;
 use Illuminate\Http\Request;
 use App\PBB;
+use App\Paten;
+use App\Kependudukan;
+use App\Bencana;
 use App\Rules\PBBRule;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -32,8 +35,8 @@ class PbbController extends Controller
 
         $pbb = PBB::query();
         if (!$request->input()) {
-            $pbb = DB::table('db_realisasi_pbb')->get();
-            $count = DB::table('db_realisasi_pbb')->get()->count();
+            $pbb = PBB::select()->get();
+            $count = PBB::select()->get()->count();
         } else {
             if ($request->filled('instansi_id')) {
                 $pbb = PBB::where('instansi_id', '=', $request->get('instansi_id'))->orderBy('id', 'DESC')
@@ -41,88 +44,134 @@ class PbbController extends Controller
                 $count = PBB::where('instansi_id', '=', $request->get('instansi_id'))->orderBy('id', 'DESC')
                     ->get()->count();
             }
-            if ($request->filled('waktu')) {
-                $pbb = PBB::where('waktu', '=', $request->get('waktu'))->orderBy('id', 'DESC')
+            if ($request->filled('periode')) {
+                $pbb = PBB::where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode'))->orderBy('id', 'DESC')
                     ->get();
-                $count = PBB::where('waktu', '=', $request->get('waktu'))->orderBy('id', 'DESC')
+                $count = PBB::where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode'))->orderBy('id', 'DESC')
                     ->get()->count();
             }
-            if ($request->filled('id_kelurahan')) {
-                $pbb = PBB::where('id_kelurahan', '=', $request->get('id_kelurahan'))->orderBy('id', 'DESC')
+            if ($request->filled('is_verified')) {
+                $pbb = PBB::where('is_verified', '=', $request->get('is_verified'))->orderBy('id', 'DESC')
                     ->get();
-                $count = PBB::where('id_kelurahan', '=', $request->get('id_kelurahan'))->orderBy('id', 'DESC')
+                $count = PBB::where('is_verified', '=', $request->get('is_verified'))->orderBy('id', 'DESC')
                     ->get()->count();
             }
-            if ($request->filled(['instansi_id', 'waktu'])) {
+            if ($request->filled(['instansi_id', 'periode','is_verified'])) {
                 $pbb = PBB::where('instansi_id', '=', $request->get('instansi_id'))
-                    ->where('waktu', '=', $request->get('waktu'))
+                    ->where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode'))
+                    ->where('is_verified','=',$request->get('is_verified'))
                     ->orderBy('id', 'DESC')
                     ->get();
                 $count = PBB::where('instansi_id', '=', $request->get('instansi_id'))
-                    ->where('waktu', '=', $request->get('waktu'))
+                    ->where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode'))
+                    ->where('is_verified','=',$request->get('is_verified'))
                     ->orderBy('id', 'DESC')
                     ->get()->count();
             }
-            if ($request->filled(['instansi_id', 'waktu', 'id_kelurahan'])) {
+             else {
+             
+            if ($request->filled(['instansi_id', 'periode'])) {
                 $pbb = PBB::where('instansi_id', '=', $request->get('instansi_id'))
-                    ->where('waktu', '=', $request->get('waktu'))
-                    ->where('id_kelurahan', '=', $request->get('id_kelurahan'))
+                    ->where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode'))
                     ->orderBy('id', 'DESC')
                     ->get();
                 $count = PBB::where('instansi_id', '=', $request->get('instansi_id'))
-                    ->where('waktu', '=', $request->get('waktu'))
-                    ->where('id_kelurahan', '=', $request->get('id_kelurahan'))
+                    ->where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode'))
+                    ->orderBy('id', 'DESC')
+                    ->get()->count();
+            }
+            if ($request->filled(['periode','is_verified'])) {
+                $pbb = PBB::where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode'))
+                ->where('is_verified','=',$request->get('is_verified'))
+                ->orderBy('id', 'DESC')
+                ->get();
+                $count = PBB::where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode'))
+                ->where('is_verified','=',$request->get('is_verified'))
+                ->orderBy('id', 'DESC')
+                ->get()->count();
+            }
+            if ($request->filled(['instansi_id', 'is_verified'])) {
+                $pbb = PBB::where('instansi_id', '=', $request->get('instansi_id'))
+                    ->where('is_verified', '=', $request->get('is_verified'))
+                    ->orderBy('id', 'DESC')
+                    ->get();
+                $count = PBB::where('instansi_id', '=', $request->get('instansi_id'))
+                    ->where('is_verified', '=', $request->get('is_verified'))
+                    ->orderBy('id', 'DESC')
+                    ->get()->count();
+            }
+             }
+        }
+        return response(['data' => $pbb, 'total' => $count], 200);
+    }
+    public function indexCamat(Request $request)
+    {
+        $pbb = PBB::query();
+        if (!$request->input()) {
+            $pbb = PBB::select()
+                    ->where('is_verified','!=', 2)
+                    ->get();
+            $count = PBB::select()
+                    ->where('is_verified','!=', 2)
+                    ->get()
+                    ->count();
+        } else {
+            if ($request->filled('instansi_id')) {
+                $pbb = PBB::where('instansi_id', '=', $request->get('instansi_id'))
+                    ->where('is_verified','!=', 2)
+                    ->orderBy('id', 'DESC')
+                    ->get();
+                $count = PBB::where('instansi_id', '=', $request->get('instansi_id'))
+                    ->where('is_verified','!=', 2)
+                    ->get()->count();
+            }
+            if ($request->filled(['instansi_id', 'periode','is_verified'])) {
+                $pbb = PBB::where('instansi_id', '=', $request->get('instansi_id'))
+                    ->where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode'))
+                    ->where('is_verified','=',$request->get('is_verified'))
+                    ->orderBy('id', 'DESC')
+                    ->get();
+                $count = PBB::where('instansi_id', '=', $request->get('instansi_id'))
+                    ->where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode'))
+                    ->where('is_verified','=',$request->get('is_verified'))
+                    ->orderBy('id', 'DESC')
+                    ->get()->count();
+            }
+            if ($request->filled(['instansi_id', 'periode'])) {
+                $pbb = PBB::where('instansi_id', '=', $request->get('instansi_id'))
+                    ->where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode'))
+                    ->orderBy('id', 'DESC')
+                    ->get();
+                $count = PBB::where('instansi_id', '=', $request->get('instansi_id'))
+                    ->where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode'))
+                    ->orderBy('id', 'DESC')
+                    ->get()->count();
+            }
+            if ($request->filled(['periode','is_verified'])) {
+                $pbb = PBB::where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode'))
+                ->where('is_verified','=',$request->get('is_verified'))
+                ->orderBy('id', 'DESC')
+                ->get();
+                $count = PBB::where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode'))
+                ->where('is_verified','=',$request->get('is_verified'))
+                ->orderBy('id', 'DESC')
+                ->get()->count();
+            }
+            if ($request->filled(['instansi_id', 'is_verified'])) {
+                $pbb = PBB::where('instansi_id', '=', $request->get('instansi_id'))
+                    ->where('is_verified', '=', $request->get('is_verified'))
+                    ->orderBy('id', 'DESC')
+                    ->get();
+                $count = PBB::where('instansi_id', '=', $request->get('instansi_id'))
+                    ->where('is_verified', '=', $request->get('is_verified'))
                     ->orderBy('id', 'DESC')
                     ->get()->count();
             }
         }
-        // if ($request->has(['id_instansi', 'waktu', 'id_kelurahan'])) {
-        //     $pbb = PBB::where('id_instansi', '=', $request->get('id_instansi'))
-        //         ->where('waktu', '=', $request->get('waktu'))
-        //         ->where('id_kelurahan', '=', $request->get('id_kelurahan'))
-        //         ->orderBy('id', 'DESC')
-        //         ->get();
-        //     $count = PBB::where('id_instansi', '=', $request->get('id_instansi'))
-        //         ->where('waktu', '=', $request->get('waktu'))
-        //         ->where('id_kelurahan', '=', $request->get('id_kelurahan'))
-        //         ->orderBy('id', 'DESC')
-        //         ->get()->count();
-        // } else {
-        //     if ($request->isNotFilled('waktu')) {
-        //         $pbb = PBB::where('id_kelurahan', '=', $request->get('id_kelurahan'))->orderBy('id', 'DESC')
-        //             ->get();
-        //         $count = PBB::where('id_kelurahan', '=', $request->get('id_kelurahan'))->orderBy('id', 'DESC')
-        //             ->get()->count();
-        //     }
-        //     if ($request->isNotFilled('waktu')) {
-        //         $pbb = PBB::where('id_instansi', '=', $request->get('id_instansi'))->orderBy('id', 'DESC')
-        //             ->get();
-        //         $count = PBB::where('id_instansi', '=', $request->get('id_instansi'))->orderBy('id', 'DESC')
-        //             ->get()->count();
-        //     }
-        //     // if ($request->isNotFilled('id_kelurahan')) {
-        //     //     $pbb = PBB::where('id_instansi', '=', $request->get('id_instansi'))->where('waktu', '=', $request->get('waktu'))
-        //     //         ->orderBy('id', 'DESC')->get();
-        //     //     $count = PBB::where('id_instansi', '=', $request->get('id_instansi'))->where('waktu', '=', $request->get('waktu'))
-        //     //         ->orderBy('id', 'DESC')->get()->count();
-        //     // }
-        //     if ($request->filled('instansi')) {
-        //         $pbb = PBB::where('instansi', 'like', '%' . $request->get('instansi') . '%')->get();
-        //     }
-        // }
 
-        return response(['data' => $pbb, 'total' => $count], 200);
+            return response(['data' => $pbb, 'total' => $count], 200);
 
-        // if ($request->isNotFilled('id_instansi')) {
-        //     $pbb = PBB::where('waktu', '=', $request->get('waktu'))->orderBy('id', 'DESC')
-        //         ->get();
-        // }
-        // if ($request->isNotFilled('waktu')) {
-        //     $pbb = PBB::where('id_instansi', '=', $request->get('id_instansi'))->orderBy('id', 'DESC')
-        //         ->get();
-        // }
-
-
+       
     }
 
     /**
@@ -133,19 +182,12 @@ class PbbController extends Controller
     public function createPbb(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'id_instansi' => 'required',
-            'id_kelurahan' => 'required',
-            'instansi' => 'required|string',
+            'instansi_id' => 'required',
             'kelurahan' => 'required|string',
-            'target_pbb' => 'required',
-            'realisasi_bln_lalu' => 'required',
-            'realisasi_bln_ini' => 'required',
-            'jmlh_realisasi' => 'required',
-            'keterangan' => 'string',
 
         ]);
         $valid = Validator::make($request->all(), [
-            'waktu' =>  'required|unique_with:db_realisasi_pbb, id_kelurahan'
+            'periode' =>  'required|unique_with:db_realisasi_pbb, kelurahan'
         ]);
 
         if ($validator->fails()) {
@@ -168,9 +210,7 @@ class PbbController extends Controller
     public function updatePBB(Request $request, $id)
     {
         $pbb = PBB::find($id);
-        $pbb->id_instansi = $request->input('id_instansi');
-        $pbb->id_kelurahan = $request->input('id_kelurahan');
-        $pbb->instansi = $request->input('instansi');
+        $pbb->instansi_id = $request->input('instansi_id');
         $pbb->kelurahan = $request->input('kelurahan');
         $pbb->target_pbb = $request->input('target_pbb');
         $pbb->realisasi_bln_lalu = $request->input('realisasi_bln_lalu');
@@ -178,25 +218,34 @@ class PbbController extends Controller
         $pbb->jmlh_realisasi = $request->input('jmlh_realisasi');
         $pbb->sisa_target = $request->input('sisa_target');
         $pbb->keterangan = $request->input('keterangan');
-        $pbb->waktu = $request->input('waktu');
+        $pbb->periode = $request->input('periode');
+        $pbb->is_verified = $request->input('is_verified');
 
         $pbb->save();
+        $response = ["message"=>"Data Berhasil Diubah"];
 
-        return response()->json($pbb);
+        return response()->json($response);
     }
-
-
     /**
      * Remove the specified resource from storage.
      *
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
+    public function validasiPbb(Request $request, $id)
+    {
+        $pbb = PBB::find($id);
+        $pbb->is_verified = $request->input('is_verified');
+        $pbb->save();
+        $response = ["message"=>"Data Berhasil diverifikasi"];
+
+        return response()->json($response);
+    }
+
     public function destroy($id)
     {
         return PBB::destroy($id);
     }
-
     /**
      * Display the specified resource.
      *
@@ -231,12 +280,12 @@ class PbbController extends Controller
 
 
         //USING DOMPDF FOR EXPORT PDF
-        if ($request->input('id_instansi', 'waktu')) {
+        if ($request->input('instansi_id', 'periode')) {
 
             $pbb = DB::table('db_realisasi_pbb')
-                ->select('instansi', 'kelurahan', DB::raw("DATE_FORMAT(db_realisasi_pbb.waktu, '%b-%Y') as waktu"), 'target_pbb', 'realisasi_bln_lalu', 'realisasi_bln_ini', 'jmlh_realisasi', 'sisa_target', 'keterangan')
-                ->where('id_instansi', '=', $request->get('id_instansi'))
-                ->where('waktu', '=', $request->get('waktu'))
+                ->select( 'kelurahan', DB::raw("DATE_FORMAT(db_realisasi_pbb.periode, '%b-%Y') as periode"), 'target_pbb', 'realisasi_bln_lalu', 'realisasi_bln_ini', 'jmlh_realisasi', 'sisa_target', 'keterangan')
+                ->where('instansi_id', '=', $request->get('instansi_id'))
+                ->where('periode', '=', $request->get('periode'))
                 ->orderBy('id', 'DESC')
                 ->get();
             $count = DB::table('db_realisasi_pbb')
@@ -247,40 +296,40 @@ class PbbController extends Controller
                     DB::raw('SUM(jmlh_realisasi) AS total_realisasi'),
                     DB::raw('SUM(sisa_target) AS total_sisa')
                 )
-                ->where('id_instansi', '=', $request->get('id_instansi'))
-                ->where('waktu', '=', $request->get('waktu'))
+                ->where('instansi_id', '=', $request->get('instansi_id'))
+                ->where('periode', '=', $request->get('periode'))
                 ->orderBy('id', 'DESC')
                 ->get();
             $periode = DB::table('db_realisasi_pbb')
                 ->select(
-                    DB::raw("DATE_FORMAT(waktu, '%Y') as tahun"),
-                    DB::raw("DATE_FORMAT(waktu, '%m') as bulan"),
-                    DB::raw("DATE_FORMAT(waktu, '%b_%Y') as periode")
+                    DB::raw("DATE_FORMAT(periode, '%Y') as tahun"),
+                    DB::raw("DATE_FORMAT(periode, '%m') as bulan"),
+                    DB::raw("DATE_FORMAT(periode, '%b_%Y') as periode")
                 )
-                ->where('id_instansi', '=', $request->get('id_instansi'))
-                ->where('waktu', '=', $request->get('waktu'))
+                ->where('instansi_id', '=', $request->get('instansi_id'))
+                ->where('periode', '=', $request->get('periode'))
                 ->orderBy('id', 'DESC')
                 ->take(1)
                 ->get();
-            $kecamatan = DB::table('db_realisasi_pbb')
-                ->select('instansi')
-                ->where('id_instansi', '=', $request->get('id_instansi'))
+            $instansi = PBB::select('db_realisasi_pbb.instansi_id','instansi.nama_instansi')
+                ->leftJoin('instansi','instansi.id','db_realisasi_pbb.instansi_id')
+                ->where('db_realisasi_pbb.is_verified','=','1')
                 ->take(1)
                 ->get();
 
-            foreach ($kecamatan as $instansi) {
+            foreach ($instansi as $kecamatan) {
                 foreach ($periode as $per) {
                     
-                    $pdf = PDF::loadView('reportPBB', ['pbb' => $pbb, 'count' => $count, 'periode' => $periode])->setPaper('letter', 'landscape');
-                    return $pdf->stream('Laporan_PBB_' . $instansi->instansi . '_' . $per->periode . '.pdf');
+                    $pdf = PDF::loadView('reportPbb', ['pbb' => $pbb, 'count' => $count, 'periode' => $periode,'kecamatan' => $instansi])->setPaper('letter', 'landscape');
+                    return $pdf->stream('Laporan_PBB_' . $kecamatan->kecamatan . '_' . $per->periode . '.pdf');
                 }
             }
         }
-        if (!$request->filled('id_instansi')) {
+        if (!$request->filled('instansi_id')) {
             $response = ["message" => 'Harap Pilih Instansi Terlebih Dahulu'];
             return response($response, 400);
         }
-        if (!$request->filled('waktu')) {
+        if (!$request->filled('periode')) {
             $response = ["message" => 'Harap Pilih Periode Terlebih Dahulu'];
             return response($response, 400);
         }
@@ -350,31 +399,104 @@ class PbbController extends Controller
 
     public function dataBelumValid(Request $request) {
          if($request->filled(['periode','instansi_id'])) {
-            $notvalid = DB::table('db_realisasi_pbb')
+            $pbbInvalid = DB::table('db_realisasi_pbb')
                 ->select(
-                    DB::raw('count(*) as not_valid')
+                    DB::raw('count(*) as pbb_invalid')
                 )
-                ->where('periode', '=', $request->periode)
+                ->where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode'))
                 ->where('instansi_id','=',$request->instansi_id)
                 ->where('is_verified', '=', '0')
                 ->get();
-                $valid = DB::table('db_realisasi_pbb')
+                $pbbValid = DB::table('db_realisasi_pbb')
                 ->select(
-                    DB::raw('count(*) as valid')
+                    DB::raw('count(*) as pbb_valid')
                 )
-                ->where('periode', '=', $request->periode)
+                ->where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode'))
                 ->where('instansi_id','=',$request->instansi_id)
                 ->where('is_verified', '=', '1')
                 ->get();
-                $valid2 = DB::table('rekapitulasi_paten')
+                $patenInvalid = DB::table('db_rekapitulasi_paten')
                 ->select(
-                    DB::raw('count(*) as lidva')
+                    DB::raw('count(*) as paten_invalid')
                 )
-                ->where('periode', '=', $request->periode)
+                ->where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode'))
                 ->where('instansi_id','=',$request->instansi_id)
+                ->where('is_verified','=','0')
                 ->get();
-                $realisasi = $notvalid->merge($valid)->merge($valid2);
+                $patenValid = DB::table('db_rekapitulasi_paten')
+                ->select(
+                    DB::raw('count(*) as paten_valid')
+                )
+                ->where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode'))
+                ->where('instansi_id','=',$request->instansi_id)
+                ->where('is_verified','=','1')
+                ->get();
+                $kependudukanInvalid = DB::table('db_kependudukan')
+                ->select(
+                    DB::raw('count(*) as kependudukan_invalid')
+                )
+                ->where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode'))
+                ->where('instansi_id','=',$request->instansi_id)
+                ->where('is_verified','=','0')
+                ->get();
+                $kependudukanValid = DB::table('db_kependudukan')
+                ->select(
+                    DB::raw('count(*) as kependudukan_valid')
+                )
+                ->where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode'))
+                ->where('instansi_id','=',$request->instansi_id)
+                ->where('is_verified','=','1')
+                ->get();
+                $bencanaInvalid = DB::table('db_bencana_alam')
+                ->select(
+                    DB::raw('count(*) as bencana_invalid')
+                )
+                ->where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode'))
+                ->where('instansi_id','=',$request->instansi_id)
+                ->where('is_verified','=','0')
+                ->get();
+                $bencanaValid = DB::table('db_bencana_alam')
+                ->select(
+                    DB::raw('count(*) as bencana_valid')
+                )
+                ->where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode'))
+                ->where('instansi_id','=',$request->instansi_id)
+                ->where('is_verified','=','1')
+                ->get();
+                $realisasi = $pbbInvalid->merge($pbbValid)->merge($patenInvalid)->merge($patenValid)->merge($kependudukanInvalid)
+                ->merge($kependudukanValid)->merge($bencanaInvalid)->merge($bencanaValid);
                 return response()->json(['data' => $realisasi]);
+        } else if ($request->filled('periode')){
+            // $pbbInvalid = DB::table('db_realisasi_pbb')
+            // ->select(
+            //     DB::raw('count(*) as pbb_invalid')
+            // )
+            // ->where(DB::raw('YEAR(periode)'), '=', $request->periode)
+            // ->where('is_verified', '=', '0')
+            // ->get();
+            // $pbbValid = DB::table('db_realisasi_pbb')
+            // ->select(
+            //     DB::raw('count(*) as pbb_valid')
+            // )
+            // ->where(DB::raw('YEAR(periode)'), '=', $request->periode)
+            // ->where('is_verified', '=', '1')
+            // ->get();
+            // $patenInvalid = DB::table('db_rekapitulasi_paten')
+            // ->select(
+            //     DB::raw('count(*) as paten_invalid')
+            // )
+            // ->where(DB::raw('YEAR(periode)'), '=', $request->periode)
+            // ->where('is_verified','=','0')
+            // ->get();
+            // $patenValid = DB::table('db_rekapitulasi_paten')
+            // ->select(
+            //     DB::raw('count(*) as paten_valid')
+            // )
+            // ->where(DB::raw('YEAR(periode)'), '=', $request->periode)
+            // ->where('is_verified','=','1')
+            // ->get();
+            // $realisasi = $pbbInvalid->merge($pbbValid)->merge($patenInvalid)->merge($patenValid);
+            // return response()->json(['data' => $realisasi]);
         }
     }
 
@@ -399,5 +521,18 @@ class PbbController extends Controller
     public function update(Request $request, $id)
     {
         //
+    }
+
+    public function totalData(Request $request)
+    {
+        if($request->filled(['periode','instansi_id'])) {
+            $realisasi = 
+            PBB::where([['is_verified', 0],[DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode')],['instansi_id', $request->instansi_id]])->count() + 
+            Paten::where([['is_verified', 0],[DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode')],['instansi_id', $request->instansi_id]])->count() +
+            Kependudukan::where([['is_verified', 0],[DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode')],['instansi_id', $request->instansi_id]])->count() +
+            Bencana::where([['is_verified', 0],[DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode')],['instansi_id', $request->instansi_id]])->count();
+            
+            return response()->json(['data' => $realisasi]);
+        }
     }
 }

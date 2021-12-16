@@ -139,12 +139,14 @@
         total_admin: "",
         total_pbb: "",
         total_paten: "",
+        total_kependudukan: "",
+        total_bencana: "",
         kecamatan: [],
         sekarang: "",
         waktu_lama: "",
         merged: null,
         interval: null,
-        waktu: new Date().getFullYear(),
+        waktu: new Date(),
         kelurahan: "",
         user: "",
         loading: false,
@@ -222,12 +224,14 @@
         this.$http
           .get("/total", {
             params: {
-              periode: this.waktu,
+              periode: this.$moment(this.waktu).format("YYYY"),
             },
           })
           .then((response) => {
             this.total_pbb = response.data.data[0].total_pbb;
             this.total_paten = response.data.data[1].total_paten;
+            this.total_kependudukan = response.data.data[2].total_kependudukan;
+            this.total_bencana = response.data.data[3].total_bencana;
             // let results = response.data.data;
             // let pbb = results.map((a) => [[a.total_pbb] [a.total_paten]]);
             // let paten = results.map((a) => a.total_paten);
@@ -248,13 +252,17 @@
                 "Realisasi PBB",
                 "Rekapitulasi PATEN",
                 "Kependudukan",
-                "Pembuatan Akta",
                 "Keadaan Bencana Alam",
               ],
               datasets: [
                 {
                   backgroundColor: barBackgroundColors,
-                  data: [`${this.total_pbb}`, `${this.total_paten}`],
+                  data: [
+                    `${this.total_pbb}`,
+                    `${this.total_paten}`,
+                    `${this.total_kependudukan}`,
+                    `${this.total_bencana}`,
+                  ],
                   borderWidth: 1,
                 },
               ],

@@ -70,8 +70,9 @@ class AuthController extends Controller
             'instansi_id' => 'required',
             'name' => 'required|string|max:255',
             'username' => 'required|string|unique:users',
-            'email' => 'required|string|email|max:255|unique:users',
+            'email' => 'required|string|email|max:255',
             'password' => 'required|string|min:6|confirmed',
+            'role' => 'unique_with:users,instansi_id'
         ]);
 
         if ($validator->fails()) {
@@ -86,23 +87,42 @@ class AuthController extends Controller
         $response = ['User berhasil disimpan'];
         return response($response, 200);
     }
-    public function update(Request $request)
+    public function update(Request $request, $id)
     {
-        $request->validate([
-            'current_password' => 'required',
-            'password' => 'required|string|min:8|confirmed',
-            'password_confirmation' => 'required',
+        $this->validate($request, [
+            "name" => "required|string",
+            "username" => "required|unique:users,username," . $id,
+            "email" => "required",
+            "password" => "sometimes|confirmed",
         ]);
-        $user = FacadesAuth::user();
+        
+        $user = User::findOrFail($id);
 
-        if (!Hash::check($request->current_password, $user->password)) {
-            $response = ['message' => 'Password yang anda masukkan salah'];
-            return response($response, 422);
+        if ($request->filled(['password','password_confirmation'])) {
+            $user->update([
+                "name" => $request->name,
+                "username" => $request->username,
+                "email" => $request->email,
+                "password" => Hash::make($request->password),
+                "password_confirmation" => Hash::make($request->password)
+            ]);
+        } else {
+            // Jika user tidak mengganti passwordnya
+
+            $user->update([
+                "name" => $request->name,
+                "username" => $request->username,
+                "email" => $request->email,
+            ]);
         }
-        $user->password = Hash::make($request->password);
-        $user->save();
+        // if (!Hash::check($request->current_password, $user->password)) {
+        //     $response = ['message' => 'Password yang anda masukkan salah'];
+        //     return response($response, 422);
+        // }
+        // $user->password = Hash::make($request->password);
+        // $user->save();
 
-        $response = ['message' => 'Password Berhasil diubah'];
+        $response = ['message' => 'Profile Berhasil diubah'];
 
         return response($response, 201);
     }
@@ -111,6 +131,13 @@ class AuthController extends Controller
         $user = $request->user();
         $response = $user;
         return response($response, 200);
+    }
+    
+    public function show($id)
+    {
+        $user = User::where('users.id', $id)
+        ->join('instansi','instansi.id' , '=', 'users.instansi_id')->first();
+        return response()->json(['data' => $user,],200);
     }
 
     public function index()
@@ -144,6 +171,7 @@ class AuthController extends Controller
     ->leftJoin('instansi','instansi.id','users.instansi_id')
     ->where('role','=','User')
     ->orWhere('role','=','Camat')
+    ->orderBy('id','DESC')
     ->get();
         // $user = User::join('instansi','instansi.id' , '=', 'users.instansi_id')
         // ->where('role','=','User')
@@ -166,6 +194,10 @@ class AuthController extends Controller
         // $user = User::where('name', '=', $request->name)->get();
 
         return response(['data' => $instansi, 'total' => $count, 'all' => $all], 200);
+    }
+    public function destroy($id)
+    {
+        return User::destroy($id);
     }
    
 }

@@ -109,8 +109,22 @@ class InstansiController extends Controller
                 ->groupBy(
                     'instansi_id'
                 );
-            $paten = DB::table('rekapitulasi_paten')
-                ->select('instansi_id', DB::raw('COUNT(rekapitulasi_paten.id) as total_paten'))
+            $paten = DB::table('db_rekapitulasi_paten')
+                ->select('instansi_id', DB::raw('COUNT(db_rekapitulasi_paten.id) as total_paten'))
+                ->where('periode', '=', $request->periode)
+                ->where('is_verified', '=', '1')
+                ->groupBy(
+                    'instansi_id'
+                );
+            $kependudukan = DB::table('db_kependudukan')
+                ->select('instansi_id', DB::raw('COUNT(db_kependudukan.id) as total_kependudukan'))
+                ->where('periode', '=', $request->periode)
+                ->where('is_verified', '=', '1')
+                ->groupBy(
+                    'instansi_id'
+                );
+            $bencana = DB::table('db_bencana_alam')
+                ->select('instansi_id', DB::raw('COUNT(db_bencana_alam.id) as total_bencana'))
                 ->where('periode', '=', $request->periode)
                 ->where('is_verified', '=', '1')
                 ->groupBy(
@@ -119,17 +133,25 @@ class InstansiController extends Controller
             $instansi = DB::table('instansi')
                 ->select(
                     'instansi.id',
-                    'instansi.instansi',
+                    'instansi.nama_instansi',
                     'lat',
                     'lng',
                     'realisasi.total_pbb',
-                    'paten.total_paten'
+                    'paten.total_paten',
+                    'kependudukan.total_kependudukan',
+                    'bencana.total_bencana'
                 )
                 ->leftJoinSub($realisasi, 'realisasi', function ($join) {
                     $join->on('instansi.id', 'realisasi.instansi_id');
                 })
                 ->leftJoinSub($paten, 'paten', function ($join) {
                     $join->on('instansi.id', 'paten.instansi_id');
+                })
+                ->leftJoinSub($kependudukan, 'kependudukan', function ($join) {
+                    $join->on('instansi.id', 'kependudukan.instansi_id');
+                })
+                ->leftJoinSub($bencana, 'bencana', function ($join) {
+                    $join->on('instansi.id', 'bencana.instansi_id');
                 })
                 ->where('instansi', '=', 'Kecamatan')
                 ->get();
@@ -165,15 +187,29 @@ class InstansiController extends Controller
                 ->where('is_verified' ,'=','1')
                 ->where(DB::raw('YEAR(periode)'), '=', $request->periode)
                 ->get();
-                $paten = DB::table('rekapitulasi_paten')
+                $paten = DB::table('db_rekapitulasi_paten')
                 ->select(
                     DB::raw('count(*) as total_paten')
                 )
                 ->where('is_verified' ,'=','1')
                 ->where(DB::raw('YEAR(periode)'), '=', $request->periode)
                 ->get();
+                $kependudukan = DB::table('db_kependudukan')
+                ->select(
+                    DB::raw('count(*) as total_kependudukan')
+                )
+                ->where('is_verified' ,'=','1')
+                ->where(DB::raw('YEAR(periode)'), '=', $request->periode)
+                ->get();
+                $bencana = DB::table('db_bencana_alam')
+                ->select(
+                    DB::raw('count(*) as total_bencana')
+                )
+                ->where('is_verified' ,'=','1')
+                ->where(DB::raw('YEAR(periode)'), '=', $request->periode)
+                ->get();
                 
-                $instansi = $realisasi->merge($paten);
+                $instansi = $realisasi->merge($paten)->merge($kependudukan)->merge($bencana);
 
                 return response()->json(['data' => $instansi]);
         }

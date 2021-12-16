@@ -65,22 +65,22 @@ const routes = [
     },
     children: [
       {
-        name: "PBB",
+        name: "Laporan Realisasi PBB",
         component: () => import("./views/pbb/Index"),
         path: "/pbb",
       },
       {
-        name: "Input Data PBB",
+        name: "Input Data Realisasi PBB",
         component: () => import("./views/pbb/Create"),
-        path: "/pbb/create",
+        path: "/pbb/add",
       },
       {
-        name: "Edit Data PBB",
+        name: "Update Data Realisasi PBB",
         component: () => import("./views/pbb/Detail"),
-        path: "/pbb/:id",
+        path: "/pbb/update/:id",
       },
       {
-        name: "DELETE PBB",
+        name: "Hapus Data Realisasi PBB",
         component: () => import("./views/pbb/Index"),
         path: "/pbb/delete/:id",
       },
@@ -102,14 +102,98 @@ const routes = [
     },
     children: [
       {
-        name: "Paten",
+        name: "Laporan Rekapitulasi PATEN",
         component: () => import("./views/paten/Index"),
         path: "/paten",
       },
       {
-        name: "Akta",
-        component: () => import("./views/akta/Index"),
-        path: "/akta",
+        name: "Input Data Rekapitulasi PATEN",
+        component: () => import("./views/paten/Create"),
+        path: "/paten/add",
+      },
+      {
+        name: "Update Data Rekapitulasi PATEN",
+        component: () => import("./views/paten/Detail"),
+        path: "/paten/update/:id",
+      },
+      {
+        name: "Hapus Data Rekapitulasi PATEN",
+        component: () => import("./views/paten/Index"),
+        path: "/paten/delete/:id",
+      },
+    ],
+  },
+  {
+    name: "Kependudukan",
+    icon: "mdi-account",
+    component: MainLayout,
+    path: "/pendudukan",
+    open: false,
+    beforeEnter: (to, from, next) => {
+      if (!store.getters["auth/authenticated"]) {
+        return next({
+          name: "Login",
+        });
+      }
+      next();
+    },
+    children: [
+      {
+        name: "Laporan Kependudukan",
+        component: () => import("./views/kependudukan/Index"),
+        path: "/kependudukan",
+      },
+      {
+        name: "Input Data Kependudukan",
+        component: () => import("./views/kependudukan/Create"),
+        path: "/kependudukan/add",
+      },
+      {
+        name: "Update Data Kependudukan",
+        component: () => import("./views/kependudukan/Detail"),
+        path: "/kependudukan/update/:id",
+      },
+      {
+        name: "Hapus Data Kependudukan",
+        component: () => import("./views/kependudukan/Index"),
+        path: "/kependudukan/delete/:id",
+      },
+    ],
+  },
+  {
+    name: "Bencana",
+    icon: "mdi-account",
+    component: MainLayout,
+    path: "/pendudukan",
+    open: false,
+    beforeEnter: (to, from, next) => {
+      if (!store.getters["auth/authenticated"]) {
+        return next({
+          name: "Login",
+        });
+      }
+      next();
+    },
+    children: [
+      {
+        name: "Laporan Keadaan Bencana Alam",
+        component: () => import("./views/bencana/Index"),
+        path: "/bencana",
+      },
+      {
+        name: "Input Data Keadaan Bencana Alam",
+        component: () => import("./views/bencana/Create"),
+        path: "/bencana/add",
+      },
+      {
+        name: "Update Data Keadaan Bencana Alam",
+        component: () => import("./views/bencana/Detail"),
+        path: "/bencana/update/:id",
+      },
+      {
+        name: "Hapus Data Keadaan Bencana Alam",
+        component: () => import("./views/bencana/Index"),
+        path: "/bencana/delete/:id",
       },
     ],
   },
@@ -131,7 +215,7 @@ const routes = [
     children: [
       {
         name: "Ubah Profil",
-        component: () => import("./views/admin/User/Profile"),
+        component: () => import("./views/user/Profile"),
         path: "/profile",
       },
     ],
@@ -155,28 +239,7 @@ const routes = [
 
   //   ],
   // },
-  {
-    name: "Lap Kependudukan",
-    icon: "mdi-account",
-    component: MainLayout,
-    path: "/pendudukan",
-    open: false,
-    beforeEnter: (to, from, next) => {
-      if (!store.getters["auth/authenticated"]) {
-        return next({
-          name: "Login",
-        });
-      }
-      next();
-    },
-    children: [
-      {
-        name: "Laporan Kependudukan",
-        component: () => import("./views/kependudukan/Index"),
-        path: "/kependudukan",
-      },
-    ],
-  },
+
   {
     name: "Report User",
     component: MainLayout,
@@ -253,8 +316,8 @@ const routes = [
       },
       {
         name: "Edit Data User",
-        component: () => import("./views/user/Detail"),
-        path: "/user/update",
+        component: () => import("./views/user/Edit"),
+        path: "/user/update/:id",
       },
       // {
       //   name: "DELETE PBB",
@@ -280,7 +343,7 @@ const routes = [
     children: [
       {
         name: "Kelola Informasi",
-        component: () => import("./views/user/Index"),
+        component: () => import("./views/informasi/Index"),
         path: "/informasi",
       },
       {

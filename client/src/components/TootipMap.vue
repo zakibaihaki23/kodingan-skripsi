@@ -13,21 +13,41 @@
           <div v-else>
             <div><b>PBB:</b> 0</div>
           </div>
-          <div>
-            <b>PATEN:</b>
-            {{ item.total_paten }}
+          <div v-if="item.total_paten != null">
+            <div>
+              <b>PATEN:</b>
+              {{ item.total_paten }}
+            </div>
           </div>
-          <div>
-            <b>Kependudukan:</b>
-            {{ item.total_penduduk }}
+          <div v-else>
+            <div><b>PATEN:</b> 0</div>
           </div>
-          <div>
-            <b>Akta:</b>
-            {{ item.total_pbb }}
+          <div v-if="item.total_kependudukan != null">
+            <div>
+              <b>Kependudukan:</b>
+              {{ item.total_kependudukan }}
+            </div>
           </div>
-          <div>
-            <b>Bencana Alam:</b>
-            {{ item.total_pbb }}
+          <div v-else>
+            <div><b>Kependudukan:</b> 0</div>
+          </div>
+          <div v-if="item.total_akta != null">
+            <div>
+              <b>Akta:</b>
+              {{ item.total_akta }}
+            </div>
+          </div>
+          <div v-else>
+            <div><b>Akta:</b> 0</div>
+          </div>
+          <div v-if="item.total_bencana != null">
+            <div>
+              <b>Bencana Alam:</b>
+              {{ item.total_bencana }}
+            </div>
+          </div>
+          <div v-else>
+            <div><b>Bencana Alam:</b> 0</div>
           </div>
         </l-popup>
       </div>
@@ -61,9 +81,6 @@
     },
     methods: {
       renderData() {
-        let uah = this.$moment(this.tes);
-
-        console.log(uah);
         // this.$http
         //   .get("/counter", {
         //     params: {

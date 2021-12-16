@@ -1,209 +1,145 @@
 <template>
   <div class="regist">
-    <h1>Input Data PBB</h1>
+    <h1 class="mb-10">Input Data PBB</h1>
     <v-row></v-row>
-    <v-form>
+    <v-form v-model="isFormValid">
       <v-row>
-        <v-col cols="12" sm="6" lg="6" md="6">
-          <div class="form-right-1">
-            <p>
-              Kelurahan
-              <span style="color: red">*</span>
-            </p>
-            <v-select
-              single-line
-              outlined
-              class="form"
-              item-text="name"
-              item-value="id"
-              v-model="kelurahan_id"
-              :items="kelurahan"
-              return-object
-            ></v-select>
-          </div>
-        </v-col>
-        <v-col cols="12" sm="6" lg="6" md="6">
-          <div class="form-right-1">
-            <p>
-              Periode
-              <span style="color: red">*</span>
-            </p>
-            <v-menu
-              ref="menu"
-              v-model="menu"
-              :close-on-content-click="false"
-              :return-value.sync="date"
-              transition="scale-transition"
-              offset-y
-              max-width="290px"
-              min-width="auto"
-            >
-              <template v-slot:activator="{ on, attrs }">
-                <v-text-field
-                  :value="date_picker"
-                  prepend-inner-icon="mdi-calendar"
+        <div class="row">
+          <div class="col mx-auto">
+            <div class="form-group row">
+              <div class="col-md-6">
+                <p>
+                  Kelurahan
+                  <span style="color: red">*</span>
+                </p>
+                <v-select
                   single-line
-                  clearable
                   outlined
                   class="form"
-                  v-bind="attrs"
-                  v-on="on"
-                  @click:clear="date = ''"
-                ></v-text-field>
-              </template>
-              <v-date-picker locale="id" v-model="date" type="month" no-title scrollable>
-                <v-spacer></v-spacer>
-                <v-btn text color="primary" @click="menu = false">Batalkan</v-btn>
-                <v-btn text color="primary" @click="$refs.menu.save(date)">Ok</v-btn>
-              </v-date-picker>
-            </v-menu>
+                  item-text="name"
+                  item-value="id"
+                  v-model="kelurahan_id"
+                  :items="kelurahan"
+                  return-object
+                  :rules="[rules.required]"
+                ></v-select>
+              </div>
+              <div class="col-md-6">
+                <p>
+                  Periode
+                  <span style="color: red">*</span>
+                </p>
+                <v-menu
+                  ref="menu"
+                  v-model="menu"
+                  :close-on-content-click="false"
+                  :return-value.sync="date"
+                  transition="scale-transition"
+                  offset-y
+                  max-width="290px"
+                  min-width="auto"
+                >
+                  <template v-slot:activator="{ on, attrs }">
+                    <v-text-field
+                      :value="date_picker"
+                      prepend-inner-icon="mdi-calendar"
+                      single-line
+                      clearable
+                      outlined
+                      class="form"
+                      v-bind="attrs"
+                      v-on="on"
+                      @click:clear="date = ''"
+                      :rules="[rules.required]"
+                    ></v-text-field>
+                  </template>
+                  <v-date-picker locale="id" v-model="date" type="month" no-title scrollable>
+                    <v-spacer></v-spacer>
+                    <v-btn text color="primary" @click="menu = false">Batalkan</v-btn>
+                    <v-btn text color="primary" @click="$refs.menu.save(date)">Ok</v-btn>
+                  </v-date-picker>
+                </v-menu>
+              </div>
+            </div>
+            <div class="form-group row">
+              <div class="col-lg-4">
+                <p>Target PBB</p>
+                <vuetify-money
+                  v-model="form.target_pbb"
+                  v-bind:placeholder="placeholder"
+                  v-bind:readonly="readonly"
+                  v-bind:disabled="disabled"
+                  v-bind:outlined="outlined"
+                  v-bind:clearable="clearable"
+                  v-bind:valueWhenIsEmpty="kosong"
+                  v-bind:options="options"
+                  class="form"
+                />
+              </div>
+              <div class="col-lg-4">
+                <p>Realisasi Bulan Lalu</p>
+                <vuetify-money
+                  v-model="form.realisasi_lalu"
+                  v-bind:placeholder="placeholder"
+                  v-bind:readonly="readonly"
+                  v-bind:disabled="disabled"
+                  v-bind:outlined="outlined"
+                  v-bind:clearable="clearable"
+                  v-bind:valueWhenIsEmpty="kosong"
+                  v-bind:options="options"
+                  class="form"
+                />
+              </div>
+              <div class="col-lg-4">
+                <p>Realisasi Bulan Ini</p>
+                <vuetify-money
+                  v-model="form.realisasi_sekarang"
+                  v-bind:placeholder="placeholder"
+                  v-bind:readonly="readonly"
+                  v-bind:disabled="disabled"
+                  v-bind:outlined="outlined"
+                  v-bind:clearable="clearable"
+                  v-bind:valueWhenIsEmpty="kosong"
+                  v-bind:options="options"
+                  class="form"
+                />
+              </div>
+            </div>
+            <div class="form-group row">
+              <div class="col-lg-6">
+                <p>Jumlah Realisasi</p>
+                <v-text-field outlined class="form" v-model="form.jumlah_realisasi"></v-text-field>
+              </div>
+              <div class="col-lg-6">
+                <p>Sisa Target</p>
+                <vuetify-money
+                  v-model="form.sisa_target"
+                  v-bind:placeholder="placeholder"
+                  v-bind:readonly="readonly"
+                  v-bind:disabled="disabled"
+                  v-bind:outlined="outlined"
+                  v-bind:clearable="clearable"
+                  v-bind:valueWhenIsEmpty="kosong"
+                  v-bind:options="options"
+                  class="form"
+                />
+              </div>
+            </div>
+            <div class="form-group row">
+              <div>
+                <p>Keterangan</p>
+                <v-textarea
+                  clearable
+                  clear-icon="mdi-close-circle"
+                  single-line
+                  outlined
+                  class="form"
+                  v-model="form.keterangan"
+                ></v-textarea>
+              </div>
+            </div>
           </div>
-        </v-col>
-        <v-col cols="12" sm="6" lg="6" md="6">
-          <div class="form-right">
-            <p>
-              Target PBB
-              <span style="color: red">*</span>
-            </p>
-            <!-- <v-text-field
-              single-line
-              label="Target PBB"
-              outlined
-              class="form"
-              v-model="form.target_pbb"
-            >
-            </v-text-field>-->
-            <vuetify-money
-              v-model="form.target_pbb"
-              v-bind:placeholder="placeholder"
-              v-bind:readonly="readonly"
-              v-bind:disabled="disabled"
-              v-bind:outlined="outlined"
-              v-bind:clearable="clearable"
-              v-bind:valueWhenIsEmpty="kosong"
-              v-bind:options="options"
-              class="form"
-            />
-          </div>
-        </v-col>
-        <v-col cols="12" sm="6" lg="6" md="6">
-          <div class="form-right">
-            <p>
-              Realisasi Bulan Lalu
-              <span style="color: red">*</span>
-            </p>
-            <!-- <v-text-field
-              single-line
-              label="Realisasi Bulan Lalu"
-              outlined
-              class="form"
-              v-model="form.realisasi_lalu"
-            >
-            </v-text-field>-->
-            <vuetify-money
-              v-model="form.realisasi_lalu"
-              v-bind:placeholder="placeholder"
-              v-bind:readonly="readonly"
-              v-bind:disabled="disabled"
-              v-bind:outlined="outlined"
-              v-bind:clearable="clearable"
-              v-bind:valueWhenIsEmpty="kosong"
-              v-bind:options="options"
-              class="form"
-            />
-          </div>
-        </v-col>
-        <v-col cols="12" sm="6" lg="6" md="6">
-          <div class="form-right">
-            <p>
-              Realisasi Bulan Ini
-              <span style="color: red">*</span>
-            </p>
-            <!-- <v-text-field
-              single-line
-              label="Realisasi Bulan Ini"
-              outlined
-              class="form"
-              v-model="form.realisasi_sekarang"
-            >
-            </v-text-field>-->
-            <vuetify-money
-              v-model="form.realisasi_sekarang"
-              v-bind:placeholder="placeholder"
-              v-bind:readonly="readonly"
-              v-bind:disabled="disabled"
-              v-bind:outlined="outlined"
-              v-bind:clearable="clearable"
-              v-bind:valueWhenIsEmpty="kosong"
-              v-bind:options="options"
-              class="form"
-            />
-          </div>
-        </v-col>
-        <v-col cols="12" sm="6" lg="6" md="6">
-          <div class="form-right">
-            <p>
-              Jumlah Realisasi
-              <span style="color: red">*</span>
-            </p>
-            <v-text-field outlined class="form" v-model="form.jumlah_realisasi"></v-text-field>
-            <!-- <vuetify-money
-              label="Jumlah Realisasi"
-              v-model="form.jumlah_realisasi"
-              v-bind:placeholder="placeholder"
-              v-bind:readonly="readonly"
-              v-bind:disabled="disabled"
-              v-bind:outlined="outlined"
-              v-bind:clearable="clearable"
-              v-bind:valueWhenIsEmpty="kosong"
-              v-bind:options="options"
-              class="form"
-            />-->
-          </div>
-        </v-col>
-        <v-col cols="12" sm="6" lg="6" md="6">
-          <div class="form-right">
-            <p>
-              Sisa Target
-              <span style="color: red">*</span>
-            </p>
-            <!-- <v-text-field
-              single-line
-              label="Sisa Target"
-              outlined
-              class="form"
-              v-model="form.sisa_target"
-            >
-            </v-text-field>-->
-            <vuetify-money
-              v-model="form.sisa_target"
-              v-bind:placeholder="placeholder"
-              v-bind:readonly="readonly"
-              v-bind:disabled="disabled"
-              v-bind:outlined="outlined"
-              v-bind:clearable="clearable"
-              v-bind:valueWhenIsEmpty="kosong"
-              v-bind:options="options"
-              class="form"
-            />
-          </div>
-        </v-col>
-        <v-col cols="12" sm="6" lg="6" md="6">
-          <div class="form-right">
-            <p>
-              Keterangan
-              <span style="color: red">*</span>
-            </p>
-            <v-textarea
-              clearable
-              clear-icon="mdi-close-circle"
-              single-line
-              outlined
-              class="form"
-              v-model="form.keterangan"
-            ></v-textarea>
-          </div>
-        </v-col>
+        </div>
       </v-row>
 
       <br />
@@ -220,122 +156,33 @@
               class="button"
               outlined
               style="
-                margin-top: 50px;
                 box-sizing: content-box;
                 border-radius: 25px;
-                width: 111px;
+                width: 100px;
                 height: 45px;
                 padding: 4px;
               "
               >Batalkan</v-btn
+            >&nbsp;
+            <v-btn
+              style="
+                background: #007bff;
+                color: white;
+                box-sizing: content-box;
+                border-radius: 25px;
+                width: 100px;
+                height: 45px;
+                padding: 4px;
+              "
+              class="save"
+              @click="save()"
+              :disabled="overlay == true || !isFormValid"
+              >Simpan</v-btn
             >
-
-            <v-dialog v-model="confirmDialog" persistent>
-              <template v-slot:activator="{ on, attrs }">
-                <v-btn
-                  v-bind="attrs"
-                  v-on="on"
-                  style="
-                    margin-top: 50px;
-                    background: #007bff;
-                    color: white;
-                    box-sizing: content-box;
-                    border-radius: 25px;
-                    width: 111px;
-                    height: 45px;
-                    padding: 4px;
-                    margin-left: 10px;
-                  "
-                  class="save"
-                  >Simpan</v-btn
-                >
-              </template>
-              <v-card>
-                <v-card-title class="text-h5">Apakah data di bawah ini sudah benar?</v-card-title>
-                <v-card-text style="margin-top: 20px">
-                  <v-row style="margin-top: -20px">
-                    <v-col md="2">
-                      <h3>Kelurahan</h3>
-                    </v-col>
-                    <v-col>
-                      <b>: {{ kelurahan_id.name }}</b>
-                    </v-col>
-                  </v-row>
-
-                  <v-row style="margin-top: -20px">
-                    <v-col md="2">
-                      <h3>Periode</h3>
-                    </v-col>
-                    <v-col>
-                      <b>: {{ date }}</b>
-                    </v-col>
-                  </v-row>
-
-                  <v-row style="margin-top: -20px">
-                    <v-col md="2">
-                      <h3>Target PBB</h3>
-                    </v-col>
-                    <v-col>
-                      <b>: {{ form.target_pbb }}</b>
-                    </v-col>
-                  </v-row>
-
-                  <v-row style="margin-top: -20px">
-                    <v-col md="2">
-                      <h3>Realisasi Bulan Lalu</h3>
-                    </v-col>
-                    <v-col>
-                      <b>: {{ form.realisasi_lalu }}</b>
-                    </v-col>
-                  </v-row>
-
-                  <v-row style="margin-top: -20px">
-                    <v-col md="2">
-                      <h3>Realisasi Bulan ini</h3>
-                    </v-col>
-                    <v-col>
-                      <b>: {{ form.realisasi_sekarang }}</b>
-                    </v-col>
-                  </v-row>
-
-                  <v-row style="margin-top: -20px">
-                    <v-col md="2">
-                      <h3>Jumlah Realisasi</h3>
-                    </v-col>
-                    <v-col>
-                      <b>: {{ form.jumlah_realisasi }}</b>
-                    </v-col>
-                  </v-row>
-
-                  <v-row style="margin-top: -20px">
-                    <v-col md="2">
-                      <h3>Sisa Target</h3>
-                    </v-col>
-                    <v-col>
-                      <b>: {{ form.sisa_target }}</b>
-                    </v-col>
-                  </v-row>
-
-                  <v-row style="margin-top: -20px">
-                    <v-col md="2">
-                      <h3>Keterangan</h3>
-                    </v-col>
-                    <v-col>
-                      <b>: {{ form.keterangan }}</b>
-                    </v-col>
-                  </v-row>
-                </v-card-text>
-                <v-card-actions>
-                  <v-spacer></v-spacer>
-                  <v-btn color="blue darken-1" text @click="confirmDialog = false">Batalkan</v-btn>
-                  <v-btn color="blue darken-1" text @click="save">Simpan</v-btn>
-                </v-card-actions>
-              </v-card>
-              <v-overlay :value="overlay">
-                <v-progress-circular indeterminate size="64"></v-progress-circular>
-              </v-overlay>
-            </v-dialog>
           </b-col>
+          <v-overlay :value="overlay">
+            <v-progress-circular indeterminate color="blue"></v-progress-circular>
+          </v-overlay>
         </b-row>
       </div>
     </v-form>
@@ -355,18 +202,19 @@
         menu: false,
         search: null,
         saveDisabled: true,
+        isFormValid: false,
         loading: false,
         rules: {
           required: (value) => !!value || "Required",
           counter: (value) => value.length <= 12 || "Max 30 Characters",
         },
         form: {
-          kelurahan: "",
-          target_pbb: "",
-          realisasi_lalu: "",
-          realisasi_sekarang: "",
-          jumlah_realisasi: "",
-          sisa_target: "",
+          kelurahan: 0,
+          target_pbb: 0,
+          realisasi_lalu: 0,
+          realisasi_sekarang: 0,
+          jumlah_realisasi: 0,
+          sisa_target: 0,
           keterangan: "",
         },
         value: String,
@@ -430,7 +278,6 @@
         const [year, month, day] = date.split("-");
         return `${day}/${month}/${year}`;
       },
-
       renderData() {
         this.$http
           .get(`/kecamatan`, {
@@ -457,9 +304,7 @@
         this.overlay = true;
         this.$http
           .post("/pbb", {
-            id_instansi: this.user.id_instansi,
-            id_kelurahan: this.kelurahan_id.id,
-            instansi: this.user.instansi,
+            instansi_id: this.user.instansi_id,
             kelurahan: this.kelurahan_id.name,
             target_pbb: parseInt(this.form.target_pbb),
             realisasi_bln_lalu: parseInt(this.form.realisasi_lalu),
@@ -467,12 +312,15 @@
             jmlh_realisasi: parseInt(this.form.jumlah_realisasi),
             sisa_target: parseInt(this.form.sisa_target),
             keterangan: this.form.keterangan,
-            waktu: this.date + "-01",
+            periode: this.date + "-01",
           })
           .then((response) => {
-            this.overlay = false;
-            this.$router.push("/pbb");
-            this.$toast.success("Data Berhasil Disimpan");
+            let self = this;
+            setTimeout(function () {
+              self.overlay = false;
+              self.$toast.success("Data Berhasil Disimpan");
+              self.$router.push("/pbb");
+            }, 10 * 10 * 10);
           })
           .catch((error) => {
             this.overlay = false;

@@ -1,12 +1,12 @@
 <template>
-  <div class="helper" v-if="this.user.role == 'Admin'">
-    <h1>Kelola User</h1>
+  <div id="app" style="margin-left: 25px; margin-right: 25px" v-if="this.user.role == 'Admin'">
+    <h1>Kelola Informasi</h1>
     <!-- FOR ALL DEVICE -->
     <v-container>
       <b-row class="mb-10">
-        <b-col>
+        <b-col lg="6">
           <v-btn
-            :to="{ path: '/user/create' }"
+            :to="{ path: '/informasi/add' }"
             style="
               width: 200px;
               height: 50px;
@@ -22,7 +22,7 @@
             >Input Data</v-btn
           >
         </b-col>
-        <b-col>
+        <b-col lg="6">
           <v-tooltip bottom>
             <template v-slot:activator="{ on, attrs }">
               <v-text-field
@@ -36,147 +36,123 @@
                 hide-details
               ></v-text-field>
             </template>
-            <span>Cari Berdasarkan Kelurahan</span>
+            <span>Cari Data</span>
           </v-tooltip>
         </b-col>
       </b-row>
     </v-container>
-    <p class="mt-10" style="font-size: 25px">Filter</p>
-    <v-divider class="d-flex d-none d-sm-block" style="margin-right: 40px"></v-divider>
-    <br />
-    <div id="app">
-      <v-data-table :headers="table" :items="userTable" class="elevation-1">
-        <!-- <template v-slot:item="props"> -->
-        <template>
-          <!-- <tr v-if="!isMobile"> -->
-          <tr>
-            <!-- <td>{{ props.item.kelurahan }}</td>
-              <td>{{ props.item.waktu | moment("MMM - YYYY") }}</td>
-              <td>Rp. {{ formatPrice(props.item.target_pbb) }}</td>
-              <td>Rp. {{ formatPrice(props.item.realisasi_bln_lalu) }}</td>
-              <td>Rp. {{ formatPrice(props.item.realisasi_bln_ini) }}</td>
-              <td>{{ props.item.jmlh_realisasi }}</td>
-              <td>Rp. {{ formatPrice(props.item.sisa_target) }}</td>
-            <td>{{ props.item.keterangan }}</td>-->
-            <!-- <td>
-                <v-menu offset-y>
-                  <template v-slot:activator="{ on, attrs }">
-                    <v-btn v-bind="attrs" v-on="on" icon>
-                      <v-icon dark>mdi-dots-horizontal</v-icon>
-                    </v-btn>
-                  </template>
-                  <v-list>
-                    <template class="menu">
-                      <v-list-item :to="{ path: `/pbb/${props.item.id}` }" link>
-                        <div>
-                          <v-list-item-title>Edit</v-list-item-title>
-                        </div>
-                      </v-list-item>
-                    </template>
-                    <v-divider style="margin-left: 10px; margin-right: 10px"></v-divider>
-
-                    <v-list-item
-                      link
-                      @click="openDialog(props.item.id, props.item.kelurahan, props.item.waktu)"
-                    >Delete</v-list-item>
-                  </v-list>
-                </v-menu>
-            </td>-->
-          </tr>
-          <!-- <tr v-else>
-              <td>
-                <ul class="flex-content">
-                  <li class="flex-item" data-label="Kelurahan">{{ props.item.kelurahan }}</li>
-                  <li
-                    class="flex-item"
-                    data-label="Periode"
-                  >{{ props.item.waktu | moment("MMM - YYYY") }}</li>
-                  <li
-                    class="flex-item"
-                    data-label="Target PBB"
-                  >Rp. {{ formatPrice(props.item.target_pbb) }}</li>
-                  <li
-                    class="flex-item"
-                    data-label="Tealisasi Bulan Lalu"
-                  >Rp. {{ formatPrice(props.item.realisasi_bln_lalu) }}</li>
-                  <li
-                    class="flex-item"
-                    data-label="Realisasi Bulan Ini"
-                  >Rp. {{ formatPrice(props.item.realisasi_bln_ini) }}</li>
-                  <li
-                    class="flex-item"
-                    data-label="Jumlah Realisasi"
-                  >{{ props.item.jmlh_realisasi }}</li>
-                  <li
-                    class="flex-item"
-                    data-label="Sisa Target"
-                  >Rp. {{ formatPrice(props.item.sisa_target) }}</li>
-                  <li class="flex-item" data-label="Keterangan">{{ props.item.keterangan }}</li>
-                </ul>
-                <v-menu offset-y>
-                  <template v-slot:activator="{ on, attrs }">
-                    <v-btn v-bind="attrs" v-on="on" icon>
-                      <v-icon dark>mdi-dots-horizontal</v-icon>
-                    </v-btn>
-                  </template>
-                  <v-list>
-                    <template class="menu">
-                      <v-list-item :to="{ path: `/pbb/${props.item.id}` }" link>
-                        <div>
-                          <v-list-item-title>Edit</v-list-item-title>
-                        </div>
-                      </v-list-item>
-                    </template>
-                    <v-divider style="margin-left: 10px; margin-right: 10px"></v-divider>
-
-                    <v-list-item
-                      link
-                      @click="openDialog(props.item.id, props.item.kelurahan, props.item.waktu)"
-                    >Delete</v-list-item>
-                  </v-list>
-                </v-menu>
-              </td>
-          </tr>-->
-        </template>
-      </v-data-table>
-      <!-- <b-modal v-model="dialog" centered no-close-on-backdrop @ok="deletePBB()">
+    <p class="d-flex d-none d-sm-block" style="font-size: 25px; margin-top: 40px">Filter</p>
+    <v-divider class="d-flex d-none d-sm-block"></v-divider>
+    <b-row style="margin-top: 1px">
+      <b-col cols="12" lg="3">
+        <KecamatanSelected
+          v-show="!firstLoad"
+          v-model="kecamatan"
+          @selected="kecamatanSelected"
+        ></KecamatanSelected>
+      </b-col>
+      <b-col cols="12" lg="3">
+        <v-menu
+          ref="menu"
+          v-model="date_filter"
+          :close-on-content-click="false"
+          transition="scale-transition"
+          offset-y
+          min-width="290px"
+        >
+          <template v-slot:activator="{ on }">
+            <div v-on="on">
+              <v-tooltip top>
+                <template v-slot:activator="{ on, attrs }">
+                  <v-text-field
+                    v-show="!firstLoad"
+                    v-bind="attrs"
+                    v-on="on"
+                    style="border-radius: 10px; font-size: 13px"
+                    prepend-inner-icon="mdi-calendar"
+                    outlined
+                    single-line
+                    clearable
+                    readonly
+                    dense
+                    @click:clear="(date = ''), renderData(search)"
+                    :value="format_date"
+                  >
+                    <template v-slot:label>Filter Periode</template>
+                  </v-text-field>
+                </template>
+                <span>Cari Berdasarkan Periode</span>
+              </v-tooltip>
+            </div>
+          </template>
+          <v-date-picker locale="id" v-model="date" no-title scrollable>
+            <v-spacer></v-spacer>
+            <v-btn text color="primary" @click="date_filter = false">Cancel</v-btn>
+            <v-btn text color="primary" @click="(date_filter = false), renderData(search)"
+              >OK</v-btn
+            >
+          </v-date-picker>
+        </v-menu>
+      </b-col>
+    </b-row>
+    <v-skeleton-loader
+      v-if="firstLoad"
+      :loading="isLoading"
+      type="table-tbody"
+      :types="{ 'table-row': 'table-cell@8' }"
+    ></v-skeleton-loader>
+    <v-data-table
+      v-show="!firstLoad"
+      :loading="isLoading"
+      :search="search"
+      :headers="table"
+      :items="informasi"
+      class="elevation-1"
+    >
+      <template v-slot:[`item.nama_instansi`]="{ item }">
+        <span v-if="item.nama_instansi == null">Semua Kecamatan</span>
+        <span v-else>{{ item.nama_instansi }}</span>
+      </template>
+      <template v-slot:[`item.waktu`]="{ item }">
+        {{ item.waktu | moment("DD - MMMM - YYYY") }}
+      </template>
+    </v-data-table>
+    <!-- <b-modal v-model="dialog" centered no-close-on-backdrop @ok="deletePBB()">
         Apakah anda ingin menghapus data dari
         <b>{{ this.kel }}</b>
         <br />Pada Periode Laporan
         <b>{{ this.period }}</b>?
       </b-modal>-->
-    </div>
   </div>
 </template>
 
 <script>
   import { mapGetters } from "vuex";
+  import KecamatanSelected from "../../components/SelectKecamatanInformasi.vue";
 
   export default {
+    components: { KecamatanSelected },
     data() {
       return {
-        userTable: [],
+        informasi: [],
         search: "",
+        date_filter: "",
+        date: "",
+        firstLoad: true,
+        isLoading: true,
+        kecamatan: [],
         table: [
-          {
-            text: "Nama",
-            value: "name",
-          },
-          {
-            text: "Username",
-            value: "username",
-          },
-          {
-            text: "Email",
-            value: "email",
-          },
-          {
-            text: "Role",
-            value: "role",
-          },
           {
             text: "Kecamatan",
             value: "nama_instansi",
+          },
+          {
+            text: "Informasi",
+            value: "informasi",
+          },
+          {
+            text: "Waktu",
+            value: "waktu",
           },
           {
             value: "actions",
@@ -201,9 +177,6 @@
     },
     created() {
       this.renderData();
-      if (this.user.role != "Admin") {
-        this.$router.push("/dashboard");
-      }
     },
     watch: {
       clearable: {
@@ -217,18 +190,55 @@
       ...mapGetters({
         user: "auth/user",
       }),
+      format_date() {
+        if (this.date) return this.$moment(this.date).format("DD - MMMM - YYYY");
+      },
     },
     methods: {
       renderData(search) {
+        this.firstLoad = true;
+
+        let waktu = "";
+        if (this.date) {
+          waktu = this.date;
+        } else {
+          waktu = null;
+        }
+
         this.$http
-          .get("/user")
+          .get("/informasi/all", {
+            params: {
+              instansi_id: this.kecamatan.value,
+              waktu,
+            },
+          })
           .then((response) => {
-            this.userTable = response.data.data;
-            //   console.log(this.userTable);
+            this.informasi = response.data.data;
+            this.firstLoad = false;
+            this.isLoading = false;
+            //   console.log(this.informasi);
           })
           .catch((error) => {
             //   this.dialogOverlay = false;
           });
+      },
+      kecamatanSelected(kecamatan) {
+        this.downloadDisabled = true;
+        this.kecamatan = "";
+        this.filterKecamatan = null;
+        this.date_filter = false;
+        if (kecamatan) {
+          this.kecamatan = kecamatan;
+          this.filterKecamatan = kecamatan.id;
+        } else {
+          this.downloadDisabled = true;
+        }
+        if (this.date && this.kecamatan) {
+          this.downloadDisabled = false;
+        } else {
+          this.downloadDisabled = true;
+        }
+        this.renderData();
       },
     },
   };

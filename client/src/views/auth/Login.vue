@@ -12,7 +12,7 @@
       </div>
     </div>
     <div class="row justify-content-center">
-      <div class="col-md-6 col-md-offset-3 col-xs-12">
+      <div class="col-lg-8 col-lg-offset-5 col-xs-12">
         <div class="card flex-row my-5 border-0 shadow rounded-3 overflow-hidden">
           <div class="card-body p-4 p-sm-5">
             <h3 class="text-center fw-bold">
@@ -27,10 +27,12 @@
                   required
                   class="form"
                   single-line
+                  @keydown.space.prevent
                   outlined
                   label="username"
                   :rules="[rules.required, rules.minmin]"
                   prepend-inner-icon="mdi-account"
+                  :disabled="loading == true"
                 ></v-text-field>
               </div>
 
@@ -47,6 +49,7 @@
                   class="form"
                   outlined
                   single-line
+                  :disabled="loading == true"
                 ></v-text-field>
               </div>
 
@@ -90,8 +93,8 @@
       show1: false,
       rules: {
         required: (value) => !!value || "Required.",
-        min: (v) => (v && v.length >= 8) || "Min 8 characters",
-        minmin: (v) => (v && v.length >= 5) || "Min 5 characters",
+        min: (v) => (v && v.length >= 8) || "Minimal 8 Karakter",
+        minmin: (v) => (v && v.length >= 5) || "Minimal 5 Karakter",
       },
     }),
     computed: {
