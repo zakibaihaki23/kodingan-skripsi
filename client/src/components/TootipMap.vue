@@ -2,7 +2,7 @@
   <div>
     <l-marker v-for="item in instansi" :key="item.id" :lat-lng="item">
       <div>
-        <l-popup style="height: 200px">
+        <l-tooltip style="height: 200px">
           <span>Total data yang diinput {{ item.nama_instansi }} Bulan ini:</span>
           <div v-if="item.total_pbb != null">
             <div>
@@ -31,14 +31,14 @@
           <div v-else>
             <div><b>Kependudukan:</b> 0</div>
           </div>
-          <div v-if="item.total_akta != null">
+          <div v-if="item.total_imunisasi != null">
             <div>
-              <b>Akta:</b>
-              {{ item.total_akta }}
+              <b>Kegiatan Camat:</b>
+              {{ item.total_imunisasi }}
             </div>
           </div>
           <div v-else>
-            <div><b>Akta:</b> 0</div>
+            <div><b>Kegiatan Camat:</b> 0</div>
           </div>
           <div v-if="item.total_bencana != null">
             <div>
@@ -49,28 +49,27 @@
           <div v-else>
             <div><b>Bencana Alam:</b> 0</div>
           </div>
-        </l-popup>
+        </l-tooltip>
       </div>
     </l-marker>
   </div>
 </template>
 
 <script>
-  import { LMap, LTileLayer, LMarker, LPopup } from "vue2-leaflet";
+  import { LMap, LTileLayer, LMarker, LTooltip } from "vue2-leaflet";
 
   export default {
     components: {
       LMap,
       LTileLayer,
       LMarker,
-      LPopup,
+      LTooltip,
     },
     data() {
       return {
-        waktu:
-          this.$moment(new Date(Date.now() + 3600 * 1000 * 24).toISOString().substr(0, 10)).format(
-            "YYYY-MM"
-          ) + "-01",
+        waktu: this.$moment(
+          new Date(Date.now() + 3600 * 1000 * 24).toISOString().substr(0, 10)
+        ).format("YYYY-MM"),
         instansi: [],
         total: [],
         tes: new Date(Date.now() + 3600 * 1000 * 24).toISOString().substr(0, 10),

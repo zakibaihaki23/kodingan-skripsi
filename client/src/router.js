@@ -161,6 +161,43 @@ const routes = [
     ],
   },
   {
+    name: "Imunisasi",
+    icon: "mdi-account",
+    component: MainLayout,
+    path: "/imun",
+    open: false,
+    beforeEnter: (to, from, next) => {
+      if (!store.getters["auth/authenticated"]) {
+        return next({
+          name: "Login",
+        });
+      }
+      next();
+    },
+    children: [
+      {
+        name: "Laporan Imunisasi",
+        component: () => import("./views/imunisasi/Index"),
+        path: "/imunisasi",
+      },
+      {
+        name: "Input Data Imunisasi",
+        component: () => import("./views/imunisasi/Create"),
+        path: "/imunisasi/add",
+      },
+      {
+        name: "Update Data Imunisasi",
+        component: () => import("./views/imunisasi/Detail"),
+        path: "/imunisasi/update/:id",
+      },
+      {
+        name: "Hapus Data Imunisasi",
+        component: () => import("./views/imunisasi/Index"),
+        path: "/imunisasi/delete/:id",
+      },
+    ],
+  },
+  {
     name: "Bencana",
     icon: "mdi-account",
     component: MainLayout,
@@ -221,27 +258,8 @@ const routes = [
     ],
   },
 
-  // {
-  //   name: 'Create',
-  //   icon: 'mdi-view-dashboard',
-  //   component: MainLayout,
-  //   path: '/pbb',
-  //   open: false,
-  //   beforeEnter: (to, from, next) => {
-  //     if (!store.getters['auth/authenticated']) {
-  //       return next({
-  //         name: 'Login',
-  //       });
-  //     }
-  //     next();
-  //   },
-  //   children: [
-
-  //   ],
-  // },
-
   {
-    name: "Report User",
+    name: "Report",
     component: MainLayout,
     path: "/report",
     beforeEnter: (to, from, next) => {
@@ -254,9 +272,9 @@ const routes = [
     },
     children: [
       {
-        name: "Laporan PBB",
-        component: () => import("./views/pbb/Report"),
-        path: "/report/pbb",
+        name: "Download Laporan",
+        component: () => import("./views/download/Index"),
+        path: "/report",
       },
     ],
   },
@@ -316,7 +334,7 @@ const routes = [
       },
       {
         name: "Edit Data User",
-        component: () => import("./views/user/Edit"),
+        component: () => import("./views/user/Detail"),
         path: "/user/update/:id",
       },
       // {
@@ -353,14 +371,14 @@ const routes = [
       },
       {
         name: "Edit Informasi",
-        component: () => import("./views/user/Detail"),
-        path: "/informasi/update",
+        component: () => import("./views/informasi/Detail"),
+        path: "/informasi/update/:id",
       },
-      // {
-      //   name: "DELETE PBB",
-      //   component: () => import("./views/pbb/Index"),
-      //   path: "/pbb/delete/:id",
-      // },
+      {
+        name: "DELETE Informasi",
+        component: () => import("./views/informasi/Index"),
+        path: "/informasi/delete/:id",
+      },
     ],
   },
   // {

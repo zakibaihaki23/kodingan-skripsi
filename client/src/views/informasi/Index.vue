@@ -1,47 +1,32 @@
 <template>
   <div id="app" style="margin-left: 25px; margin-right: 25px" v-if="this.user.role == 'Admin'">
-    <h1>Kelola Informasi</h1>
     <!-- FOR ALL DEVICE -->
     <v-container>
-      <b-row class="mb-10">
-        <b-col lg="6">
+      <b-row>
+        <b-col>
+          <div style="margin: 0px; padding: 0px">
+            <h4>Kelola Informasi</h4>
+          </div>
+        </b-col>
+        <b-col class="text-right" style="margin: 0px; padding: 0px">
           <v-btn
+            large
+            depressed
+            v-show="!firstLoad"
             :to="{ path: '/informasi/add' }"
             style="
-              width: 200px;
-              height: 50px;
               background: #4662d4;
               color: white;
               border-radius: 30px;
-              font-size: 16px;
-              font-weight: bold;
               text-transform: capitalize;
               cursor: pointer;
-              padding: 5px;
             "
-            >Input Data</v-btn
-          >
-        </b-col>
-        <b-col lg="6">
-          <v-tooltip bottom>
-            <template v-slot:activator="{ on, attrs }">
-              <v-text-field
-                v-bind="attrs"
-                v-on="on"
-                v-model="search"
-                append-icon="mdi-magnify"
-                rounded
-                label="Search...."
-                solo
-                hide-details
-              ></v-text-field>
-            </template>
-            <span>Cari Data</span>
-          </v-tooltip>
+            >Input Data
+            <v-icon right>mdi-plus-circle</v-icon>
+          </v-btn>
         </b-col>
       </b-row>
     </v-container>
-    <p class="d-flex d-none d-sm-block" style="font-size: 25px; margin-top: 40px">Filter</p>
     <v-divider class="d-flex d-none d-sm-block"></v-divider>
     <b-row style="margin-top: 1px">
       <b-col cols="12" lg="3">
@@ -68,7 +53,7 @@
                     v-show="!firstLoad"
                     v-bind="attrs"
                     v-on="on"
-                    style="border-radius: 10px; font-size: 13px"
+                    style="border-radius: 10px; font-size: 13px; width: 250px"
                     prepend-inner-icon="mdi-calendar"
                     outlined
                     single-line
@@ -78,19 +63,20 @@
                     @click:clear="(date = ''), renderData(search)"
                     :value="format_date"
                   >
-                    <template v-slot:label>Filter Periode</template>
+                    <template v-slot:label>Filter Waktu</template>
                   </v-text-field>
                 </template>
-                <span>Cari Berdasarkan Periode</span>
+                <span>Cari Berdasarkan Waktu</span>
               </v-tooltip>
             </div>
           </template>
-          <v-date-picker locale="id" v-model="date" no-title scrollable>
-            <v-spacer></v-spacer>
-            <v-btn text color="primary" @click="date_filter = false">Cancel</v-btn>
-            <v-btn text color="primary" @click="(date_filter = false), renderData(search)"
-              >OK</v-btn
-            >
+          <v-date-picker
+            locale="id"
+            v-model="date"
+            no-title
+            scrollable
+            @input="(date_filter = false), renderData(search)"
+          >
           </v-date-picker>
         </v-menu>
       </b-col>
@@ -114,15 +100,65 @@
         <span v-else>{{ item.nama_instansi }}</span>
       </template>
       <template v-slot:[`item.waktu`]="{ item }">
-        {{ item.waktu | moment("DD - MMMM - YYYY") }}
+        {{ item.waktu | moment("dddd / DD - MMMM - YYYY") }}
+      </template>
+      <template v-slot:[`item.actions`]="{ item }">
+        <v-menu offset-y>
+          <template v-slot:activator="{ on, attrs }">
+            <v-btn v-bind="attrs" v-on="on" icon>
+              <v-icon dark>mdi-dots-horizontal</v-icon>
+            </v-btn>
+          </template>
+          <v-list>
+            <v-list-item
+              :to="{
+                path: `/informasi/update/${item.id}`,
+              }"
+              link
+            >
+              <v-list-item-title class="text-center">Edit</v-list-item-title>
+            </v-list-item>
+            <v-list-item @click="hapusDialog(item)" link>
+              <v-list-item-title class="text-center">Hapus</v-list-item-title>
+            </v-list-item>
+          </v-list>
+        </v-menu>
       </template>
     </v-data-table>
-    <!-- <b-modal v-model="dialog" centered no-close-on-backdrop @ok="deletePBB()">
-        Apakah anda ingin menghapus data dari
-        <b>{{ this.kel }}</b>
-        <br />Pada Periode Laporan
-        <b>{{ this.period }}</b>?
-      </b-modal>-->
+    <b-modal v-model="dialog" centered no-close-on-backdrop @ok="hapusData(idData)">
+      Apakah anda ingin menghapus data user berikut:
+      <div class="row">
+        <div class="col mx-auto">
+          <div class="form-group row">
+            <div class="col-md-3">Kecamatan</div>
+            <div class="col-md-6" style="font-weight: bold" v-if="this.kec != null">
+              {{ this.kec }}
+            </div>
+            <div v-else class="col-md-6" style="font-weight: bold">Seluruh Kecamatan</div>
+          </div>
+          <div class="form-group row">
+            <div class="col-md-3">Informasi</div>
+            <div class="col-md-6" style="font-weight: bold">{{ this.info }}</div>
+          </div>
+          <div class="form-group row">
+            <div class="col-md-3">Waktu</div>
+            <div class="col-md-6" style="font-weight: bold">
+              {{ this.waktu }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </b-modal>
+    <v-dialog v-model="dialogOverlay" persistent max-width="300">
+      <div>
+        <v-card color="primary" dark class="text-center">
+          <v-card-text>
+            Mohon tunggu sebentar......
+            <v-progress-linear indeterminate color="white" class="mb-0"></v-progress-linear>
+          </v-card-text>
+        </v-card>
+      </div>
+    </v-dialog>
   </div>
 </template>
 
@@ -137,6 +173,13 @@
         informasi: [],
         search: "",
         date_filter: "",
+        dialog: false,
+        kec: "",
+        kecamatan: "",
+        info: "",
+        idData: "",
+        waktu: "",
+        dialogOverlay: false,
         date: "",
         firstLoad: true,
         isLoading: true,
@@ -196,7 +239,7 @@
     },
     methods: {
       renderData(search) {
-        this.firstLoad = true;
+        this.isLoading = true;
 
         let waktu = "";
         if (this.date) {
@@ -216,14 +259,39 @@
             this.informasi = response.data.data;
             this.firstLoad = false;
             this.isLoading = false;
-            //   console.log(this.informasi);
           })
           .catch((error) => {
-            //   this.dialogOverlay = false;
+            this.firstLoad = false;
+            this.isLoading = false;
+          });
+      },
+      hapusDialog(item) {
+        this.dialog = true;
+        this.idData = item.id;
+        this.kec = item.nama_instansi;
+        this.info = item.informasi;
+        this.waktu = this.$moment(item.waktu).format("dddd, DD - MMMM - YYYY");
+      },
+      hapusData(idData) {
+        this.dialogOverlay = true;
+        this.firstLoad = true;
+        this.$http
+          .delete("/informasi/" + idData)
+          .then((response) => {
+            let self = this;
+            setTimeout(function () {
+              self.dialog = false;
+              self.renderData();
+              self.$toast.success("Data Berhasil Dihapus");
+              self.dialogOverlay = false;
+            }, 10 * 10 * 10);
+          })
+          .catch((error) => {
+            console.log(error);
+            console.log("gagal");
           });
       },
       kecamatanSelected(kecamatan) {
-        this.downloadDisabled = true;
         this.kecamatan = "";
         this.filterKecamatan = null;
         this.date_filter = false;
@@ -232,6 +300,7 @@
           this.filterKecamatan = kecamatan.id;
         } else {
           this.downloadDisabled = true;
+          this.kelurahanDisabled = true;
         }
         if (this.date && this.kecamatan) {
           this.downloadDisabled = false;

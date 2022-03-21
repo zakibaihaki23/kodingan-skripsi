@@ -1,42 +1,37 @@
 <template>
   <div id="app" style="margin-left: 25px; margin-right: 25px">
-    <h1>Laporan Kependudukan</h1>
     <!-- FOR ALL DEVICE -->
     <v-container>
-      <b-row class="mt-3">
-        <b-col> </b-col>
-        <b-col lg="6">
-          <v-tooltip bottom>
-            <template v-slot:activator="{ on, attrs }">
-              <v-text-field
-                v-bind="attrs"
-                v-on="on"
-                v-model="search"
-                append-icon="mdi-magnify"
-                rounded
-                label="Search...."
-                solo
-                hide-details
-              ></v-text-field>
-            </template>
-            <span>Cari Berdasarkan Kelurahan</span>
-          </v-tooltip>
+      <b-row>
+        <b-col>
+          <div>
+            <h4>Laporan Kependudukan</h4>
+          </div>
         </b-col>
+        <b-col> </b-col>
       </b-row>
     </v-container>
-    <p class="mt-5" style="font-size: 25px">Filter</p>
     <v-divider class="d-flex d-none d-sm-block"></v-divider>
 
-    <b-row style="margin-top: 1px">
-      <b-col cols="12" lg="3">
+    <b-row style="margin-top: 1px" cols-lg="5" cols-md="1">
+      <b-col>
         <KecamatanSelected
           v-show="!firstLoad"
           v-model="kecamatan"
           @selected="kecamatanSelected"
-          :disabled="kelurahanDisabled"
         ></KecamatanSelected>
       </b-col>
-      <b-col cols="12" lg="4">
+      <b-col>
+        <KelurahanSelected
+          v-show="!firstLoad"
+          v-model="kelurahan"
+          @selected="kelurahanSelected"
+          :kecamatanId="kecamatan.value"
+          :disabled="kelurahanDisabled"
+        >
+        </KelurahanSelected>
+      </b-col>
+      <b-col lg="3">
         <v-menu
           ref="menu"
           v-model="date_filter"
@@ -53,16 +48,15 @@
                     v-show="!firstLoad"
                     v-bind="attrs"
                     v-on="on"
-                    style="border-radius: 10px; font-size: 13px"
+                    style="border-radius: 10px; font-size: 13px; width: 250px"
                     prepend-inner-icon="mdi-calendar"
                     outlined
-                    readonly
                     single-line
                     clearable
+                    readonly
                     dense
                     @click:clear="(date = ''), renderData(search)"
                     :value="format_date"
-                    @input="dateSelected"
                   >
                     <template v-slot:label>Periode</template>
                   </v-text-field>
@@ -72,21 +66,18 @@
             </div>
           </template>
           <v-date-picker
-            @change="dateSelected"
             locale="id"
             v-model="date"
             type="month"
             no-title
             scrollable
+            @input="(date_filter = false), renderData(search)"
           >
-            <v-spacer></v-spacer>
-            <v-btn text color="primary" @click="date_filter = false">Cancel</v-btn>
-            <v-btn text color="primary" @click="(date_filter = false), renderData(search)"
-              >OK</v-btn
-            >
           </v-date-picker>
         </v-menu>
       </b-col>
+      <b-col lg="1"></b-col>
+      <b-col></b-col>
     </b-row>
     <br />
     <v-skeleton-loader
@@ -95,113 +86,157 @@
       type="table-tbody"
       :types="{ 'table-row': 'table-cell@8' }"
     ></v-skeleton-loader>
-    <div id="app">
-      <v-data-table
-        loading-text="Memuat Data"
-        v-show="!firstLoad"
-        :loading="isLoading"
-        :headers="table"
-        :search="search"
-        :items="kependudukan"
-        :hide-header="isMobile"
-        :class="{ mobile: isMobile }"
-        class="elevation-1"
-      >
-        <template v-slot:header="props">
-          <thead>
-            <td>{{ props.props.headers.text }}</td>
-            <td></td>
-            <td
-              colspan="3"
-              style="font-weight: bold; font-size: 15px; text-align: center"
-              class="card-1"
-            >
-              Jumlah Penduduk Awal Bulan Lalu
-            </td>
-            <td
-              colspan="3"
-              style="font-weight: bold; font-size: 15px; text-align: center"
-              class="card-1"
-            >
-              Lahir
-            </td>
-            <td
-              colspan="3"
-              style="font-weight: bold; font-size: 15px; text-align: center"
-              class="card-1"
-            >
-              Meninggal
-            </td>
-            <td
-              colspan="3"
-              style="font-weight: bold; font-size: 15px; text-align: center"
-              class="card-1"
-            >
-              Datang
-            </td>
-            <td
-              colspan="3"
-              style="font-weight: bold; font-size: 15px; text-align: center"
-              class="card-1"
-            >
-              Pindah
-            </td>
-            <td
-              colspan="3"
-              style="font-weight: bold; font-size: 15px; text-align: center"
-              class="card-1"
-            >
-              Jumlah Penduduk Bulan Ini
-            </td>
-          </thead>
-        </template>
-        <template v-slot:[`item.periode`]="{ item }">
-          {{ item.periode | moment("MMMM - YYYY") }}
-        </template>
-        <template v-slot:[`item.total_penduduk_bln_lalu`]="{ item }">
-          <span style="font-weight: bold">{{ item.total_penduduk_bln_lalu }}</span>
-        </template>
-        <template v-slot:[`item.total_lahir`]="{ item }">
-          <span style="font-weight: bold">{{ item.total_lahir }}</span>
-        </template>
-        <template v-slot:[`item.total_meninggal`]="{ item }">
-          <span style="font-weight: bold">{{ item.total_meninggal }}</span>
-        </template>
-        <template v-slot:[`item.total_datang`]="{ item }">
-          <span style="font-weight: bold">{{ item.total_datang }}</span>
-        </template>
-        <template v-slot:[`item.total_pindah`]="{ item }">
-          <span style="font-weight: bold">{{ item.total_pindah }}</span>
-        </template>
-        <template v-slot:[`item.total_penduduk_bln_ini`]="{ item }">
-          <span style="font-weight: bold">{{ item.total_penduduk_bln_ini }}</span>
-        </template>
-        <template v-slot:[`item.is_verified`]="{ item }">
-          <span v-if="item.is_verified == 0">Menunggu Validasi</span>
-          <span v-if="item.is_verified == 1">Sudah Divalidasi</span>
-        </template>
-        <template v-slot:[`item.actions`]="{ item }">
-          <v-menu offset-y v-if="item.is_verified == 0">
-            <template v-slot:activator="{ on, attrs }">
-              <v-btn v-bind="attrs" v-on="on" icon>
-                <v-icon dark>mdi-dots-horizontal</v-icon>
-              </v-btn>
-            </template>
-            <v-list>
-              <template class="menu">
-                <v-list-item link>
-                  <div>
-                    <v-list-item-title @click="dialogValid(item)">Validasi</v-list-item-title>
-                  </div>
-                </v-list-item>
-              </template>
-              <v-divider style="margin-left: 10px; margin-right: 10px"></v-divider>
+    <v-progress-linear :active="isLoading" :indeterminate="isLoading" middle></v-progress-linear>
+    <v-simple-table v-show="!firstLoad">
+      <template v-slot:default>
+        <thead style="border-style: solid; border-width: 2px; border-color: #d7d0d0">
+          <td rowspan="2">Periode</td>
+          <td rowspan="2">Kecamatan</td>
+          <td rowspan="2">Desa/Kelurahan</td>
+          <td colspan="3">Jumlah Penduduk Awal Bulan Lalu</td>
+          <td colspan="3">Lahir</td>
+          <td colspan="3">Meninggal</td>
+          <td colspan="3">Datang</td>
+          <td colspan="3">Pindah</td>
+          <td colspan="3">Jumlah Penduduk Bulan Ini</td>
 
-              <v-list-item @click="dialogTolak(item)">Tolak</v-list-item>
-            </v-list>
-          </v-menu>
-        </template>
-      </v-data-table>
+          <tr style="border-style: solid; border-width: 2px; border-color: #d7d0d0">
+            <th>L</th>
+            <th>P</th>
+            <th>L + P</th>
+            <th>L</th>
+            <th>P</th>
+            <th>L + P</th>
+            <th>L</th>
+            <th>P</th>
+            <th>L + P</th>
+            <th>L</th>
+            <th>P</th>
+            <th>L + P</th>
+            <th>L</th>
+            <th>P</th>
+            <th>L + P</th>
+            <th>L</th>
+            <th>P</th>
+            <th>L + P</th>
+          </tr>
+        </thead>
+        <tbody v-if="kependudukan == ''">
+          <td colspan="20" style="font-weight: bold">No Data Available</td>
+        </tbody>
+        <tbody v-else>
+          <tr v-for="item in kependudukan" :key="item.id">
+            <td class="text-left" style="font-weight: bold" v-if="item.periode == null">NIHIL</td>
+            <td class="text-left" v-else>{{ item.periode | moment("MMMM - YYYY") }}</td>
+            <td class="text-left">{{ item.nama_instansi }}</td>
+            <td class="text-left" style="font-weight: bold" v-if="item.kelurahan == null">NIHIL</td>
+            <td class="text-left" v-else>{{ item.kelurahan }}</td>
+            <td
+              class="text-center"
+              style="font-weight: bold"
+              v-if="item.jmlh_penduduk_bln_lalu_l == null"
+            >
+              NIHIL
+            </td>
+            <td class="text-center" v-else>{{ item.jmlh_penduduk_bln_lalu_l }}</td>
+            <td
+              class="text-center"
+              style="font-weight: bold"
+              v-if="item.jmlh_penduduk_bln_lalu_p == null"
+            >
+              NIHIL
+            </td>
+            <td class="text-center" v-else>{{ item.jmlh_penduduk_bln_lalu_p }}</td>
+            <td
+              class="text-center"
+              style="font-weight: bold"
+              v-if="item.total_penduduk_bln_lalu == 0"
+            >
+              NIHIL
+            </td>
+            <td class="text-center" v-else>{{ item.total_penduduk_bln_lalu }}</td>
+            <td class="text-center" style="font-weight: bold" v-if="item.lahir_l == null">NIHIL</td>
+            <td class="text-center" v-else>{{ item.lahir_l }}</td>
+            <td class="text-center" style="font-weight: bold" v-if="item.lahir_p == null">NIHIL</td>
+            <td class="text-center" v-else>{{ item.lahir_p }}</td>
+            <td class="text-center" style="font-weight: bold" v-if="item.total_lahir == 0">
+              NIHIL
+            </td>
+            <td class="text-center" v-else>{{ item.total_lahir }}</td>
+            <td class="text-center" style="font-weight: bold" v-if="item.meninggal_l == null">
+              NIHIL
+            </td>
+            <td class="text-center" v-else>{{ item.meninggal_l }}</td>
+            <td class="text-center" style="font-weight: bold" v-if="item.meninggal_p == null">
+              NIHIL
+            </td>
+            <td class="text-center" v-else>{{ item.meninggal_p }}</td>
+            <td class="text-center" style="font-weight: bold" v-if="item.total_meninggal == 0">
+              NIHIL
+            </td>
+            <td class="text-center" v-else>{{ item.total_meninggal }}</td>
+            <td class="text-center" style="font-weight: bold" v-if="item.datang_l == null">
+              NIHIL
+            </td>
+            <td class="text-center" v-else>{{ item.datang_l }}</td>
+            <td class="text-center" style="font-weight: bold" v-if="item.datang_p == null">
+              NIHIL
+            </td>
+            <td class="text-center" v-else>{{ item.datang_p }}</td>
+            <td class="text-center" style="font-weight: bold" v-if="item.total_datang == 0">
+              NIHIL
+            </td>
+            <td class="text-center" v-else>{{ item.total_datang }}</td>
+            <td class="text-center" style="font-weight: bold" v-if="item.pindah_l == null">
+              NIHIL
+            </td>
+            <td class="text-center" v-else>{{ item.pindah_l }}</td>
+            <td class="text-center" style="font-weight: bold" v-if="item.pindah_p == null">
+              NIHIL
+            </td>
+            <td class="text-center" v-else>{{ item.pindah_p }}</td>
+            <td class="text-center" style="font-weight: bold" v-if="item.total_pindah == 0">
+              NIHIL
+            </td>
+            <td class="text-center" v-else>{{ item.total_pindah }}</td>
+            <td
+              class="text-center"
+              style="font-weight: bold"
+              v-if="item.jmlh_penduduk_bln_ini_l == null"
+            >
+              NIHIL
+            </td>
+            <td class="text-center" v-else>{{ item.jmlh_penduduk_bln_ini_l }}</td>
+            <td
+              class="text-center"
+              style="font-weight: bold"
+              v-if="item.jmlh_penduduk_bln_ini_p == null"
+            >
+              NIHIL
+            </td>
+            <td class="text-center" v-else>{{ item.jmlh_penduduk_bln_ini_p }}</td>
+            <td
+              class="text-center"
+              style="font-weight: bold"
+              v-if="item.total_penduduk_bln_ini == 0"
+            >
+              NIHIL
+            </td>
+            <td class="text-center" v-else>{{ item.total_penduduk_bln_ini }}</td>
+          </tr>
+        </tbody>
+      </template>
+    </v-simple-table>
+    <div class="mt-5">
+      <b-pagination
+        align="center"
+        v-model="pagination.current_page"
+        :total-rows="pagination.total"
+        @input="onPageChange"
+        :per-page="data.per_page"
+        first-number
+        last-number
+      ></b-pagination>
     </div>
   </div>
 </template>
@@ -209,7 +244,7 @@
 <script>
   import { mapGetters } from "vuex";
   import KecamatanSelected from "../../../components/SelectKecamatan.vue";
-  import KelurahanSelected from "../../../components/SelectKelurahan.vue";
+  import KelurahanSelected from "../../../components/SelectKelurahanAdmin.vue";
 
   export default {
     components: { KecamatanSelected, KelurahanSelected },
@@ -220,7 +255,6 @@
         date_filter: "",
         date: "",
         isMobile: false,
-        page: 1,
         dialog: false,
         firstLoad: true,
         loadingBtn: false,
@@ -231,153 +265,16 @@
         tolakDialog: false,
         overlay: false,
         kelurahans: "",
+        data: [],
+        pagination: {
+          current_page: 1,
+          total: 0,
+        },
         kell: "",
         perr: "",
         idData: "",
         id: "",
         period: "",
-        table: [
-          {
-            text: "Desa/Kelurahan",
-            align: "center",
-            value: "kelurahan",
-            width: "190px",
-          },
-          {
-            text: "Periode",
-            align: "center",
-            value: "periode",
-            width: "190px",
-          },
-          {
-            text: "L",
-            align: "center",
-            value: "jmlh_penduduk_bln_lalu_l",
-            sortable: false,
-          },
-          {
-            text: "P",
-            align: "center",
-            value: "jmlh_penduduk_bln_lalu_p",
-            sortable: false,
-          },
-          {
-            text: "L+P",
-            align: "center",
-            value: "total_penduduk_bln_lalu",
-            sortable: false,
-            class: "black--text",
-          },
-
-          {
-            text: "L",
-            align: "center",
-            value: "lahir_l",
-            sortable: false,
-          },
-          {
-            text: "P",
-            align: "center",
-            value: "lahir_p",
-            sortable: false,
-          },
-          {
-            text: "L+P",
-            align: "center",
-            value: "total_lahir",
-            sortable: false,
-            class: "black--text",
-          },
-          {
-            text: "L",
-            align: "center",
-            value: "meninggal_l",
-            sortable: false,
-          },
-          {
-            text: "P",
-            align: "center",
-            value: "meninggal_p",
-            sortable: false,
-          },
-          {
-            text: "L+P",
-            align: "center",
-            value: "total_meninggal",
-            sortable: false,
-            class: "black--text",
-          },
-          {
-            text: "L",
-            align: "center",
-            value: "datang_l",
-            sortable: false,
-          },
-
-          {
-            text: "P",
-            align: "center",
-            value: "datang_p",
-            sortable: false,
-          },
-          {
-            text: "L+P",
-            align: "center",
-            value: "total_datang",
-            sortable: false,
-            class: "black--text",
-          },
-          {
-            text: "L",
-            align: "center",
-            value: "pindah_l",
-            sortable: false,
-          },
-          {
-            text: "P",
-            align: "center",
-            value: "pindah_p",
-            sortable: false,
-          },
-          {
-            text: "L+P",
-            align: "center",
-            value: "total_pindah",
-            sortable: false,
-            class: "black--text",
-          },
-
-          {
-            text: "L",
-            align: "center",
-            value: "jmlh_penduduk_bln_ini_l",
-            sortable: false,
-          },
-          {
-            text: "P",
-            align: "center",
-            value: "jmlh_penduduk_bln_ini_p",
-            sortable: false,
-          },
-          {
-            text: "L+P",
-            align: "center",
-            value: "total_penduduk_bln_ini",
-            sortable: false,
-            class: "black--text",
-          },
-          {
-            text: "Status",
-            value: "is_verified",
-            align: "center",
-          },
-          {
-            align: "center",
-            value: "actions",
-            sortable: false,
-            sortable: false,
-          },
-        ],
         kependudukan: [],
         warehouse: null,
         warehouse_id: "",
@@ -385,11 +282,12 @@
         status: null,
         filterActive: null,
         kecamatan: [],
-        kelurahan: [],
+        kelurahan: null,
         kelurahanDisabled: true,
         downloadDisabled: true,
         status: null,
         filterStatus: null,
+        filterKelurahan: null,
       };
     },
     watch: {
@@ -433,6 +331,9 @@
         let val = (value / 1).toFixed(0).replace(".", ",");
         return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
       },
+      onPageChange() {
+        this.renderData();
+      },
       renderData(search) {
         this.isLoading = true;
         let periode = "";
@@ -445,15 +346,20 @@
         this.$http
           .get("/kependudukan", {
             params: {
+              page: this.pagination.current_page,
               instansi_id: this.kecamatan.value,
+              kelurahan: this.filterKelurahan,
               periode,
-              is_verified: 1,
+              is_verified: 2,
             },
           })
           .then((response) => {
-            this.kependudukan = response.data.data;
+            this.kependudukan = response.data.data.data;
             this.firstLoad = false;
             this.isLoading = false;
+            this.pagination.current_page = response.data.data.current_page;
+            this.pagination.total = response.data.data.total;
+            this.data = response.data.data;
           })
           .catch((error) => {
             if (error) {
@@ -463,37 +369,29 @@
           });
       },
       kecamatanSelected(kecamatan) {
-        this.downloadDisabled = true;
-        this.kelurahanDisabled = false;
         this.kecamatan = "";
         this.filterKecamatan = null;
         this.date_filter = false;
         if (kecamatan) {
+          this.kelurahanDisabled = false;
           this.kecamatan = kecamatan;
           this.filterKecamatan = kecamatan.id;
         } else {
-          this.downloadDisabled = true;
           this.kelurahanDisabled = true;
-        }
-        if (this.date && this.kecamatan) {
-          this.downloadDisabled = false;
-        } else {
-          this.downloadDisabled = true;
         }
         this.renderData();
       },
-      kelurahanSelected(kelurahan) {
-        this.kecamatanDisabled = true;
-        this.kelurahan = null;
-        this.filterKelurahan = null;
-        if (kelurahan) {
-          this.kecamatanDisabled = true;
-          this.kelurahan = kelurahan;
-          this.filterKelurahan = kelurahan.value;
+      kelurahanSelected(val) {
+        this.val = null;
+        this.filterKelurahan = "";
+        if (val) {
+          this.val = val;
+          this.filterKelurahan = val.name;
         } else {
-          this.kecamatanDisabled = true;
+          this.val = null;
+          this.filterKelurahan = "";
         }
-        this.renderData("");
+        this.renderData();
       },
       dateSelected() {
         if (this.user.role == "User") {
@@ -522,7 +420,39 @@
   // .v-data-table > .v-data-table__wrapper > table > tbody > tr > td {
   //   font-size: 17px;
   // }
+  .v-data-table > .v-data-table__wrapper > table > tbody > tr > td {
+    font-size: 17px;
+    margin: auto;
+    white-space: nowrap;
+  }
 
+  tbody td {
+    text-align: center;
+    border-style: solid;
+    border-width: 2px;
+    border-color: #d7d0d0;
+  }
+  thead tr th {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell,
+      "Open Sans", "Helvetica Neue", sans-serif;
+    font-weight: bold;
+    color: black !important;
+    font-size: 10pt !important;
+    vertical-align: middle !important;
+    white-space: nowrap;
+    border-style: solid !important;
+    border-width: 2px !important;
+    border-color: #d7d0d0 !important;
+  }
+  thead td {
+    color: black !important;
+    font-weight: bold;
+    text-align: center;
+    border-style: solid;
+    border-width: 2px;
+    border-color: #d7d0d0;
+    font-weight: bold;
+  }
   .v-menu__content {
     border-radius: 8px;
     border: 1px solid #c4c4c4;

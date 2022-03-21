@@ -1,59 +1,28 @@
 <template>
   <div id="app" style="margin-left: 25px; margin-right: 25px">
-    <h1>Validasi Laporan Realisasi PBB</h1>
     <!-- FOR ALL DEVICE -->
     <v-container>
-      <b-row class="mt-3">
-        <b-col> </b-col>
-        <b-col lg="6">
-          <v-tooltip bottom>
-            <template v-slot:activator="{ on, attrs }">
-              <v-text-field
-                v-bind="attrs"
-                v-on="on"
-                v-model="search"
-                append-icon="mdi-magnify"
-                rounded
-                label="Search...."
-                solo
-                hide-details
-              ></v-text-field>
-            </template>
-            <span>Cari Berdasarkan Kelurahan</span>
-          </v-tooltip>
-        </b-col>
-        <!-- <v-col>
-          <div>
-            <v-tooltip bottom>
-              <template v-slot:activator="{ on, attrs }">
-                <v-text-field
-                  v-bind="attrs"
-                  v-on="on"
-                  v-model="search"
-                  append-icon="mdi-magnify"
-                  rounded
-                  label="Search...."
-                  solo
-                  hide-details
-                  class="search d-sm-none d-md-none d-lg-none d-xl-none"
-                >
-                </v-text-field>
-              </template>
-              <span>search by helper code, name, or phone number</span>
-            </v-tooltip>
+      <b-row>
+        <b-col>
+          <div style="margin: 0px; padding: 0px">
+            <h4>Laporan Realisasi PBB</h4>
           </div>
-        </v-col>-->
+        </b-col>
+        <b-col> </b-col>
       </b-row>
     </v-container>
-    <p class="mt-5" style="font-size: 25px">Filter</p>
     <v-divider class="d-flex d-none d-sm-block"></v-divider>
 
-    <b-row style="margin-top: 1px">
-      <b-col cols="12" lg="3">
+    <b-row style="margin-top: 1px" cols-lg="5" cols-md="1">
+      <b-col>
         <StatusSelected v-show="!firstLoad" v-model="status" @selected="statusSelected">
         </StatusSelected>
       </b-col>
-      <b-col cols="12" lg="4">
+      <b-col>
+        <KelurahanSelected v-show="!firstLoad" v-model="kelurahan" @selected="KelurahanSelected">
+        </KelurahanSelected>
+      </b-col>
+      <b-col lg="3">
         <v-menu
           ref="menu"
           v-model="date_filter"
@@ -70,7 +39,7 @@
                     v-show="!firstLoad"
                     v-bind="attrs"
                     v-on="on"
-                    style="border-radius: 10px; font-size: 13px"
+                    style="border-radius: 10px; font-size: 13px; width: 250px"
                     prepend-inner-icon="mdi-calendar"
                     outlined
                     single-line
@@ -87,25 +56,30 @@
               </v-tooltip>
             </div>
           </template>
-          <v-date-picker locale="id" v-model="date" type="month" no-title scrollable>
-            <v-spacer></v-spacer>
-            <v-btn text color="primary" @click="date_filter = false">Cancel</v-btn>
-            <v-btn text color="primary" @click="(date_filter = false), renderData(search)"
-              >OK</v-btn
-            >
+          <v-date-picker
+            locale="id"
+            v-model="date"
+            type="month"
+            no-title
+            scrollable
+            @input="(date_filter = false), renderData(search)"
+          >
           </v-date-picker>
         </v-menu>
       </b-col>
+      <b-col lg="1"></b-col>
+      <b-col></b-col>
     </b-row>
-    <div>
-      <v-dialog v-model="dialogOverlay" persistent max-width="1px">
-        <div class="text-center">
-          <v-overlay :value="overlay">
-            <v-progress-circular color="primary" indeterminate :size="20"></v-progress-circular>
-          </v-overlay>
-        </div>
-      </v-dialog>
-    </div>
+    <v-dialog v-model="dialogOverlay" persistent max-width="300">
+      <div>
+        <v-card color="primary" dark class="text-center">
+          <v-card-text>
+            Mohon tunggu sebentar......
+            <v-progress-linear indeterminate color="white" class="mb-0"></v-progress-linear>
+          </v-card-text>
+        </v-card>
+      </div>
+    </v-dialog>
     <br />
     <v-skeleton-loader
       v-if="firstLoad"
@@ -113,206 +87,139 @@
       type="table-tbody"
       :types="{ 'table-row': 'table-cell@8' }"
     ></v-skeleton-loader>
-    <div id="app">
-      <v-data-table
-        v-show="!firstLoad"
-        loading-text="Memuat Data"
-        :loading="isLoading"
-        :headers="table"
-        :search="search"
-        :items="pbb"
-        :hide-header="isMobile"
-        :class="{ mobile: isMobile }"
-        class="elevation-1"
-      >
-        <template v-slot:[`item.periode`]="{ item }">
+    <v-data-table
+      v-show="!firstLoad"
+      loading-text="Memuat Data"
+      :loading="isLoading"
+      :headers="table"
+      :search="search"
+      :items="pbb"
+      :hide-header="isMobile"
+      hide-default-footer
+      :class="{ mobile: isMobile }"
+      class="elevation-1"
+    >
+      <template v-slot:[`item.periode`]="{ item }">
+        <div v-if="item.periode == '0000-00-00'">
+          {{ "NIHIL" }}
+        </div>
+        <div v-else>
           {{ item.periode | moment("MMMM - YYYY") }}
-        </template>
-        <template v-slot:[`item.target_pbb`]="{ item }">
-          Rp. {{ formatPrice(item.target_pbb) }}
-        </template>
-        <template v-slot:[`item.realisasi_bln_lalu`]="{ item }">
-          <div v-if="item.realisasi_bln_lalu == null">
-            {{ "-" }}
-          </div>
-          <div v-else>
-            {{ item.realisasi_bln_lalu }}
-          </div>
-        </template>
-        <template v-slot:[`item.realisasi_bln_ini`]="{ item }">
-          <div v-if="item.realisasi_bln_ini == null">
-            {{ "-" }}
-          </div>
-          <div v-else>
-            {{ item.realisasi_bln_ini }}
-          </div>
-        </template>
-        <template v-slot:[`item.jmlh_realisasi`]="{ item }">
-          <div v-if="item.jmlh_realisasi == null">
-            {{ "-" }}
-          </div>
-          <div v-else>
-            {{ item.jmlh_realisasi }}
-          </div>
-        </template>
-        <template v-slot:[`item.sisa_target`]="{ item }">
-          <div v-if="item.sisa_target == null">
-            {{ "-" }}
-          </div>
-          <div v-else>
-            {{ item.sisa_target }}
-          </div>
-        </template>
-        <template v-slot:[`item.keterangan`]="{ item }">
-          <div v-if="item.keterangan == null">
-            {{ "-" }}
-          </div>
-          <div v-else>
-            {{ item.keterangan }}
-          </div>
-        </template>
-        <template v-slot:[`item.is_verified`]="{ item }">
-          <span v-if="item.is_verified == 0"> Menunggu Validasi </span>
-          <span v-else> Sudah Divalidasi </span>
-        </template>
-        <template v-slot:[`item.actions`]="{ item }">
-          <v-menu offset-y v-if="item.is_verified == 0">
-            <template v-slot:activator="{ on, attrs }">
-              <v-btn v-bind="attrs" v-on="on" icon>
-                <v-icon dark>mdi-dots-horizontal</v-icon>
-              </v-btn>
-            </template>
-            <v-list>
-              <template class="menu">
-                <v-list-item link>
-                  <div>
-                    <v-list-item-title @click="dialogValid(item)">Validasi</v-list-item-title>
-                  </div>
-                </v-list-item>
-              </template>
-              <v-divider style="margin-left: 10px; margin-right: 10px"></v-divider>
-
-              <v-list-item @click="dialogTolak(item)">Tolak</v-list-item>
-            </v-list>
-          </v-menu>
-        </template>
-
-        <!-- <template v-slot:item="props">
-          <tr v-if="!isMobile">
-            <td>{{ props.item.kelurahan }}</td>
-            <td>{{ props.item.periode | moment("MMM - YYYY") }}</td>
-            <td>Rp. {{ formatPrice(props.item.target_pbb) }}</td>
-            <td>Rp. {{ formatPrice(props.item.realisasi_bln_lalu) }}</td>
-            <td>Rp. {{ formatPrice(props.item.realisasi_bln_ini) }}</td>
-            <td>{{ props.item.jmlh_realisasi }}</td>
-            <td>Rp. {{ formatPrice(props.item.sisa_target) }}</td>
-            <td>{{ props.item.keterangan }}</td>
-            <td>
-              <v-menu offset-y>
-                <template v-slot:activator="{ on, attrs }">
-                  <v-btn v-bind="attrs" v-on="on" icon>
-                    <v-icon dark>mdi-dots-horizontal</v-icon>
-                  </v-btn>
-                </template>
-                <v-list>
-                  <template class="menu">
-                    <v-list-item :to="{ path: `/pbb/${props.item.id}` }" link>
-                      <div>
-                        <v-list-item-title>Edit</v-list-item-title>
-                      </div>
-                    </v-list-item>
-                  </template>
-                  <v-divider style="margin-left: 10px; margin-right: 10px"></v-divider>
-
-                  <v-list-item
-                    link
-                    @click="openDialog(props.item.id, props.item.kelurahan, props.item.periode)"
-                    >Delete</v-list-item
-                  >
-                </v-list>
-              </v-menu>
-            </td>
-          </tr>
-        </template> -->
-      </v-data-table>
-      <b-modal v-model="validDialog" centered no-close-on-backdrop @ok="validasi(idData)">
-        Apakah anda ingin melakukan <b>Validasi</b> data dari
-        <b>{{ this.kell }}</b>
-        <br />Pada Periode Laporan <b>{{ this.perr }}</b
-        >?
-      </b-modal>
-      <b-modal v-model="tolakDialog" centered no-close-on-backdrop @ok="tolak(idData)">
-        Apakah anda ingin <b>Menolak</b> data dari
-        <b>{{ this.kell }}</b>
-        <br />Pada Periode Laporan <b>{{ this.perr }}</b
-        >?
-      </b-modal>
-      <!-- <v-dialog v-model="dialog" persistent max-width="360px">
-        <v-card style="height: 200px">
-          <v-card-title class="headline"> </v-card-title>
-          <v-card-text style="font-size: 16px; margin-top: 10px" class="text-center"
-            >Apa ada yakin ingin menghapus data dari <b>{{ kelurahan }}</b> ?
-          </v-card-text>
-          <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-row>
-              <v-col xl="5" cols="6" md="6" sm="6" lg="6">
-                <v-btn
-                  @click="dialog = false"
-                  style="
-                    margin-bottom: 20px;
-                    margin-top: 5px;
-                    background: #4662d4;
-                    color: white;
-                    border-radius: 100px;
-                    width: 96px;
-                    font-weight: bold;
-                    height: 50px;
-                    padding: 4px;
-                    font-size: 16px;
-                    text-transform: capitalize;
-                  "
-                >
-                  No
-                </v-btn>
-              </v-col>
-              <v-col xl="5" cols="6" md="6" sm="6" lg="6">
-                <v-btn
-                  text
-                  @click="deletePBB(id)"
-                  style="
-                    margin-bottom: 10px;
-                    margin-top: 5px;
-                    background: white;
-                    color: #4662d4;
-                    border-style: solid;
-                    border-color: #4662d4;
-                    border-radius: 100px;
-                    width: 96px;
-                    font-weight: bold;
-                    height: 50px;
-                    padding: 4px;
-                    font-size: 16px;
-                    text-transform: capitalize;
-                  "
-                >
-                  Yes
-                </v-btn>
-              </v-col>
-            </v-row>
-          </v-card-actions>
-        </v-card>
-      </v-dialog>-->
+        </div>
+      </template>
+      <template v-slot:[`item.kelurahan`]="{ item }">
+        <div class="text-left" v-if="item.kelurahan == null">
+          {{ "NIHIL" }}
+        </div>
+        <div v-else>
+          {{ item.kelurahan }}
+        </div>
+      </template>
+      <template v-slot:[`item.target_pbb`]="{ item }">
+        <div v-if="item.target_pbb == null">
+          {{ "NIHIL" }}
+        </div>
+        <div v-else>Rp. {{ formatPrice(item.target_pbb) }}</div>
+      </template>
+      <template v-slot:[`item.realisasi_bln_lalu`]="{ item }">
+        <div v-if="item.realisasi_bln_lalu == null">
+          {{ "NIHIL" }}
+        </div>
+        <div v-else>
+          {{ item.realisasi_bln_lalu }}
+        </div>
+      </template>
+      <template v-slot:[`item.realisasi_bln_ini`]="{ item }">
+        <div v-if="item.realisasi_bln_ini == null">
+          {{ "NIHIL" }}
+        </div>
+        <div v-else>
+          {{ item.realisasi_bln_ini }}
+        </div>
+      </template>
+      <template v-slot:[`item.jmlh_realisasi`]="{ item }">
+        <div v-if="item.jmlh_realisasi == null">
+          {{ "NIHIL" }}
+        </div>
+        <div v-else>
+          {{ item.jmlh_realisasi }}
+        </div>
+      </template>
+      <template v-slot:[`item.sisa_target`]="{ item }">
+        <div v-if="item.sisa_target == null">
+          {{ "NIHIL" }}
+        </div>
+        <div v-else>
+          {{ item.sisa_target }}
+        </div>
+      </template>
+      <template v-slot:[`item.keterangan`]="{ item }">
+        <div v-if="item.keterangan == null">
+          {{ "NIHIL" }}
+        </div>
+        <div v-else>
+          {{ item.keterangan }}
+        </div>
+      </template>
+      <template v-slot:[`item.is_verified`]="{ item }">
+        <span v-if="item.is_verified == 1"> Menunggu Validasi </span>
+        <span v-if="item.is_verified == 2"> Sudah Divalidasi </span>
+      </template>
+      <template v-slot:[`item.actions`]="{ item }">
+        <v-menu offset-y v-if="item.is_verified == 1">
+          <template v-slot:activator="{ on, attrs }">
+            <v-btn v-bind="attrs" v-on="on" icon>
+              <v-icon dark>mdi-dots-horizontal</v-icon>
+            </v-btn>
+          </template>
+          <v-list>
+            <v-list-item link @click="dialogValid(item)">
+              <v-list-item-title class="text-center">Validasi</v-list-item-title>
+            </v-list-item>
+            <v-list-item link @click="dialogTolak(item)">
+              <v-list-item-title style="text-align: center"> Tolak </v-list-item-title>
+            </v-list-item>
+          </v-list>
+        </v-menu>
+      </template>
+    </v-data-table>
+    <div class="mt-5">
+      <b-pagination
+        align="center"
+        v-model="pagination.current_page"
+        :total-rows="pagination.total"
+        @input="onPageChange"
+        :per-page="data.per_page"
+        first-number
+        last-number
+      ></b-pagination>
     </div>
+    <b-modal v-model="validDialog" centered no-close-on-backdrop @ok="validasi(idData)">
+      <p v-if="this.kell != null">
+        Apakah anda ingin <b>Validasi</b> data dari <b>{{ this.kell }}</b
+        >?
+      </p>
+      <p v-else>Apakah Anda ingin <b>Validasi</b> Data ini?</p>
+      Pada Periode Laporan <b>{{ this.perr }}</b>
+    </b-modal>
+    <b-modal v-model="tolakDialog" centered no-close-on-backdrop @ok="tolak(idData)">
+      <p v-if="this.kell != null">
+        Apakah anda ingin <b>Menolak</b> data dari <b>{{ this.kell }}</b
+        >?
+      </p>
+      <p v-else>Apakah Anda ingin Menolak Data ini?</p>
+      Pada Periode Laporan <b>{{ this.perr }}</b>
+    </b-modal>
   </div>
 </template>
 
 <script>
   import { mapGetters } from "vuex";
   import StatusSelected from "../../../components/StatusSelected.vue";
+  import KelurahanSelected from "../../../components/SelectKelurahan.vue";
 
   export default {
-    components: { StatusSelected },
+    components: { StatusSelected, KelurahanSelected },
     data() {
       return {
         search: "",
@@ -329,50 +236,81 @@
         loading: false,
         dialogOverlay: false,
         overlay: false,
+        data: [],
+        pagination: {
+          current_page: 1,
+          total: 0,
+        },
         kelurahans: "",
         status: null,
         kel: "",
         idData: "",
         id: "",
         period: "",
+        kelurahan: [],
         filterStatus: null,
         table: [
           {
-            text: "Desa/Kelurahan",
-            value: "kelurahan",
-          },
-          {
             text: "Periode Laporan",
             value: "periode",
+            class: "black--text subheading",
+            width: "140px",
+          },
+          {
+            text: "Desa/Kelurahan",
+            value: "kelurahan",
+            class: "black--text subheading",
+            width: "150px",
           },
           {
             text: "Target PBB (Rp.)",
             value: "target_pbb",
+            align: "center",
+            class: "black--text subheading",
+            align: "center",
           },
           {
             text: "Realisasi Bulan yang Lalu",
             value: "realisasi_bln_lalu",
+            align: "center",
+            class: "black--text subheading",
+            align: "center",
           },
           {
             text: "Realisasi Bulan Ini",
             value: "realisasi_bln_ini",
+            align: "center",
+            class: "black--text subheading",
+            align: "center",
           },
 
           {
             text: "Jumlah Realisasi S/D Bulan Ini",
             value: "jmlh_realisasi",
+            align: "center",
+            class: "black--text subheading",
+            align: "center",
           },
           {
             text: "Sisa Target",
             value: "sisa_target",
+            align: "center",
+            class: "black--text subheading",
+            align: "center",
           },
           {
             text: "Keterangan (%)",
             value: "keterangan",
+            align: "center",
+            class: "black--text subheading",
+            align: "center",
           },
           {
             text: "Status",
             value: "is_verified",
+            align: "center",
+            class: "black--text subheading",
+            align: "center",
           },
           {
             value: "actions",
@@ -437,8 +375,19 @@
         let val = (value / 1).toFixed(0).replace(".", ",");
         return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
       },
+      onPageChange() {
+        this.renderData();
+      },
       renderData(search) {
         this.isLoading = true;
+
+        let kelurahan = "";
+        if (this.filterKelurahan || this.filterKelurahan == 0) {
+          kelurahan = this.filterKelurahan;
+        } else {
+          kelurahan = null;
+        }
+
         let is_verified = "";
         if (this.filterStatus || this.filterStatus == 0) {
           is_verified = this.filterStatus;
@@ -454,20 +403,22 @@
         }
 
         this.$http
-          .get("/camat/pbb", {
+          .get("/camat-view/pbb", {
             params: {
+              page: this.pagination.current_page,
               instansi_id: this.user.instansi_id,
+              kelurahan,
               periode,
               is_verified,
             },
           })
           .then((response) => {
-            this.pbb = response.data.data;
+            this.pbb = response.data.data.data;
             this.firstLoad = false;
-            this.dialog = false;
-            this.dialogOverlay = false;
-            this.overlay = true;
             this.isLoading = false;
+            this.pagination.current_page = response.data.data.current_page;
+            this.pagination.total = response.data.data.total;
+            this.data = response.data.data;
           })
           .catch((error) => {
             if (error) {
@@ -491,11 +442,10 @@
         this.idData = item.id;
       },
       validasi(id) {
-        this.validDialog = false;
         this.dialogOverlay = true;
         this.$http
           .put(`/valid/pbb/${id}`, {
-            is_verified: 1,
+            is_verified: 2,
           })
           .then((response) => {
             this.renderData();
@@ -513,11 +463,10 @@
           });
       },
       tolak(id) {
-        this.tolakDialog = false;
         this.dialogOverlay = true;
         this.$http
           .put(`/valid/pbb/${id}`, {
-            is_verified: 2,
+            is_verified: 3,
           })
           .then((response) => {
             this.renderData();
@@ -526,25 +475,18 @@
               self.dialogOverlay = false;
               self.$toast.success("Data Berhasil Ditolak");
             }, 10 * 10 * 10);
+          })
+          .catch((error) => {
+            if (error) {
+              this.dialogOverlay = false;
+              this.renderData();
+            }
           });
       },
-      kecamatanSelected(kecamatan) {
-        this.downloadDisabled = true;
-        this.kelurahanDisabled = false;
-        this.kecamatan = "";
-        this.filterKecamatan = null;
-        this.date_filter = false;
-        if (kecamatan) {
-          this.kecamatan = kecamatan;
-          this.filterKecamatan = kecamatan.id;
-        } else {
-          this.downloadDisabled = true;
-          this.kelurahanDisabled = true;
-        }
-        if (this.date && this.kecamatan) {
-          this.downloadDisabled = false;
-        } else {
-          this.downloadDisabled = true;
+      KelurahanSelected(kelurahan) {
+        this.filterKelurahan = null;
+        if (kelurahan) {
+          this.filterKelurahan = kelurahan.name;
         }
         this.renderData();
       },

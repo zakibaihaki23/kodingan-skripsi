@@ -30,9 +30,9 @@ class AuthController extends Controller
             return response(['errors' => $validator->errors()->all()], 401); //402?
         }
 
-        $user = User::where('username', $request->username)
-        ->select()
-        ->join('instansi','instansi.id' , '=', 'users.instansi_id')
+        $user = User::with('instansi')
+        ->with('kelurahan')
+        ->where('users.username','=', $request->username)
         ->first();
 
 
@@ -72,7 +72,7 @@ class AuthController extends Controller
             'username' => 'required|string|unique:users',
             'email' => 'required|string|email|max:255',
             'password' => 'required|string|min:6|confirmed',
-            'role' => 'unique_with:users,instansi_id'
+            'role' => 'unique_with:users, username'
         ]);
 
         if ($validator->fails()) {
@@ -135,69 +135,77 @@ class AuthController extends Controller
     
     public function show($id)
     {
-        $user = User::where('users.id', $id)
-        ->join('instansi','instansi.id' , '=', 'users.instansi_id')->first();
+        $user = DB::table('users')
+        ->select('users.id','users.instansi_id','users.name','users.username','users.email','users.role','instansi.nama_instansi')
+        ->join('instansi','instansi.id','=', 'users.instansi_id')
+        ->where('users.id','=',$id)
+        ->first();
+        // $user = User::where('users.id', $id)
+        // ->join('instansi','instansi.id' , '=', 'users.instansi_id')->first();
+
         return response()->json(['data' => $user,],200);
     }
 
-    public function index()
+    public function index(Request $request)
     {
-    //     $user = DB::table('users')
-    //     ->select(
-    //         'instansi_id',
-    //         'name',
-    //         'username',
-    //         'email',
-    //         'role'
-
-    //     );
-    // $instansi = DB::table('instansi')
-    //     ->select(
-    //         'instansi.id',
-    //         'instansi.nama_instansi',
-    //         'user.name',
-    //         'user.username',
-    //         'user.email',
-    //         'user.role'
-    //     )
-    //     ->leftJoinSub($user, 'user', function ($join) {
-    //         $join->on('instansi.id', 'user.instansi_id');
-    //     })
-    //     ->where('role','=','User')
-    //     ->orWhere('role','=','Camat')
-    //     ->get();
-
+    if (!$request->input()) {
     $instansi = User::select('users.id','users.instansi_id','users.name','users.username','users.email','users.role','instansi.nama_instansi')
     ->leftJoin('instansi','instansi.id','users.instansi_id')
     ->where('role','=','User')
     ->orWhere('role','=','Camat')
     ->orderBy('id','DESC')
     ->get();
-        // $user = User::join('instansi','instansi.id' , '=', 'users.instansi_id')
-        // ->where('role','=','User')
-        // ->orWhere('role','=','Camat')
-        // ->get();
-            
-        
-        $count = User::select('role', DB::raw('count(*) as total'))
-            ->where('role','!=','Admin')
-            ->groupBy('role')
-            ->get();
-        $all = DB::table('users')
-        ->where('role','!=','Admin')
-        ->count();
-            
-        // $count = DB::table('users')
-        // ->where('role','=','User')
-        // ->orWhere('role','=','Camat')
-        //     ->count();
-        // $user = User::where('name', '=', $request->name)->get();
 
-        return response(['data' => $instansi, 'total' => $count, 'all' => $all], 200);
+    $all = DB::table('users')
+    ->where('role','!=','Admin')
+    ->count();
+    } else {
+       if($request->filled('instansi_id')) {
+           $instansi = User::select('users.id','users.instansi_id','users.name','users.username','users.email','users.role','instansi.nama_instansi')
+           ->leftJoin('instansi','instansi.id','users.instansi_id')
+           ->where('role','!=','Admin')
+           ->where('instansi_id','=', $request->get('instansi_id'))
+           ->get();
+       }
+       if($request->filled('role')) {
+        $instansi = User::select('users.id','users.instansi_id','users.name','users.username','users.email','users.role','instansi.nama_instansi')
+        ->leftJoin('instansi','instansi.id','users.instansi_id')
+        ->where('role','=',$request->get('role'))
+        ->get();
+    } 
+    if($request->filled('instansi_id','role')) {
+        $instansi = User::select('users.id','users.instansi_id','users.name','users.username','users.email','users.role','instansi.nama_instansi')
+        ->leftJoin('instansi','instansi.id','users.instansi_id')
+        ->where('instansi_id','=', $request->get('instansi_id'))
+        ->where('role','=',$request->get('role'))
+        ->get();
+    } 
+    }     
+
+        return response(['data' => $instansi], 200);
     }
     public function destroy($id)
     {
         return User::destroy($id);
+    }
+
+    public function role() {
+        
+        // $data = User::select('role', DB::raw('count(*) as total'))
+        //     ->where('role','!=','Admin')
+        //     ->groupBy('role')
+        //     ->get();
+        // $total = DB::table('users')
+        // ->where('role','!=','Admin')
+        // ->count();
+        $user = User::select('role', DB::raw('count(*) as total'))
+            ->where('role','=','User')
+            ->get();
+        $camat = User::select('role', DB::raw('count(*) as total'))
+            ->where('role','=','Camat')
+            ->get();
+
+        return response(['user' => $user, 'camat' => $camat], 200);
     }
    
 }

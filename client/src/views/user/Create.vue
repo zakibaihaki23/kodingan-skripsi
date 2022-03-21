@@ -11,7 +11,7 @@
                   Kecamatan
                   <span style="color: red">*</span>
                 </p>
-                <v-select
+                <v-autocomplete
                   single-line
                   outlined
                   return-object
@@ -22,7 +22,7 @@
                   :items="kecamatan"
                   clearable
                   :rules="[rules.required]"
-                ></v-select>
+                ></v-autocomplete>
               </div>
               <div class="col-sm-6">
                 <p>
@@ -115,7 +115,7 @@
                   Role
                   <span style="color: red">*</span>
                 </p>
-                <v-select
+                <v-autocomplete
                   single-line
                   outlined
                   return-object
@@ -125,7 +125,7 @@
                   :items="role"
                   v-model="form.role"
                   :rules="[rules.required]"
-                ></v-select>
+                ></v-autocomplete>
               </div>
             </div>
           </form>
@@ -163,28 +163,16 @@
               >
             </b-col>
           </b-row>
-          <v-overlay :value="overlay">
-            <v-progress-circular indeterminate color="blue"></v-progress-circular>
-          </v-overlay>
-          <!-- <b-modal
-            v-model="dialog"
-            centered
-            no-close-on-backdrop
-            @ok="save()"
-            title="Konfirmasi Form Data"
-          >
-            <b-container fluid>
-              <b-row class="mb-1">
-                <b-col class="text-left" v-if="form.kecamatan == 1">
-                  Informasi Ke seluruh Kecamatan
-                </b-col>
-                <b-col class="text-left" v-else>
-                  Kecamatan : &nbsp;
-                  <b>{{}}</b>
-                </b-col>
-              </b-row>
-            </b-container>
-          </b-modal> -->
+          <v-dialog v-model="dialogOverlay" persistent max-width="300">
+            <div>
+              <v-card color="primary" dark class="text-center">
+                <v-card-text>
+                  Mohon tunggu sebentar......
+                  <v-progress-linear indeterminate color="white" class="mb-0"></v-progress-linear>
+                </v-card-text>
+              </v-card>
+            </div>
+          </v-dialog>
         </div>
       </div>
     </v-form>
@@ -204,6 +192,7 @@
         menu: false,
         search: null,
         saveDisabled: true,
+        dialogOverlay: false,
         isFormValid: false,
         loading: false,
         check: "",
@@ -228,10 +217,12 @@
         },
         role: [
           {
-            name: "User",
+            name: "Admin Kecamatan",
+            value: "User",
           },
           {
             name: "Camat",
+            value: "Camat",
           },
         ],
         kecamatan: [],
@@ -305,7 +296,7 @@
       },
       //untuk menyimpan data registrasi ke dalam API
       save() {
-        this.overlay = true;
+        this.dialogOverlay = true;
         this.$http
           .post("/register", {
             instansi_id: this.form.kecamatan.id,
@@ -314,18 +305,18 @@
             email: this.form.email,
             password: this.form.password,
             password_confirmation: this.form.konfirmasi_password,
-            role: this.form.role.name,
+            role: this.form.role.value,
           })
           .then((response) => {
             let self = this;
             setTimeout(function () {
-              self.overlay = false;
+              self.dialogOverlay = false;
               self.$router.push("/user");
               self.$toast.success("Data Berhasil Disimpan");
             }, 10 * 10 * 10);
           })
           .catch((error) => {
-            this.overlay = false;
+            this.dialogOverlay = false;
             if (error.response.status == 422) {
               this.$toast.error("Periksa Form Kembali");
             } else {

@@ -99,7 +99,7 @@
     }),
     computed: {
       validated: function () {
-        return this.user.username.length > 5 && this.user.password.length > 7;
+        return this.user.username.length > 4 && this.user.password.length > 7;
       },
     },
     methods: {

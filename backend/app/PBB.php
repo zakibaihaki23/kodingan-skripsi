@@ -22,4 +22,8 @@ class PBB extends Authenticatable
         return \Carbon\Carbon::parse($this->attributes['waktu'])
             ->diffForHumans();
     }
+
+    public function kecamatan() {
+        return $this->hasOne('App\Instansi');
+    }
 }

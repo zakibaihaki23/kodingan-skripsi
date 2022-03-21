@@ -18,142 +18,160 @@ class PatenController extends Controller
      */
     public function index(Request $request)
     {
-        $paten = Paten::query();
-        if (!$request->input()) {
-            $paten = Paten::select()->get();
+        $instansi_id = $request->input('instansi_id');
+        $kelurahan = $request->input('kelurahan');
+        $periode = $request->input('periode');
+        $is_verified = $request->input('is_verified');
+
+
+         $paten = Paten::query();
+        if (!$request->except('page')) {
+            $paten = Paten::select('instansi.nama_instansi','db_rekapitulasi_paten.*')
+                    ->leftJoin('instansi','instansi.id','=','db_rekapitulasi_paten.instansi_id')
+                    ->orderBy('periode', 'DESC')
+                    ->paginate(10);
             $count = Paten::select()->get()->count();
         } else {
-            if ($request->filled('instansi_id')) {
-                $paten = Paten::where('instansi_id', '=', $request->get('instansi_id'))->orderBy('id', 'DESC')
-                    ->get();
-                $count = Paten::where('instansi_id', '=', $request->get('instansi_id'))->orderBy('id', 'DESC')
+             $paten = Paten::select('instansi.nama_instansi','db_rekapitulasi_paten.*')
+                    ->leftJoin('instansi','instansi.id','=','db_rekapitulasi_paten.instansi_id')
+                    ->when($instansi_id, function ($query, $instansi_id) {
+                        return $query->where('instansi_id',$instansi_id);
+                    })
+                    ->when($kelurahan, function ($query, $kelurahan) {
+                        return $query->where('kelurahan', $kelurahan);
+                    })
+                    ->when($periode, function ($query, $periode) {
+                        return $query->where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), $periode);
+                    })
+                    ->when($is_verified, function ($query, $is_verified) {
+                        return $query->where('is_verified', $is_verified);
+                    })
+                    ->orderBy('periode', 'DESC')
+                    ->paginate(10);
+            $count = Paten::when($instansi_id, function ($query, $instansi_id) {
+                        return $query->where('instansi_id',$instansi_id);
+                    })
+                    ->when($kelurahan, function ($query, $kelurahan) {
+                        return $query->where('kelurahan', $kelurahan);
+                    })
+                    ->when($periode, function ($query, $periode) {
+                        return $query->where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), $periode);
+                    })
+                    ->when($is_verified, function ($query, $is_verified) {
+                        return $query->where('is_verified', $is_verified);
+                    })
                     ->get()->count();
-            }
-            if ($request->filled('periode')) {
-                $paten = Paten::where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode'))->orderBy('id', 'DESC')
-                    ->get();
-                $count = Paten::where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode'))->orderBy('id', 'DESC')
-                    ->get()->count();
-            }
-            if ($request->filled('is_verified')) {
-                $paten = Paten::where('is_verified', '=', $request->get('is_verified'))->orderBy('id', 'DESC')
-                    ->get();
-                $count = Paten::where('is_verified', '=', $request->get('is_verified'))->orderBy('id', 'DESC')
-                    ->get()->count();
-            }
-            if ($request->filled(['instansi_id', 'periode','is_verified'])) {
-                $paten = Paten::where('instansi_id', '=', $request->get('instansi_id'))
-                    ->where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode'))
-                    ->where('is_verified','=',$request->get('is_verified'))
-                    ->orderBy('id', 'DESC')
-                    ->get();
-                $count = Paten::where('instansi_id', '=', $request->get('instansi_id'))
-                    ->where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode'))
-                    ->where('is_verified','=',$request->get('is_verified'))
-                    ->orderBy('id', 'DESC')
-                    ->get()->count();
-            }
-             else {
-             
-            if ($request->filled(['instansi_id', 'periode'])) {
-                $paten = Paten::where('instansi_id', '=', $request->get('instansi_id'))
-                    ->where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode'))
-                    ->orderBy('id', 'DESC')
-                    ->get();
-                $count = Paten::where('instansi_id', '=', $request->get('instansi_id'))
-                    ->where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode'))
-                    ->where('is_verified','=',$request->get('is_verified'))
-                    ->orderBy('id', 'DESC')
-                    ->get()->count();
-            }
-            if ($request->filled(['periode','is_verified'])) {
-                $paten = Paten::where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode'))
-                ->where('is_verified','=',$request->get('is_verified'))
-                ->orderBy('id', 'DESC')
-                ->get();
-                $count = Paten::where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode'))
-                ->where('is_verified','=',$request->get('is_verified'))
-                ->orderBy('id', 'DESC')
-                ->get()->count();
-            }
-            if ($request->filled(['instansi_id', 'is_verified'])) {
-                $paten = Paten::where('instansi_id', '=', $request->get('instansi_id'))
-                    ->where('is_verified', '=', $request->get('is_verified'))
-                    ->orderBy('id', 'DESC')
-                    ->get();
-                $count = Paten::where('instansi_id', '=', $request->get('instansi_id'))
-                    ->where('is_verified', '=', $request->get('is_verified'))
-                    ->orderBy('id', 'DESC')
-                    ->get()->count();
-            }
-             }
         }
         return response(['data' => $paten, 'total' => $count], 200);
     }
     
     public function indexCamat(Request $request)
-    {
+    { 
+        $instansi_id = $request->input('instansi_id');
+        $kelurahan = $request->input('kelurahan');
+        $periode = $request->input('periode');
+        $is_verified = $request->input('is_verified');
+
         $paten = Paten::query();
-        if (!$request->input()) {
-            $paten = Paten::select()
-                    ->where('is_verified','!=', 2)
-                    ->get();
+        if (!$request->except('page')) {
+            $paten = Paten::select('instansi.nama_instansi','db_rekapitulasi_paten.*')
+                    ->leftJoin('instansi','instansi.id','=','db_rekapitulasi_paten.instansi_id')
+                    ->where('is_verified','!=', 3)
+                    ->orderBy('periode', 'DESC')
+                    ->paginate(10);
             $count = Paten::select()
-                    ->where('is_verified','!=', 2)
+                    ->where('is_verified','!=', 3)
                     ->get()
                     ->count();
         } else {
-            if ($request->filled('instansi_id')) {
-                $paten = Paten::where('instansi_id', '=', $request->get('instansi_id'))
-                    ->where('is_verified','!=', 2)
-                    ->orderBy('id', 'DESC')
-                    ->get();
-                $count = Paten::where('instansi_id', '=', $request->get('instansi_id'))
-                    ->where('is_verified','!=', 2)
+            $paten = Paten::select('instansi.nama_instansi','db_rekapitulasi_paten.*')
+                    ->leftJoin('instansi','instansi.id','=','db_rekapitulasi_paten.instansi_id')
+                    ->when($instansi_id, function ($query, $instansi_id) {
+                        return $query->where('instansi_id',$instansi_id)
+                        ->where('is_verified','!=',3);
+                    })
+                    ->when($kelurahan, function ($query, $kelurahan) {
+                        return $query->where('kelurahan',$kelurahan)
+                        ->where('is_verified','!=',3);
+                    })
+                    ->when($periode, function ($query, $periode) {
+                        return $query->where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"),$periode)
+                        ->where('is_verified','!=',3);
+                    })
+                    ->when($is_verified, function ($query, $is_verified) {
+                        return $query->where('is_verified', $is_verified);
+                    })
+                    ->orderBy('periode', 'DESC')
+                    ->paginate(10);
+            $count = Paten::when($instansi_id, function ($query, $instansi_id) {
+                        return $query->where('instansi_id',$instansi_id)
+                        ->where('is_verified','!=',3);
+                    })
+                    ->when($kelurahan, function ($query, $kelurahan) {
+                        return $query->where('kelurahan', $kelurahan)
+                        ->where('is_verified','!=',3);
+                    })
+                    ->when($periode, function ($query, $periode) {
+                        return $query->where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), $periode)
+                        ->where('is_verified','!=',3);
+                    })
+                    ->when($is_verified, function ($query, $is_verified) {
+                        return $query->where('is_verified', $is_verified);
+                    })
                     ->get()->count();
-            }
-            if ($request->filled(['instansi_id', 'periode','is_verified'])) {
-                $paten = Paten::where('instansi_id', '=', $request->get('instansi_id'))
-                    ->where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode'))
-                    ->where('is_verified','=',$request->get('is_verified'))
-                    ->orderBy('id', 'DESC')
-                    ->get();
-                $count = Paten::where('instansi_id', '=', $request->get('instansi_id'))
-                    ->where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode'))
-                    ->where('is_verified','=',$request->get('is_verified'))
-                    ->orderBy('id', 'DESC')
-                    ->get()->count();
-            }
-            if ($request->filled(['instansi_id', 'periode'])) {
-                $paten = Paten::where('instansi_id', '=', $request->get('instansi_id'))
-                    ->where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode'))
-                    ->orderBy('id', 'DESC')
-                    ->get();
-                $count = Paten::where('instansi_id', '=', $request->get('instansi_id'))
-                    ->where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode'))
-                    ->orderBy('id', 'DESC')
-                    ->get()->count();
-            }
-            if ($request->filled(['periode','is_verified'])) {
-                $paten = Paten::where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode'))
-                ->where('is_verified','=',$request->get('is_verified'))
-                ->orderBy('id', 'DESC')
-                ->get();
-                $count = Paten::where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode'))
-                ->where('is_verified','=',$request->get('is_verified'))
-                ->orderBy('id', 'DESC')
-                ->get()->count();
-            }
-            if ($request->filled(['instansi_id', 'is_verified'])) {
-                $paten = Paten::where('instansi_id', '=', $request->get('instansi_id'))
-                    ->where('is_verified', '=', $request->get('is_verified'))
-                    ->orderBy('id', 'DESC')
-                    ->get();
-                $count = Paten::where('instansi_id', '=', $request->get('instansi_id'))
-                    ->where('is_verified', '=', $request->get('is_verified'))
-                    ->orderBy('id', 'DESC')
-                    ->get()->count();
-            }
+            // if ($request->filled('instansi_id')) {
+            //     $paten = Paten::where('instansi_id', '=', $request->get('instansi_id'))
+            //         ->where('is_verified','!=', 2)
+            //         ->orderBy('id', 'DESC')
+            //         ->get();
+            //     $count = Paten::where('instansi_id', '=', $request->get('instansi_id'))
+            //         ->where('is_verified','!=', 2)
+            //         ->get()->count();
+            // }
+            // if ($request->filled(['instansi_id', 'periode','is_verified'])) {
+            //     $paten = Paten::where('instansi_id', '=', $request->get('instansi_id'))
+            //         ->where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode'))
+            //         ->where('is_verified','=',$request->get('is_verified'))
+            //         ->orderBy('id', 'DESC')
+            //         ->get();
+            //     $count = Paten::where('instansi_id', '=', $request->get('instansi_id'))
+            //         ->where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode'))
+            //         ->where('is_verified','=',$request->get('is_verified'))
+            //         ->orderBy('id', 'DESC')
+            //         ->get()->count();
+            // }
+            // if ($request->filled(['instansi_id', 'periode'])) {
+            //     $paten = Paten::where('instansi_id', '=', $request->get('instansi_id'))
+            //         ->where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode'))
+            //         ->where('is_verified','!=', 2)
+            //         ->orderBy('id', 'DESC')
+            //         ->get();
+            //     $count = Paten::where('instansi_id', '=', $request->get('instansi_id'))
+            //         ->where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode'))
+            //         ->where('is_verified','!=', 2)
+            //         ->orderBy('id', 'DESC')
+            //         ->get()->count();
+            // }
+            // if ($request->filled(['periode','is_verified'])) {
+            //     $paten = Paten::where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode'))
+            //     ->where('is_verified','=',$request->get('is_verified'))
+            //     ->orderBy('id', 'DESC')
+            //     ->get();
+            //     $count = Paten::where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode'))
+            //     ->where('is_verified','=',$request->get('is_verified'))
+            //     ->orderBy('id', 'DESC')
+            //     ->get()->count();
+            // }
+            // if ($request->filled(['instansi_id', 'is_verified'])) {
+            //     $paten = Paten::where('instansi_id', '=', $request->get('instansi_id'))
+            //         ->where('is_verified', '=', $request->get('is_verified'))
+            //         ->orderBy('id', 'DESC')
+            //         ->get();
+            //     $count = Paten::where('instansi_id', '=', $request->get('instansi_id'))
+            //         ->where('is_verified', '=', $request->get('is_verified'))
+            //         ->orderBy('id', 'DESC')
+            //         ->get()->count();
+            // }
         }
 
             return response(['data' => $paten, 'total' => $count], 200);
@@ -170,10 +188,9 @@ class PatenController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'instansi_id' => 'required',
-            'kelurahan' => 'string|required',
         ]);
         $valid = Validator::make($request->all(), [
-            'periode' =>  'required|unique_with:db_rekapitulasi_paten, kelurahan'
+            'periode' =>  'unique_with:db_rekapitulasi_paten, kelurahan'
         ]);
 
         if ($validator->fails()) {
@@ -292,8 +309,8 @@ class PatenController extends Controller
                 'imb','situ_siup','izin_merobohkan_bangunan',
                 'izin_keramaian','izin_partai','keterangan')
                 ->where('instansi_id', '=', $request->get('instansi_id'))
-                ->where('periode', '=', $request->get('periode'))
-                ->where('is_verified','=','1')
+                ->where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode'))
+                ->where('is_verified','=',2)
                 ->orderBy('id', 'DESC')
                 ->get();
             $count = DB::table('db_rekapitulasi_paten')
@@ -318,25 +335,24 @@ class PatenController extends Controller
                     DB::raw('SUM(izin_partai) AS total_izin_partai')
                     )
                 ->where('instansi_id', '=', $request->get('instansi_id'))
-                ->where('periode', '=', $request->get('periode'))
-                ->where('is_verified','=','1')
+                ->where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode'))
+                ->where('is_verified','=',2)
                 ->orderBy('id', 'DESC')
                 ->get();
             $periode = DB::table('db_rekapitulasi_paten')
-                ->select(
-                    DB::raw("DATE_FORMAT(periode, '%Y') as tahun"),
-                    DB::raw("DATE_FORMAT(periode, '%m') as bulan"),
-                    DB::raw("DATE_FORMAT(periode, '%b_%Y') as periode")
-                )
+                ->select('periode')
                 ->where('instansi_id', '=', $request->get('instansi_id'))
-                ->where('periode', '=', $request->get('periode'))
-                ->where('is_verified','=','1')
+                ->where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode'))
+                ->where('is_verified','=',2)
                 ->orderBy('id', 'DESC')
                 ->take(1)
                 ->get();
-            $instansi = Paten::select('db_rekapitulasi_paten.instansi_id','instansi.nama_instansi')
+            $instansi = DB::table('db_rekapitulasi_paten')
+                ->select('db_rekapitulasi_paten.instansi_id','instansi.nama_instansi')
                 ->leftJoin('instansi','instansi.id','db_rekapitulasi_paten.instansi_id')
-                ->where('db_rekapitulasi_paten.is_verified','=','1')
+                ->where('instansi_id', '=', $request->get('instansi_id'))
+                ->where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode'))
+                ->where('is_verified','=',2)
                 ->take(1)
                 ->get();
 

@@ -1,130 +1,98 @@
 <template>
   <div>
-    <v-autocomplete
-      outlined
-      single-line
-      :search-input.sync="search"
-      style="border-radius: 10px; width: 250px; font-size: 13px"
-      item-text="name"
-      item-value="value"
-      v-model="item_list"
-      :items="items"
-      required
-      @change="selected"
-      append-icon=""
-      clearable
-      return-object
-      label="Kelurahan"
-      dense
-    >
-    </v-autocomplete>
+    <v-tooltip top>
+      <template v-slot:activator="{ on, attrs }">
+        <v-autocomplete
+          v-on="on"
+          v-bind="attrs"
+          outlined
+          single-line
+          :search-input.sync="search"
+          style="border-radius: 10px; width: 250px; font-size: 13px"
+          item-text="name"
+          item-value="value"
+          v-model="item_list"
+          :items="items"
+          required
+          @change="selected"
+          append-icon=""
+          clearable
+          return-object
+          label="Kelurahan"
+          dense
+        >
+        </v-autocomplete>
+      </template>
+      <span>Cari Berdasarkan Kelurahan</span>
+    </v-tooltip>
   </div>
 </template>
 
 <script>
-import { mapGetters } from "vuex";
-export default {
-  name: "AddPackableItem",
-  data() {
-    return {
-      search: null,
-      item_list: null,
-      items: [],
-    };
-  },
-  props: ["clear", "item"],
+  import { mapGetters } from "vuex";
+  export default {
+    name: "KelurahanSelected",
+    data() {
+      return {
+        search: null,
+        item_list: null,
+        items: [],
+      };
+    },
+    props: ["clear", "item"],
 
-  mounted() {
-    this.renderData("");
-  },
-  watch: {
-    kecamatanId: {
-      handler: function (val) {
-        if (val) {
-          this.item_list = null;
-          this.renderData("", val);
-        }
+    mounted() {
+      this.renderData("", this.kelurahanId);
+    },
+    watch: {
+      search: {
+        handler: function (val) {
+          if (val) {
+            this.renderData(val);
+          }
+        },
+        deep: true,
+      },
+      clear: {
+        handler: function (val) {
+          this.renderData("");
+          if (val == true) {
+            this.item_list = "";
+          }
+        },
+        deep: true,
       },
     },
-    kelurahan: {
-      handler: function (val) {
-        if (val == null) {
-          this.item_list = null;
-        }
-      },
+    computed: {
+      ...mapGetters({
+        user: "auth/user",
+      }),
     },
-    search: {
-      handler: function (val) {
-        if (val) {
-          this.renderData(val);
-        }
-      },
-      deep: true,
-    },
-    clear: {
-      handler: function (val) {
-        this.renderData("");
-        if (val == true) {
-          this.item_list = "";
-        }
-      },
-      deep: true,
-    },
-  },
-  computed: {
-    ...mapGetters({
-      user: "auth/user",
-    }),
-  },
-  methods: {
-    renderData(search, kecamatanId) {
-      // GET PACKABLE WHEN 0
-      if (this.user.role == "User") {
+    methods: {
+      renderData(search) {
+        // GET PACKABLE WHEN 0
         this.$http
-          .get("/kelurahan", {
+          .get("/kecamatan", {
             params: {
-              id_instansi: `${this.user.id_instansi}`,
+              id: `${this.user.instansi_id}`,
             },
           })
           .then((response) => {
             this.items = [];
 
-            let array = response.data.data;
+            let array = response.data.data[0].kelurahan;
 
             for (let i = 0; i < array.length; i++) {
               this.items.push({
-                name: array[i].kelurahan,
+                name: array[i].nama_kelurahan,
                 value: array[i].id,
               });
-              // this.itemSelected(response.data.data)
             }
           });
-      } else {
-        this.$http
-          .get("/kelurahan", {
-            params: {
-              id_instansi: kecamatanId,
-            },
-          })
-          .then((response) => {
-            this.items = response.data.data;
-            this.items = [];
-
-            let array = response.data.data;
-
-            for (let i = 0; i < array.length; i++) {
-              this.items.push({
-                name: array[i].kelurahan,
-                value: array[i].id,
-              });
-              // this.itemSelected(response.data.data)
-            }
-          });
-      }
+      },
+      selected(event) {
+        this.$emit("selected", event);
+      },
     },
-    selected(event) {
-      this.$emit("selected", event);
-    },
-  },
-};
+  };
 </script>

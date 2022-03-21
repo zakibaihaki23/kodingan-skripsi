@@ -17,144 +17,90 @@ class BencanaController extends Controller
      */
     public function index(Request $request)
     {
+        $instansi_id = $request->input('instansi_id');
+        $kelurahan = $request->input('kelurahan');
+        $periode = $request->input('periode');
+        $is_verified = $request->input('is_verified');
+
+
         $bencana = Bencana::query();
-        if (!$request->input()) {
-            $bencana = Bencana::select()->get();
+        if (!$request->except('page')) {
+            $bencana = Bencana::select('instansi.nama_instansi','db_bencana_alam.*')
+                    ->leftJoin('instansi','instansi.id','=','db_bencana_alam.instansi_id')
+                    ->orderBy('periode', 'DESC')
+                    ->paginate(10);
             $count = Bencana::select()->get()->count();
         } else {
-            if ($request->filled('instansi_id')) {
-                $bencana = Bencana::where('instansi_id', '=', $request->get('instansi_id'))->orderBy('id', 'DESC')
-                    ->get();
-                $count = Bencana::where('instansi_id', '=', $request->get('instansi_id'))->orderBy('id', 'DESC')
+             $bencana = Bencana::select('instansi.nama_instansi','db_bencana_alam.*')
+                    ->leftJoin('instansi','instansi.id','=','db_bencana_alam.instansi_id')
+                    ->when($instansi_id, function ($query, $instansi_id) {
+                        return $query->where('instansi_id',$instansi_id);
+                    })
+                    ->when($kelurahan, function ($query, $kelurahan) {
+                        return $query->where('kelurahan', $kelurahan);
+                    })
+                    ->when($periode, function ($query, $periode) {
+                        return $query->where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), $periode);
+                    })
+                    ->when($is_verified, function ($query, $is_verified) {
+                        return $query->where('is_verified', $is_verified);
+                    })
+                    ->orderBy('periode', 'DESC')
+                    ->paginate(10);
+            $count = Bencana::when($instansi_id, function ($query, $instansi_id) {
+                        return $query->where('instansi_id',$instansi_id);
+                    })
+                    ->when($kelurahan, function ($query, $kelurahan) {
+                        return $query->where('kelurahan', $kelurahan);
+                    })
+                    ->when($periode, function ($query, $periode) {
+                        return $query->where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), $periode);
+                    })
+                    ->when($is_verified, function ($query, $is_verified) {
+                        return $query->where('is_verified', $is_verified);
+                    })
                     ->get()->count();
-            }
-            if ($request->filled('periode')) {
-                $bencana = Bencana::where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode'))->orderBy('id', 'DESC')
-                    ->get();
-                $count = Bencana::where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode'))->orderBy('id', 'DESC')
-                    ->get()->count();
-            }
-            if ($request->filled('is_verified')) {
-                $bencana = Bencana::where('is_verified', '=', $request->get('is_verified'))->orderBy('id', 'DESC')
-                    ->get();
-                $count = Bencana::where('is_verified', '=', $request->get('is_verified'))->orderBy('id', 'DESC')
-                    ->get()->count();
-            }
-            if ($request->filled(['instansi_id', 'periode','is_verified'])) {
-                $bencana = Bencana::where('instansi_id', '=', $request->get('instansi_id'))
-                    ->where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode'))
-                    ->where('is_verified','=',$request->get('is_verified'))
-                    ->orderBy('id', 'DESC')
-                    ->get();
-                $count = Bencana::where('instansi_id', '=', $request->get('instansi_id'))
-                    ->where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode'))
-                    ->where('is_verified','=',$request->get('is_verified'))
-                    ->orderBy('id', 'DESC')
-                    ->get()->count();
-            }
-             else {
-             
-            if ($request->filled(['instansi_id', 'periode'])) {
-                $bencana = Bencana::where('instansi_id', '=', $request->get('instansi_id'))
-                    ->where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode'))
-                    ->orderBy('id', 'DESC')
-                    ->get();
-                $count = Bencana::where('instansi_id', '=', $request->get('instansi_id'))
-                    ->where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode'))
-                    ->orderBy('id', 'DESC')
-                    ->get()->count();
-            }
-            if ($request->filled(['periode','is_verified'])) {
-                $bencana = Bencana::where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode'))
-                ->where('is_verified','=',$request->get('is_verified'))
-                ->orderBy('id', 'DESC')
-                ->get();
-                $count = Bencana::where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode'))
-                ->where('is_verified','=',$request->get('is_verified'))
-                ->orderBy('id', 'DESC')
-                ->get()->count();
-            }
-            if ($request->filled(['instansi_id', 'is_verified'])) {
-                $bencana = Bencana::where('instansi_id', '=', $request->get('instansi_id'))
-                    ->where('is_verified', '=', $request->get('is_verified'))
-                    ->orderBy('id', 'DESC')
-                    ->get();
-                $count = Bencana::where('instansi_id', '=', $request->get('instansi_id'))
-                    ->where('is_verified', '=', $request->get('is_verified'))
-                    ->orderBy('id', 'DESC')
-                    ->get()->count();
-            }
-             }
         }
         return response(['data' => $bencana, 'total' => $count], 200);
     }
 
     public function indexCamat(Request $request)
     {
+        $instansi_id = $request->input('instansi_id');
+        $kelurahan = $request->input('kelurahan');
+        $periode = $request->input('periode');
+        $is_verified = $request->input('is_verified');
+
         $bencana = Bencana::query();
-        if (!$request->input()) {
-            $bencana = Bencana::select()
-                    ->where('is_verified','!=', 2)
-                    ->get();
-            $count = Bencana::select()
-                    ->where('is_verified','!=', 2)
-                    ->get()
-                    ->count();
+        if (!$request->input) {
+            $bencana = Bencana::select('instansi.nama_instansi','db_bencana_alam.*')
+                    ->leftJoin('instansi','instansi.id','=','db_bencana_alam.instansi_id')
+                    ->where('is_verified','!=', 3)
+                    ->orderBy('periode', 'DESC')
+                    ->paginate(10);
         } else {
-            if ($request->filled('instansi_id')) {
-                $bencana = Bencana::where('instansi_id', '=', $request->get('instansi_id'))
-                    ->where('is_verified','!=', 2)
-                    ->orderBy('id', 'DESC')
-                    ->get();
-                $count = Bencana::where('instansi_id', '=', $request->get('instansi_id'))
-                    ->where('is_verified','!=', 2)
-                    ->get()->count();
-            }
-            if ($request->filled(['instansi_id', 'periode','is_verified'])) {
-                $bencana = Bencana::where('instansi_id', '=', $request->get('instansi_id'))
-                    ->where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode'))
-                    ->where('is_verified','=',$request->get('is_verified'))
-                    ->orderBy('id', 'DESC')
-                    ->get();
-                $count = Bencana::where('instansi_id', '=', $request->get('instansi_id'))
-                    ->where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode'))
-                    ->where('is_verified','=',$request->get('is_verified'))
-                    ->orderBy('id', 'DESC')
-                    ->get()->count();
-            }
-            if ($request->filled(['instansi_id', 'periode'])) {
-                $bencana = Bencana::where('instansi_id', '=', $request->get('instansi_id'))
-                    ->where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode'))
-                    ->orderBy('id', 'DESC')
-                    ->get();
-                $count = Bencana::where('instansi_id', '=', $request->get('instansi_id'))
-                    ->where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode'))
-                    ->orderBy('id', 'DESC')
-                    ->get()->count();
-            }
-            if ($request->filled(['periode','is_verified'])) {
-                $bencana = Bencana::where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode'))
-                ->where('is_verified','=',$request->get('is_verified'))
-                ->orderBy('id', 'DESC')
-                ->get();
-                $count = Bencana::where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode'))
-                ->where('is_verified','=',$request->get('is_verified'))
-                ->orderBy('id', 'DESC')
-                ->get()->count();
-            }
-            if ($request->filled(['instansi_id', 'is_verified'])) {
-                $bencana = Bencana::where('instansi_id', '=', $request->get('instansi_id'))
-                    ->where('is_verified', '=', $request->get('is_verified'))
-                    ->orderBy('id', 'DESC')
-                    ->get();
-                $count = Bencana::where('instansi_id', '=', $request->get('instansi_id'))
-                    ->where('is_verified', '=', $request->get('is_verified'))
-                    ->orderBy('id', 'DESC')
-                    ->get()->count();
-            }
+            $bencana = Bencana::select('instansi.nama_instansi','db_bencana_alam.*')
+                    ->leftJoin('instansi','instansi.id','=','db_bencana_alam.instansi_id')
+                    ->when($instansi_id, function ($query, $instansi_id) {
+                        return $query->where('instansi_id',$instansi_id)
+                        ->where('is_verified','!=',3);
+                    })
+                    ->when($kelurahan, function ($query, $kelurahan) {
+                        return $query->where('kelurahan',$kelurahan)
+                        ->where('is_verified','!=',3);
+                    })
+                    ->when($periode, function ($query, $periode) {
+                        return $query->where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"),$periode)
+                        ->where('is_verified','!=',3);
+                    })
+                    ->when($is_verified, function ($query, $is_verified) {
+                        return $query->where('is_verified', $is_verified);
+                    })
+                    ->orderBy('periode', 'DESC')
+                    ->paginate(10);
         }
 
-            return response(['data' => $bencana, 'total' => $count], 200);
+            return response(['data' => $bencana], 200);
 
        
     }
@@ -168,33 +114,10 @@ class BencanaController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'instansi_id' => 'required',
-            'kelurahan' => 'string|required',
-            'jmlh_kk' => 'numeric',
-            'jmlh_jiwa' => 'numeric',
-            'rumah_rusak_berat' => 'numeric',
-            'rumah_rusak_sedang' => 'numeric',
-            'rumah_rusak_ringan' => 'numeric',
-            'kantor_rusak_berat' => 'numeric',
-            'kantor_rusak_sedang' => 'numeric',
-            'kantor_rusak_ringan' => 'numeric',
-            'pendidikan_rusak_berat' => 'numeric',
-            'pendidikan_rusak_sedang' => 'numeric',
-            'pendidikan_rusak_ringan' => 'numeric',
-            'ibadah_rusak_berat' => 'numeric',
-            'ibadah_rusak_sedang' => 'numeric',
-            'ibadah_rusak_ringan' => 'numeric',
-            'jembatan_rusak_berat' => 'numeric',
-            'jembatan_rusak_sedang' => 'numeric',
-            'jembatan_rusak_ringan' => 'numeric',
-            'lainnya_rusak_berat' => 'numeric',
-            'lainnya_rusak_sedang' => 'numeric',
-            'lainnya_rusak_ringan' => 'numeric',
-            'korban_menderita' => 'numeric',
-            'korban_luka' => 'numeric',
-            'korban_meninggal' => 'numeric', 
+            
         ]);
         $valid = Validator::make($request->all(), [
-            'periode' =>  'required|unique_with:db_bencana_alam, kelurahan'
+            'periode' =>  'unique_with:db_bencana_alam, kelurahan'
         ]);
 
         if ($validator->fails()) {
@@ -321,8 +244,8 @@ class BencanaController extends Controller
                 'jembatan_rusak_ringan','lainnya_rusak_berat','lainnya_rusak_sedang','lainnya_rusak_ringan','korban_menderita','korban_luka', 'korban_meninggal',
                 'kerugian')
                 ->where('instansi_id', '=', $request->get('instansi_id'))
-                ->where('periode', '=', $request->get('periode'))
-                ->where('is_verified','=','1')
+                ->where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode'))
+                ->where('is_verified','=',2)
                 ->orderBy('id', 'DESC')
                 ->get();
             $count = DB::table('db_bencana_alam')
@@ -353,25 +276,24 @@ class BencanaController extends Controller
                     DB::raw('SUM(kerugian) AS total_kerugian')
                     )
                 ->where('instansi_id', '=', $request->get('instansi_id'))
-                ->where('periode', '=', $request->get('periode'))
-                ->where('is_verified','=','1')
+                ->where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode'))
+                ->where('is_verified','=',2)
                 ->orderBy('id', 'DESC')
                 ->get();
             $periode = DB::table('db_bencana_alam')
-                ->select(
-                    DB::raw("DATE_FORMAT(periode, '%Y') as tahun"),
-                    DB::raw("DATE_FORMAT(periode, '%m') as bulan"),
-                    DB::raw("DATE_FORMAT(periode, '%b_%Y') as periode")
-                )
+                ->select('periode')
                 ->where('instansi_id', '=', $request->get('instansi_id'))
-                ->where('periode', '=', $request->get('periode'))
-                ->where('is_verified','=','1')
+                ->where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode'))
+                ->where('is_verified','=',2)
                 ->orderBy('id', 'DESC')
                 ->take(1)
                 ->get();
-            $instansi = Bencana::select('db_bencana_alam.instansi_id','instansi.nama_instansi')
+            $instansi = DB::table('db_bencana_alam')
+                ->select('db_bencana_alam.instansi_id','instansi.nama_instansi')
                 ->leftJoin('instansi','instansi.id','db_bencana_alam.instansi_id')
-                ->where('db_bencana_alam.is_verified','=','1')
+                ->where('instansi_id', '=', $request->get('instansi_id'))
+                ->where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode'))
+                ->where('is_verified','=',2)
                 ->take(1)
                 ->get();
 

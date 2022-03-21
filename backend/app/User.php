@@ -12,14 +12,18 @@ class User extends Authenticatable
 {
     use HasApiTokens, Notifiable;
 
-    protected $fillable = ['instansi_id', 'name', 'username', 'email', 'password', 'role'];
-    protected $hidden = ['password', 'created_at', 'updated_at','pimpinan','lat','lng','instansi'];
+    protected $fillable = ['instansi_id', 'kelurahan_id', 'name', 'username', 'email', 'password', 'role'];
+    protected $hidden = ['password', 'created_at', 'updated_at'];
 
     protected $table = 'users';
 
     public function instansi()
     {
-        return $this->hasMany('App\Instansi','instansi_id');
+        return $this->belongsTo('App\Instansi');
+    }
+    public function kelurahan()
+    {
+        return $this->belongsTo('App\Kelurahan');
     }
 
 }

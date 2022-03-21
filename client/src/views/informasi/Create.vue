@@ -1,7 +1,7 @@
 <template>
   <div class="regist" v-if="this.user.role == 'Admin'">
     <h1 class="mb-10">Input Informasi</h1>
-    <v-form>
+    <v-form v-model="isFormValid">
       <div class="row">
         <div class="col-md-10 mx-auto">
           <form>
@@ -11,7 +11,7 @@
                   Kecamatan
                   <span style="color: red">*</span>
                 </p>
-                <v-select
+                <v-autocomplete
                   single-line
                   outlined
                   return-object
@@ -22,7 +22,7 @@
                   :items="data_kecamatan"
                   :disabled="seluruh_informasi == 1"
                   clearable
-                ></v-select>
+                ></v-autocomplete>
                 <v-checkbox
                   class="mt-0"
                   v-model="seluruh_informasi"
@@ -39,6 +39,7 @@
                 >
                 </v-checkbox>
               </div>
+
               <div>
                 <p>
                   Tanggal
@@ -62,9 +63,11 @@
                       return-object
                       v-bind="attrs"
                       clearable
+                      readonly
                       v-on="on"
                       @click:clear="tanggal_informasi = ''"
                       :value="format_date"
+                      :rules="[rules.required]"
                     ></v-text-field>
                   </template>
                   <v-date-picker
@@ -87,11 +90,14 @@
                   <span style="color: red">*</span>
                 </p>
                 <v-textarea
+                  clearable
+                  clear-icon="mdi-close-circle"
                   single-line
                   label="Masukkan Informasi yang ingin disampaikan"
                   outlined
                   class="form"
                   v-model="informasi"
+                  :rules="[rules.required]"
                 ></v-textarea>
               </div>
             </div>
@@ -126,6 +132,7 @@
                 class="save"
                 @click="save()"
                 :disabled="
+                  !isFormValid ||
                   overlay == true ||
                   (!kecamatan && seluruh_informasi == 0) ||
                   (!tanggal_informasi && !informasi)
@@ -134,29 +141,16 @@
               >
             </b-col>
           </b-row>
-          <v-overlay :value="overlay">
-            <v-progress-circular indeterminate color="blue"></v-progress-circular>
-          </v-overlay>
-
-          <!-- <b-modal
-            v-model="dialog"
-            centered
-            no-close-on-backdrop
-            @ok="save()"
-            title="Konfirmasi Form Data"
-          >
-            <b-container fluid>
-              <b-row class="mb-1">
-                <b-col class="text-left" v-if="form.kecamatan == 1">
-                  Informasi Ke seluruh Kecamatan
-                </b-col>
-                <b-col class="text-left" v-else>
-                  Kecamatan : &nbsp;
-                  <b>{{}}</b>
-                </b-col>
-              </b-row>
-            </b-container>
-          </b-modal> -->
+          <v-dialog v-model="dialogOverlay" persistent max-width="300">
+            <div>
+              <v-card color="primary" dark class="text-center">
+                <v-card-text>
+                  Mohon tunggu sebentar......
+                  <v-progress-linear indeterminate color="white" class="mb-0"></v-progress-linear>
+                </v-card-text>
+              </v-card>
+            </div>
+          </v-dialog>
         </div>
       </div>
     </v-form>
@@ -174,7 +168,13 @@
         tanggal_informasi: null,
         date: "",
         saveDisabled: true,
+        dialogOverlay: false,
         loading: false,
+        isFormValid: false,
+        rules: {
+          required: (value) => !!value || "Required",
+          counter: (value) => value.length <= 12 || "Max 30 Characters",
+        },
         check: "",
         kecamatan: "",
         seluruh_informasi: "",
@@ -213,7 +213,7 @@
       }),
       format_date() {
         if (this.tanggal_informasi)
-          return this.$moment(this.tanggal_informasi).format("DD - MMMM - YYYY");
+          return this.$moment(this.tanggal_informasi).format("dddd / DD - MMMM - YYYY");
       },
     },
     methods: {
@@ -226,10 +226,11 @@
       },
       //untuk menyimpan data registrasi ke dalam API
       save() {
-        this.overlay = true;
+        this.dialogOverlay = true;
         if (this.seluruh_informasi == 1) {
           this.$http
             .post("/informasi", {
+              instansi_id: 0,
               waktu: this.tanggal_informasi,
               informasi: this.informasi,
             })
@@ -237,7 +238,7 @@
               let self = this;
               setTimeout(function () {
                 self.$toast.success("Data Berhasil Disimpan");
-                self.overlay = false;
+                self.dialogOverlay = false;
                 self.$router.push("/informasi");
               }, 10 * 10 * 10);
             })
@@ -250,11 +251,11 @@
               } else if (this.tanggal_informasi && this.informasi == "") {
                 this.$toast.error("Isi informasi yang ingin disampaikan");
               }
-              this.overlay = false;
+              this.dialogOverlay = false;
             });
         }
         if (this.kecamatan) {
-          this.overlay = true;
+          this.dialogOverlay = true;
           this.$http
             .post("/informasi", {
               instansi_id: this.kecamatan.id,
@@ -265,7 +266,7 @@
               let self = this;
               setTimeout(function () {
                 self.$toast.success("Data Berhasil Disimpan");
-                self.overlay = false;
+                self.dialogOverlay = false;
                 self.$router.push("/informasi");
               }, 10 * 10 * 10);
             })
@@ -278,7 +279,7 @@
               } else if (this.tanggal_informasi && this.informasi == "") {
                 this.$toast.error("Isi informasi yang ingin disampaikan");
               }
-              this.overlay = false;
+              this.dialogOverlay = false;
             });
         }
       },

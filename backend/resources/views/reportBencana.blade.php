@@ -71,28 +71,12 @@ td.item {
 	<div>
         <center>
         @foreach ($periode as $waktu => $per)
-            @php
-            $bln = array (
-                '01' => 'Januari',
-                '02' => 'Februari',
-                '03' => 'Maret',
-                '04' => 'April',
-                '05' => 'Mei',
-                '06' => 'Juni',
-                '07' => 'Juli',
-                '08' => 'Agustus',
-                '09' => 'September',
-                '10' => 'Oktober',
-                '11' => 'November',
-                '12' => 'Desember'
-        );
-                        @endphp
-                @if ($waktu == 0)
-
                 <li style="list-style-type: none; font-size: 16pt; font-weight: bold">Laporan Keadaan Bencana Alam</li>
-                <li style="list-style-type: none; font-size: 16pt; font-weight: bold">Bulan  {{$bln[$per->bulan]}} Tahun {{$per->tahun}}</li>
-                <p></p>
-                
+                <li style="list-style-type: none; font-size: 16pt; font-weight: bold">
+                    Bulan  {{ \Carbon\Carbon::parse($per->periode)->translatedFormat('F') }} 
+                    Tahun {{ \Carbon\Carbon::parse($per->periode)->translatedFormat('Y') }}
+                </li>
+                <p></p> 
         </center>
         <br/>
         <div style="list-style-type: none; font-size: 14pt; font-weight: bold">
@@ -283,7 +267,9 @@ td.item {
         </div>
         </div>
         <div class="text-center" style="position:absolute; right:0pt; width:300pt; font-size: 13pt">
-            <p>{{$kec->nama_instansi}}, {{$bln[$per->bulan]}} {{$per->tahun}}</p>
+            <p>{{$kec->nama_instansi}}, 
+                {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }} 
+            </p>
             <p>KASI TRANTIB</p>
             <br>
             <p style="text-decoration: underline;margin-top: 20px;">
@@ -295,8 +281,7 @@ td.item {
         </p>
         </div>
     </div>
-    @endforeach
-            @endif
+            @endforeach
             @endforeach
 </body>
 </html>

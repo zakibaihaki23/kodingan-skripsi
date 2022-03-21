@@ -19,202 +19,108 @@ class KependudukanController extends Controller
      */
     public function index(Request $request)
     {
-        // $kependudukan = Kependudukan::query();
-        // if (!$request->input()) {
-        //     $kependudukan = Kependudukan::get()->count();
-        // } else {
-        //     if ($request->filled('instansi_id')) {
-        //         $kependudukan = Kependudukan::where('instansi_id', '=', $request->get('instansi_id'))->orderBy('id', 'DESC')
-        //             ->get();
-        //         $count = Kependudukan::where('instansi_id', '=', $request->get('instansi_id'))->orderBy('id', 'DESC')
-        //             ->get()->count();
-        //     }
-        //     if ($request->filled('periode')) {
-        //         $kependudukan = Kependudukan::where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode'))->orderBy('id', 'DESC')
-        //             ->get();
-        //         $count = Kependudukan::where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode'))->orderBy('id', 'DESC')
-        //             ->get()->count();
-        //     }
-        //     if ($request->filled('id_kelurahan')) {
-        //         $kependudukan = Kependudukan::where('id_kelurahan', '=', $request->get('id_kelurahan'))->orderBy('id', 'DESC')
-        //             ->get();
-        //         $count = Kependudukan::where('id_kelurahan', '=', $request->get('id_kelurahan'))->orderBy('id', 'DESC')
-        //             ->get()->count();
-        //     }
-        //     if ($request->filled(['instansi_id', 'periode','is_verified'])) {
-        //         $kependudukan = Kependudukan::where('instansi_id', '=', $request->get('instansi_id'))
-        //             ->where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode'))
-        //             ->where('is_verified','=',$request->get('is_verified'))
-        //             ->orderBy('id', 'DESC')
-        //             ->get();
-        //         $count = Kependudukan::where('instansi_id', '=', $request->get('instansi_id'))
-        //             ->where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode'))
-        //             ->where('is_verified','=',$request->get('is_verified'))
-        //             ->orderBy('id', 'DESC')
-        //             ->get()->count();
-        //     }
-        //      else {
-             
-        //     if ($request->filled(['instansi_id', 'periode'])) {
-        //         $kependudukan = Kependudukan::where('instansi_id', '=', $request->get('instansi_id'))
-        //             ->where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode'))
-        //             ->where('is_verified','=','1')
-        //             ->orderBy('id', 'DESC')
-        //             ->get();
-        //         $count = Kependudukan::where('instansi_id', '=', $request->get('instansi_id'))
-        //             ->where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode'))
-        //             ->where('is_verified','=','1')
-        //             ->orderBy('id', 'DESC')
-        //             ->get()->count();
-        //     }
-        //     if ($request->filled(['instansi_id', 'is_verified'])) {
-        //         $kependudukan = Kependudukan::where('instansi_id', '=', $request->get('instansi_id'))
-        //             ->where('is_verified', '=', $request->get('is_verified'))
-        //             ->orderBy('id', 'DESC')
-        //             ->get();
-        //         $count = Kependudukan::where('instansi_id', '=', $request->get('instansi_id'))
-        //             ->where('is_verified', '=', $request->get('is_verified'))
-        //             ->orderBy('id', 'DESC')
-        //             ->get()->count();
-        //     }
-        //      }
-        // }      
-        // return response(['data' => $kependudukan, 'total' => $count], 200); 
+        $instansi_id = $request->input('instansi_id');
+        $kelurahan = $request->input('kelurahan');
+        $periode = $request->input('periode');
+        $is_verified = $request->input('is_verified');
+
+
         $kependudukan = Kependudukan::query();
-        if (!$request->input()) {
-            $kependudukan = Kependudukan::select()->get();
+        if (!$request->except('page')) {
+            $kependudukan = Kependudukan::select('instansi.nama_instansi','db_kependudukan.*')
+                    ->leftJoin('instansi','instansi.id','=','db_kependudukan.instansi_id')
+                    ->orderBy('periode', 'DESC')
+                    ->paginate(10);
             $count = Kependudukan::select()->get()->count();
         } else {
-            if ($request->filled('instansi_id')) {
-                $kependudukan = Kependudukan::where('instansi_id', '=', $request->get('instansi_id'))->orderBy('id', 'DESC')
-                    ->get();
-                $count = Kependudukan::where('instansi_id', '=', $request->get('instansi_id'))->orderBy('id', 'DESC')
+             $kependudukan = Kependudukan::select('instansi.nama_instansi','db_kependudukan.*')
+                    ->leftJoin('instansi','instansi.id','=','db_kependudukan.instansi_id')
+                    ->when($instansi_id, function ($query, $instansi_id) {
+                        return $query->where('instansi_id',$instansi_id);
+                    })
+                    ->when($kelurahan, function ($query, $kelurahan) {
+                        return $query->where('kelurahan', $kelurahan);
+                    })
+                    ->when($periode, function ($query, $periode) {
+                        return $query->where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), $periode);
+                    })
+                    ->when($is_verified, function ($query, $is_verified) {
+                        return $query->where('is_verified', $is_verified);
+                    })
+                    ->orderBy('periode', 'DESC')
+                    ->paginate(10);
+            $count = Kependudukan::when($instansi_id, function ($query, $instansi_id) {
+                        return $query->where('instansi_id',$instansi_id);
+                    })
+                    ->when($kelurahan, function ($query, $kelurahan) {
+                        return $query->where('kelurahan', $kelurahan);
+                    })
+                    ->when($periode, function ($query, $periode) {
+                        return $query->where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), $periode);
+                    })
+                    ->when($is_verified, function ($query, $is_verified) {
+                        return $query->where('is_verified', $is_verified);
+                    })
                     ->get()->count();
-            }
-            if ($request->filled('periode')) {
-                $kependudukan = Kependudukan::where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode'))->orderBy('id', 'DESC')
-                    ->get();
-                $count = Kependudukan::where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode'))->orderBy('id', 'DESC')
-                    ->get()->count();
-            }
-            if ($request->filled('is_verified')) {
-                $kependudukan = Kependudukan::where('is_verified', '=', $request->get('is_verified'))->orderBy('id', 'DESC')
-                    ->get();
-                $count = Kependudukan::where('is_verified', '=', $request->get('is_verified'))->orderBy('id', 'DESC')
-                    ->get()->count();
-            }
-            if ($request->filled(['instansi_id', 'periode','is_verified'])) {
-                $kependudukan = Kependudukan::where('instansi_id', '=', $request->get('instansi_id'))
-                    ->where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode'))
-                    ->where('is_verified','=',$request->get('is_verified'))
-                    ->orderBy('id', 'DESC')
-                    ->get();
-                $count = Kependudukan::where('instansi_id', '=', $request->get('instansi_id'))
-                    ->where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode'))
-                    ->where('is_verified','=',$request->get('is_verified'))
-                    ->orderBy('id', 'DESC')
-                    ->get()->count();
-            }
-             else {
-             
-            if ($request->filled(['instansi_id', 'periode'])) {
-                $kependudukan = Kependudukan::where('instansi_id', '=', $request->get('instansi_id'))
-                    ->where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode'))
-                    ->orderBy('id', 'DESC')
-                    ->get();
-                $count = Kependudukan::where('instansi_id', '=', $request->get('instansi_id'))
-                    ->where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode'))
-                    ->orderBy('id', 'DESC')
-                    ->get()->count();
-            }
-            if ($request->filled(['periode','is_verified'])) {
-                $kependudukan = Kependudukan::where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode'))
-                ->where('is_verified','=',$request->get('is_verified'))
-                ->orderBy('id', 'DESC')
-                ->get();
-                $count = Kependudukan::where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode'))
-                ->where('is_verified','=',$request->get('is_verified'))
-                ->orderBy('id', 'DESC')
-                ->get()->count();
-            }
-            if ($request->filled(['instansi_id', 'is_verified'])) {
-                $kependudukan = Kependudukan::where('instansi_id', '=', $request->get('instansi_id'))
-                    ->where('is_verified', '=', $request->get('is_verified'))
-                    ->orderBy('id', 'DESC')
-                    ->get();
-                $count = Kependudukan::where('instansi_id', '=', $request->get('instansi_id'))
-                    ->where('is_verified', '=', $request->get('is_verified'))
-                    ->orderBy('id', 'DESC')
-                    ->get()->count();
-            }
-             }
         }
+        
         return response(['data' => $kependudukan, 'total' => $count], 200);
     }
 
     public function indexCamat(Request $request)
     {
+        $instansi_id = $request->input('instansi_id');
+        $kelurahan = $request->input('kelurahan');
+        $periode = $request->input('periode');
+        $is_verified = $request->input('is_verified');
+
         $kependudukan = Kependudukan::query();
-        if (!$request->input()) {
-            $kependudukan = Kependudukan::select()
-                    ->where('is_verified','!=', 2)
-                    ->get();
+        if (!$request->except('page')) {
+            $kependudukan = Kependudukan::select('instansi.nama_instansi','db_kependudukan.*')
+                    ->leftJoin('instansi','instansi.id','=','db_kependudukan.instansi_id')
+                    ->where('is_verified','!=', 3)
+                    ->orderBy('periode', 'DESC')
+                    ->paginate(10);
             $count = Kependudukan::select()
-                    ->where('is_verified','!=', 2)
+                    ->where('is_verified','!=', 3)
                     ->get()
                     ->count();
         } else {
-            if ($request->filled('instansi_id')) {
-                $kependudukan = Kependudukan::where('instansi_id', '=', $request->get('instansi_id'))
-                    ->where('is_verified','!=', 2)
-                    ->orderBy('id', 'DESC')
-                    ->get();
-                $count = Kependudukan::where('instansi_id', '=', $request->get('instansi_id'))
-                    ->where('is_verified','!=', 2)
+            $kependudukan = Kependudukan::select('instansi.nama_instansi','db_kependudukan.*')
+                    ->leftJoin('instansi','instansi.id','=','db_kependudukan.instansi_id')
+                    ->when($instansi_id, function ($query, $instansi_id) {
+                        return $query->where('instansi_id',$instansi_id)
+                        ->where('is_verified','!=',3);
+                    })
+                    ->when($kelurahan, function ($query, $kelurahan) {
+                        return $query->where('kelurahan',$kelurahan)
+                        ->where('is_verified','!=',3);
+                    })
+                    ->when($periode, function ($query, $periode) {
+                        return $query->where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"),$periode)
+                        ->where('is_verified','!=',3);
+                    })
+                    ->when($is_verified, function ($query, $is_verified) {
+                        return $query->where('is_verified', $is_verified);
+                    })
+                    ->orderBy('periode', 'DESC')
+                    ->paginate(10);
+            $count = Kependudukan::when($instansi_id, function ($query, $instansi_id) {
+                        return $query->where('instansi_id',$instansi_id)
+                        ->where('is_verified','!=',3);
+                    })
+                    ->when($kelurahan, function ($query, $kelurahan) {
+                        return $query->where('kelurahan', $kelurahan)
+                        ->where('is_verified','!=',3);
+                    })
+                    ->when($periode, function ($query, $periode) {
+                        return $query->where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), $periode)
+                        ->where('is_verified','!=',3);
+                    })
+                    ->when($is_verified, function ($query, $is_verified) {
+                        return $query->where('is_verified', $is_verified);
+                    })
                     ->get()->count();
-            }
-            if ($request->filled(['instansi_id', 'periode','is_verified'])) {
-                $kependudukan = Kependudukan::where('instansi_id', '=', $request->get('instansi_id'))
-                    ->where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode'))
-                    ->where('is_verified','=',$request->get('is_verified'))
-                    ->orderBy('id', 'DESC')
-                    ->get();
-                $count = Kependudukan::where('instansi_id', '=', $request->get('instansi_id'))
-                    ->where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode'))
-                    ->where('is_verified','=',$request->get('is_verified'))
-                    ->orderBy('id', 'DESC')
-                    ->get()->count();
-            }
-            if ($request->filled(['instansi_id', 'periode'])) {
-                $kependudukan = Kependudukan::where('instansi_id', '=', $request->get('instansi_id'))
-                    ->where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode'))
-                    ->orderBy('id', 'DESC')
-                    ->get();
-                $count = Kependudukan::where('instansi_id', '=', $request->get('instansi_id'))
-                    ->where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode'))
-                    ->orderBy('id', 'DESC')
-                    ->get()->count();
-            }
-            if ($request->filled(['periode','is_verified'])) {
-                $kependudukan = Kependudukan::where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode'))
-                ->where('is_verified','=',$request->get('is_verified'))
-                ->orderBy('id', 'DESC')
-                ->get();
-                $count = Kependudukan::where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode'))
-                ->where('is_verified','=',$request->get('is_verified'))
-                ->orderBy('id', 'DESC')
-                ->get()->count();
-            }
-            if ($request->filled(['instansi_id', 'is_verified'])) {
-                $kependudukan = Kependudukan::where('instansi_id', '=', $request->get('instansi_id'))
-                    ->where('is_verified', '=', $request->get('is_verified'))
-                    ->orderBy('id', 'DESC')
-                    ->get();
-                $count = Kependudukan::where('instansi_id', '=', $request->get('instansi_id'))
-                    ->where('is_verified', '=', $request->get('is_verified'))
-                    ->orderBy('id', 'DESC')
-                    ->get()->count();
-            }
         }
 
             return response(['data' => $kependudukan, 'total' => $count], 200);
@@ -230,23 +136,9 @@ class KependudukanController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'instansi_id' => 'required',
-            'kelurahan' => 'required|string',
-            // 'jmlh_penduduk_bln_lalu_l' => 'required',
-            // 'jmlh_penduduk_bln_lalu_p' => 'required',
-            // 'lahir_l' => 'required',
-            // 'lahir_p' => 'required',
-            // 'meninggal_l' => 'required',
-            // 'meninggal_p' => 'required',
-            // 'datang_l' => 'required',
-            // 'datang_p' => 'required',
-            // 'pindah_l' => 'required',
-            // 'pindah_p' => 'required',
-            // 'jmlh_penduduk_bln_ini_l' => 'required',
-            // 'jmlh_penduduk_bln_ini_p' => 'required',
-            
         ]);
         $valid = Validator::make($request->all(), [
-            'periode' =>  'required|unique_with:db_kependudukan, kelurahan'
+            'periode' =>  'unique_with:db_kependudukan, kelurahan'
         ]);
 
         if ($validator->fails()) {
@@ -289,8 +181,8 @@ class KependudukanController extends Controller
 
             $kependudukan = DB::table('db_kependudukan')
                 ->where('instansi_id', '=', $request->get('instansi_id'))
-                ->where('periode', '=', $request->get('periode'))
-                ->where('is_verified','=','1')
+                ->where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode'))
+                ->where('is_verified','=',2)
                 ->orderBy('id', 'DESC')
                 ->get();
             $count = DB::table('db_kependudukan')
@@ -318,25 +210,24 @@ class KependudukanController extends Controller
                     
                     )
                 ->where('instansi_id', '=', $request->get('instansi_id'))
-                ->where('periode', '=', $request->get('periode'))
-                ->where('is_verified','=','1')
+                ->where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode'))
+                ->where('is_verified','=',2)
                 ->orderBy('id', 'DESC')
                 ->get();
             $periode = DB::table('db_kependudukan')
-                ->select(
-                    DB::raw("DATE_FORMAT(periode, '%Y') as tahun"),
-                    DB::raw("DATE_FORMAT(periode, '%m') as bulan"),
-                    DB::raw("DATE_FORMAT(periode, '%b_%Y') as periode")
-                )
+                ->select('periode')
                 ->where('instansi_id', '=', $request->get('instansi_id'))
-                ->where('periode', '=', $request->get('periode'))
-                ->where('is_verified','=','1')
+                ->where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode'))
+                ->where('is_verified','=',2)
                 ->orderBy('id', 'DESC')
                 ->take(1)
                 ->get();
-            $instansi = Kependudukan::select('db_kependudukan.instansi_id','instansi.nama_instansi')
+            $instansi = DB::table('db_kependudukan')
+                ->select('db_kependudukan.instansi_id','instansi.nama_instansi')
                 ->leftJoin('instansi','instansi.id','db_kependudukan.instansi_id')
-                ->where('db_kependudukan.is_verified','=','1')
+                ->where('instansi_id', '=', $request->get('instansi_id'))
+                ->where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode'))
+                ->where('is_verified','=',2)
                 ->take(1)
                 ->get();
 

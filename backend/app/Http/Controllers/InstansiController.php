@@ -22,7 +22,7 @@ class InstansiController extends Controller
             ->where('id','=', $request->id)
             ->with('kelurahan')
             ->orderBy('nama_instansi', 'asc')
-            ->first();
+            ->get();
              $count = Instansi::select()
             ->where('instansi', '=', 'Kecamatan')
             ->where('id','=', $request->id)
@@ -38,12 +38,7 @@ class InstansiController extends Controller
             ->count();
         }
 
-        $response = [
-            'data' => $instansi,
-            'count' => $count,
-
-        ];
-        return response($response, 200);
+        return response(['data' => $instansi,'total' => $count], 200);
     }
 
     /**
@@ -65,10 +60,9 @@ class InstansiController extends Controller
     public function addInstansi(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'nama_instansi' => 'required|string',
-            'pimpinan' => 'required',
+            'nama_instansi' => 'required|string|unique_with:instansi, nama_instansi',
             'lat' => ['regex:/^[-]?(([0-8]?[0-9])\.(\d+))|(90(\.0+)?)$/'],
-            'lng' => 'numeric'
+            'lng' => ['regex:/^[-]?((((1[0-7][0-9])|([0-9]?[0-9]))\.(\d+))|180(\.0+)?)$/']
         ]);
 
         if ($validator->fails()) {
@@ -85,7 +79,7 @@ class InstansiController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'instansi_id' => 'required',
-            'nama_kelurahan' => 'required|string'
+            'nama_kelurahan' => 'required|string|unique_with:kelurahan, instansi_id'
         ]);
 
         if ($validator->fails()) {
@@ -104,29 +98,36 @@ class InstansiController extends Controller
                     'instansi_id',
                     DB::raw('COUNT(db_realisasi_pbb.id) as total_pbb')
                 )
-                ->where('periode', '=', $request->periode)
-                ->where('is_verified', '=', '1')
+                ->where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode'))
+                ->where('is_verified', '=', 2)
                 ->groupBy(
                     'instansi_id'
                 );
             $paten = DB::table('db_rekapitulasi_paten')
                 ->select('instansi_id', DB::raw('COUNT(db_rekapitulasi_paten.id) as total_paten'))
-                ->where('periode', '=', $request->periode)
-                ->where('is_verified', '=', '1')
+                ->where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode'))
+                ->where('is_verified', '=', 2)
                 ->groupBy(
                     'instansi_id'
                 );
             $kependudukan = DB::table('db_kependudukan')
                 ->select('instansi_id', DB::raw('COUNT(db_kependudukan.id) as total_kependudukan'))
-                ->where('periode', '=', $request->periode)
-                ->where('is_verified', '=', '1')
+                ->where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode'))
+                ->where('is_verified', '=', 2)
+                ->groupBy(
+                    'instansi_id'
+                );
+            $imunisasi = DB::table('db_imunisasi')
+                ->select('instansi_id', DB::raw('COUNT(db_imunisasi.id) as total_imunisasi'))
+                ->where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode'))
+                ->where('is_verified', '=', 2)
                 ->groupBy(
                     'instansi_id'
                 );
             $bencana = DB::table('db_bencana_alam')
                 ->select('instansi_id', DB::raw('COUNT(db_bencana_alam.id) as total_bencana'))
-                ->where('periode', '=', $request->periode)
-                ->where('is_verified', '=', '1')
+                ->where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode'))
+                ->where('is_verified', '=', 2)
                 ->groupBy(
                     'instansi_id'
                 );
@@ -139,6 +140,7 @@ class InstansiController extends Controller
                     'realisasi.total_pbb',
                     'paten.total_paten',
                     'kependudukan.total_kependudukan',
+                    'imunisasi.total_imunisasi',
                     'bencana.total_bencana'
                 )
                 ->leftJoinSub($realisasi, 'realisasi', function ($join) {
@@ -149,6 +151,9 @@ class InstansiController extends Controller
                 })
                 ->leftJoinSub($kependudukan, 'kependudukan', function ($join) {
                     $join->on('instansi.id', 'kependudukan.instansi_id');
+                })
+                ->leftJoinSub($imunisasi, 'imunisasi', function ($join) {
+                    $join->on('instansi.id', 'imunisasi.instansi_id');
                 })
                 ->leftJoinSub($bencana, 'bencana', function ($join) {
                     $join->on('instansi.id', 'bencana.instansi_id');
@@ -165,13 +170,13 @@ class InstansiController extends Controller
                 // ->select(
                 //     DB::raw('count(*) as total_pbb')
                 // )
-                // ->where('is_verified' ,'=','1')
+                // ->where('is_verified' ,'=',2)
                 // ->get();
                 // $paten = DB::table('rekapitulasi_paten')
                 // ->select(
                 //     DB::raw('count(*) as total_paten')
                 // )
-                // ->where('is_verified' ,'=','1')
+                // ->where('is_verified' ,'=',2)
                 // ->get();
                 
                 // $instansi = $realisasi->merge($paten);
@@ -184,32 +189,39 @@ class InstansiController extends Controller
                 ->select(
                     DB::raw('count(*) as total_pbb')
                 )
-                ->where('is_verified' ,'=','1')
+                ->where('is_verified' ,'=',2)
                 ->where(DB::raw('YEAR(periode)'), '=', $request->periode)
                 ->get();
                 $paten = DB::table('db_rekapitulasi_paten')
                 ->select(
                     DB::raw('count(*) as total_paten')
                 )
-                ->where('is_verified' ,'=','1')
+                ->where('is_verified' ,'=',2)
                 ->where(DB::raw('YEAR(periode)'), '=', $request->periode)
                 ->get();
                 $kependudukan = DB::table('db_kependudukan')
                 ->select(
                     DB::raw('count(*) as total_kependudukan')
                 )
-                ->where('is_verified' ,'=','1')
+                ->where('is_verified' ,'=',2)
+                ->where(DB::raw('YEAR(periode)'), '=', $request->periode)
+                ->get();
+                $imunisasi = DB::table('db_imunisasi')
+                ->select(
+                    DB::raw('count(*) as total_imunisasi')
+                )
+                ->where('is_verified' ,'=',2)
                 ->where(DB::raw('YEAR(periode)'), '=', $request->periode)
                 ->get();
                 $bencana = DB::table('db_bencana_alam')
                 ->select(
                     DB::raw('count(*) as total_bencana')
                 )
-                ->where('is_verified' ,'=','1')
+                ->where('is_verified' ,'=',2)
                 ->where(DB::raw('YEAR(periode)'), '=', $request->periode)
                 ->get();
                 
-                $instansi = $realisasi->merge($paten)->merge($kependudukan)->merge($bencana);
+                $instansi = $realisasi->merge($paten)->merge($kependudukan)->merge($imunisasi)->merge($bencana);
 
                 return response()->json(['data' => $instansi]);
         }

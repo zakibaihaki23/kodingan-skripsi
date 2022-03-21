@@ -25,12 +25,12 @@
             </template>
             <b-card
               border-variant="primary"
-              header="Total Kelurahan"
+              header="Total Desa/Kelurahan"
               header-bg-variant="primary"
               header-text-variant="white"
               align="center"
             >
-              <b-card-text>{{ this.kelurahan }} Kelurahan</b-card-text>
+              <b-card-text>{{ this.kelurahan }} Desa/Kelurahan</b-card-text>
             </b-card>
           </b-skeleton-wrapper>
         </b-col>
@@ -44,7 +44,7 @@
 
             <b-card
               border-variant="primary"
-              header-html="Total Data yang Diinput dan Sudah Divalidasi<br> (Tahun Ini)"
+              header-html="Total Data yang Diinput dan Sudah Divalidasi <b>(Tahun Ini)</b>"
               header-bg-variant="primary"
               header-text-variant="white"
               align="center"
@@ -78,7 +78,22 @@
               header-text-variant="white"
               align="center"
             >
-              <pie-chart loading="Loading...." :data="[total_user, total_admin]"></pie-chart>
+              <b-card-text>
+                <div class="row">
+                  <div class="col-6">
+                    <div class="h1"><b-icon icon="people-fill"></b-icon></div>
+                    <div>
+                      {{ this.total_user.total }}
+                      <b-link href="/user" style="text-decoration: none">Admin Kecamatan</b-link>
+                    </div>
+                  </div>
+                  <div class="col-6">
+                    <div class="h1"><b-icon icon="person-check-fill"></b-icon></div>
+                    {{ this.total_camat.total }}
+                    <b-link href="/user" style="text-decoration: none">Camat</b-link>
+                  </div>
+                </div>
+              </b-card-text>
             </b-card>
             <!-- <b-card
               border-variant="primary"
@@ -96,10 +111,15 @@
         </b-col>
       </b-row>
     </div>
-    <l-map style="height: 500px; width: 100%; margin-top: 20px" :zoom="zoom" :center="center">
-      <l-tile-layer :url="url" :attribution="attribution"></l-tile-layer>
-      <TooltipMap></TooltipMap>
-    </l-map>
+    <b-skeleton-wrapper :loading="loading">
+      <template #loading>
+        <b-skeleton></b-skeleton>
+      </template>
+      <l-map style="height: 500px; width: 100%; margin-top: 20px" :zoom="zoom" :center="center">
+        <l-tile-layer :url="url" :attribution="attribution"></l-tile-layer>
+        <TooltipMap></TooltipMap>
+      </l-map>
+    </b-skeleton-wrapper>
   </div>
 </template>
 
@@ -108,7 +128,7 @@
   import TooltipMap from "../../components/TootipMap.vue";
   import ColumnChart from "../../components/BarChart.vue";
 
-  const dataLabel = ["PBB", "PATEN", "Kependudukan", "Pembuatan Akta", "Keadaan Bencana Alam"];
+  const dataLabel = ["PBB", "PATEN", "Kependudukan", "Imunisasi", "Keadaan Bencana Alam"];
   const barBackgroundColors = [
     "rgba(54, 162, 235, 1)",
     "rgba(255, 206, 86, 1)",
@@ -136,10 +156,11 @@
         withPopup: [-6.30958, 106.10726],
         total_kecamatan: [],
         total_user: "",
-        total_admin: "",
+        total_camat: "",
         total_pbb: "",
         total_paten: "",
         total_kependudukan: "",
+        total_imunisasi: "",
         total_bencana: "",
         kecamatan: [],
         sekarang: "",
@@ -214,11 +235,16 @@
         // });
 
         //USER
-        this.$http.get(`/user`).then((response) => {
-          this.total_user = [response.data.total[0].role, response.data.total[0].total];
-          this.total_admin = [response.data.total[1].role, response.data.total[1].total];
-          this.loading = false;
-        });
+        this.$http
+          .get(`/role`)
+          .then((response) => {
+            this.total_user = response.data.user[0];
+            this.total_camat = response.data.camat[0];
+            this.loading = false;
+          })
+          .catch((error) => {
+            this.loading = false;
+          });
 
         //DATA VIZUALITATION
         this.$http
@@ -231,7 +257,8 @@
             this.total_pbb = response.data.data[0].total_pbb;
             this.total_paten = response.data.data[1].total_paten;
             this.total_kependudukan = response.data.data[2].total_kependudukan;
-            this.total_bencana = response.data.data[3].total_bencana;
+            this.total_imunisasi = response.data.data[3].total_imunisasi;
+            this.total_bencana = response.data.data[4].total_bencana;
             // let results = response.data.data;
             // let pbb = results.map((a) => [[a.total_pbb] [a.total_paten]]);
             // let paten = results.map((a) => a.total_paten);
@@ -252,6 +279,7 @@
                 "Realisasi PBB",
                 "Rekapitulasi PATEN",
                 "Kependudukan",
+                "Imunisasi",
                 "Keadaan Bencana Alam",
               ],
               datasets: [
@@ -261,6 +289,7 @@
                     `${this.total_pbb}`,
                     `${this.total_paten}`,
                     `${this.total_kependudukan}`,
+                    `${this.total_imunisasi}`,
                     `${this.total_bencana}`,
                   ],
                   borderWidth: 1,
@@ -269,7 +298,8 @@
             };
           })
           .catch((error) => {
-            console.log(error);
+            this.loading = false;
+            this.loaded = false;
           });
       },
     },

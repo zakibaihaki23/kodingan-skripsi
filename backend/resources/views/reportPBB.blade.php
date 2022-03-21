@@ -31,33 +31,11 @@
 }
 	</style>
 	<div>
-
 		<center>
-
             @foreach ($periode as $waktu => $per)
-            @php
-            $bln = array (
-                '01' => 'Januari',
-                '02' => 'Februari',
-                '03' => 'Maret',
-                '04' => 'April',
-                '05' => 'Mei',
-                '06' => 'Juni',
-                '07' => 'Juli',
-                '08' => 'Agustus',
-                '09' => 'September',
-                '10' => 'Oktober',
-                '11' => 'November',
-                '12' => 'Desember'
-        );
-                        @endphp
-                @if ($waktu == 0)
-
-                <li style="font-weight: bolder; font-size: 18px; list-style-type: none;">Laporan Realisasi PBB Tahun {{$per->tahun}}</li>
-                <li style="font-weight: bolder; font-size: 18px; list-style-type: none;">Bulan  {{$bln[$per->bulan]}}</li>
+                <li style="font-weight: bolder; font-size: 18px; list-style-type: none;">Laporan Realisasi PBB Tahun {{ \Carbon\Carbon::parse($per->periode)->translatedFormat('Y') }}</li>
+                <li style="font-weight: bolder; font-size: 18px; list-style-type: none;">Bulan  {{ \Carbon\Carbon::parse($per->periode)->translatedFormat('F') }}</li>
                 <p></p>
-
-
 		</center>
 		<br/>
         <div style="list-style-type: none; font-weight: bold; ">
@@ -65,13 +43,14 @@
             <li>Pemerintah Kabupaten Pandeglang</li>
             <li>{{$kec->nama_instansi}}</li>
 
+
     </div>
 <div class="table-responsive" style="margin-top: 20px">
     <table class="table table-bordered table-sm" align="center">
         <thead>
             <tr>
                 <th>No</th>
-                <th>Kelurahan</th>
+                <th>Desa / Kelurahan</th>
                 <th>Target PBB (Rp)</th>
                 <th>Realisasi Bulan yang Lalu</th>
                 <th>Realisasi Bulan ini</th>
@@ -95,15 +74,28 @@
             @php $i=1 @endphp
             @foreach($pbb as $item)
             <tr>
-                <td style="text-align: center">{{ $i++ }}</td>
-                <td style="width: 20%">{{$item->kelurahan}}</td>
-                <td>Rp. {{number_format($item->target_pbb)}}</td>
-                <td>Rp. {{number_format($item->realisasi_bln_lalu)}}</td>
-                <td>Rp. {{number_format($item->realisasi_bln_ini)}}</td>
-                <td>{{$item->jmlh_realisasi}}</td>
-                <td>Rp. {{number_format($item->sisa_target)}}</td>
-                <td>{{$item->keterangan}}</td>
-
+                  @if($item->kelurahan == null) {
+                    <td style="font-weight: bold; font-size: 20pt" 
+                      colspan="8" 
+                      class="text-center">
+                      NIHIL
+                    </td>
+                  } @else {
+                    <td style="text-align: center">{{ $i++ }}</td>
+                    <td style="width: 20%">{{$item->kelurahan}}</td>
+                    <td style="text-align: center">Rp. {{number_format($item->target_pbb)}}</td>
+                    <td style="text-align: center">{{$item->realisasi_bln_lalu}}</td>
+                    <td style="text-align: center">{{$item->realisasi_bln_ini}}</td>
+                    <td style="text-align: center">{{$item->jmlh_realisasi}}</td>
+                    <td style="text-align: center">{{$item->sisa_target}}</td>
+                    @if($item->keterangan == null) {
+                        <td>-</td>
+                    } @else {
+                        <td>{{$item->keterangan}}</td> 
+                    } 
+                    @endif
+                  }  
+                  @endif    
             </tr>
             @endforeach
         </tbody>
@@ -113,10 +105,10 @@
             <tr style="font-weight: bold;text-align: center">
                 <td colspan="2" >Jumlah</td>
                 <td>Rp. {{number_format($cnt->total_target)}}</td>
-                <td>Rp. {{number_format($cnt->total_bln_lalu)}}</td>
-                <td>Rp. {{number_format($cnt->total_bln_ini)}}</td>
+                <td>{{$cnt->total_bln_lalu}}</td>
+                <td>{{$cnt->total_bln_ini}}</td>
                 <td>{{$cnt->total_realisasi}}</td>
-                <td>Rp. {{number_format($cnt->total_sisa)}}</td>
+                <td>{{$cnt->total_sisa}}</td>
                 <td></td>
             </tr>
             @endforeach
@@ -140,7 +132,9 @@
         </div>
         </div>
         <div class="col text-right">
-            <p>{{$kec->nama_instansi}}, {{$bln[$per->bulan]}} {{$per->tahun}}</p>
+            <p>{{$kec->nama_instansi}}, 
+                {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }} 
+            </p>
             <p style="margin-right: 100px">PAD</p>
             <br>
             <p style="margin-top: 20px; text-decoration: underline; margin-right: 4px">
@@ -153,7 +147,6 @@
         </div>
     </div>
 @endforeach
-@endif
 @endforeach
 </body>
 </html>

@@ -71,26 +71,10 @@ td.item {
 	<div>
         <center>
         @foreach ($periode as $waktu => $per)
-            @php
-            $bln = array (
-                '01' => 'Januari',
-                '02' => 'Februari',
-                '03' => 'Maret',
-                '04' => 'April',
-                '05' => 'Mei',
-                '06' => 'Juni',
-                '07' => 'Juli',
-                '08' => 'Agustus',
-                '09' => 'September',
-                '10' => 'Oktober',
-                '11' => 'November',
-                '12' => 'Desember'
-        );
-                        @endphp
-                @if ($waktu == 0)
-
                 <li style="list-style-type: none;">Rekapitulasi Pelayanan Administrasi Terpadu Kecamatan (PATEN)</li>
-                <li style="list-style-type: none;">Bulan  {{$bln[$per->bulan]}} Tahun {{$per->tahun}}</li>
+                <li style="list-style-type: none;">Bulan  {{ \Carbon\Carbon::parse($per->periode)->translatedFormat('F') }} 
+                    Tahun {{ \Carbon\Carbon::parse($per->periode)->translatedFormat('Y') }}
+                </li>
                 <p></p>
                 
         </center>
@@ -106,7 +90,7 @@ td.item {
         <thead>
             <tr>
                 <th rowspan="2">No</th>
-                <th rowspan="2" style="white-space: nowrap">Desa/Kelurahan</th>
+                <th rowspan="2" style="white-space: normal">Desa / Kelurahan</th>
                 <th colspan="13">Jumlah Pelayanan Non Perizinan</th>
                 <th colspan="5">Jumlah Pelayanan Perizinan</th>
                 <th rowspan="2">Keterangan</th>
@@ -139,28 +123,37 @@ td.item {
             @php $i=1 @endphp
             @foreach($paten as $item)
             <tr>
-                <td style="text-align: center">{{ $i++ }}</td>
-                <td style="width: 15%">{{$item->kelurahan}}</td>
-                <td class="item">{{number_format($item->perekaman_ktp)}}</td>
-                <td class="item">{{number_format($item->pengantar_kk)}}</td>
-                <td class="item">{{number_format($item->ket_pindah)}}</td>
-                <td class="item">{{number_format($item->ket_domisili)}}</td>
-                <td class="item">{{number_format($item->pengantar_akta_lahir)}}</td>
-                <td class="item">{{number_format($item->pengantar_akta_mati)}}</td>
-                <td class="item">{{number_format($item->pencatatan_perkawinan)}}</td>
-                <td class="item">{{number_format($item->pencatatan_perceraian)}}</td>
-                <td class="item">{{number_format($item->skck)}}</td>
-                <td class="item">{{number_format($item->sktm)}}</td>
-                <td class="item">{{number_format($item->rekomendasi)}}</td>
-                <td class="item">{{number_format($item->legalisasi)}}</td>
-                <td class="item">{{number_format($item->ket_lain)}}</td>
-                <td class="item">{{number_format($item->imb)}}</td>
-                <td class="item">{{number_format($item->situ_siup)}}</td>
-                <td class="item">{{number_format($item->izin_merobohkan_bangunan)}}</td>
-                <td class="item">{{number_format($item->izin_keramaian)}}</td>
-                <td class="item">{{number_format($item->izin_partai)}}</td>
-                <td style="width: 15%; white-space: nowrap; text-align: left">{{$item->keterangan}}</td>
                 
+                @if($item->kelurahan == null) {
+                    <td style="font-weight: bold; font-size: 20pt" 
+                      colspan="21" 
+                      class="text-center">
+                      NIHIL
+                    </td>
+                } @else {
+                    <td style="text-align: center">{{ $i++ }}</td>
+                    <td style="width: 15%">{{$item->kelurahan}}</td>
+                    <td class="item">{{number_format($item->perekaman_ktp)}}</td>
+                    <td class="item">{{number_format($item->pengantar_kk)}}</td>
+                    <td class="item">{{number_format($item->ket_pindah)}}</td>
+                    <td class="item">{{number_format($item->ket_domisili)}}</td>
+                    <td class="item">{{number_format($item->pengantar_akta_lahir)}}</td>
+                    <td class="item">{{number_format($item->pengantar_akta_mati)}}</td>
+                    <td class="item">{{number_format($item->pencatatan_perkawinan)}}</td>
+                    <td class="item">{{number_format($item->pencatatan_perceraian)}}</td>
+                    <td class="item">{{number_format($item->skck)}}</td>
+                    <td class="item">{{number_format($item->sktm)}}</td>
+                    <td class="item">{{number_format($item->rekomendasi)}}</td>
+                    <td class="item">{{number_format($item->legalisasi)}}</td>
+                    <td class="item">{{number_format($item->ket_lain)}}</td>
+                    <td class="item">{{number_format($item->imb)}}</td>
+                    <td class="item">{{number_format($item->situ_siup)}}</td>
+                    <td class="item">{{number_format($item->izin_merobohkan_bangunan)}}</td>
+                    <td class="item">{{number_format($item->izin_keramaian)}}</td>
+                    <td class="item">{{number_format($item->izin_partai)}}</td>
+                    <td style="width: 15%; white-space: nowrap; text-align: left">{{$item->keterangan}}</td>
+                }
+                @endif
 
             </tr>
             @endforeach
@@ -194,26 +187,7 @@ td.item {
         </tbody>
     </table>
 </div>
-<!-- <div class="row">
-    <div class="col-2 text-center">
 
-        <ul style="font-size: 12px;list-style-type: none;margin-left: 30px">
-            <li>Mengetahui,</li>
-        </ul>
-        <p style="font-size: 12px;margin-left: 30px; margin-bottom: 30px">Camat {{$kec->nama_instansi}}</p>
-        <br>
-        <ul style="list-style-type: none; margin-left: 15px; font-size: 12px">
-            <li>{{$kec->pimpinan}}</li>
-            <li>NIP 198918291829128</li>
-
-           
-        </ul>
-    </div>
-    <div class="col-10">
-        
-    </div>
-    
-    </div> -->
 </div>
     <div style="clear:both; position:relative;">
     <div style="position:absolute; left:0pt; width:192pt; font-size: 13px" class="text-center">
@@ -230,7 +204,9 @@ td.item {
         </div>
         </div>
         <div class="col text-right" style="font-size: 13px">
-            <p>{{$kec->nama_instansi}}, {{$bln[$per->bulan]}} {{$per->tahun}}</p>
+            <p>{{$kec->nama_instansi}}, 
+                {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }} 
+            </p>
             <p style="margin-right: 30px">Sekretaris Kecamatan</p>
             <br>
             <p style="margin-top: 20px; text-decoration: underline; margin-right: 4px">
@@ -243,7 +219,6 @@ td.item {
         </div>
     </div>
     @endforeach
-            @endif
             @endforeach
 </body>
 </html>

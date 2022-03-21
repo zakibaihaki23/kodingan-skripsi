@@ -1,50 +1,65 @@
 <template>
   <div id="app" style="margin-left: 25px; margin-right: 25px" v-if="this.user.role == 'Admin'">
-    <h1>Kelola User</h1>
     <!-- FOR ALL DEVICE -->
     <v-container>
-      <b-row class="mb-10">
-        <b-col lg="6">
+      <b-row>
+        <b-col>
+          <div style="margin: 0px; padding: 0px">
+            <h4>Kelola User</h4>
+          </div>
+        </b-col>
+        <b-col class="text-right" style="margin: 0px; padding: 0px">
           <v-btn
+            large
+            depressed
             v-show="!firstLoad"
             :to="{ path: '/user/create' }"
             style="
-              width: 200px;
-              height: 50px;
               background: #4662d4;
               color: white;
               border-radius: 30px;
-              font-size: 16px;
-              font-weight: bold;
               text-transform: capitalize;
               cursor: pointer;
-              padding: 5px;
             "
-            >Input Data</v-btn
-          >
-        </b-col>
-        <b-col lg="6">
-          <v-tooltip bottom>
-            <template v-slot:activator="{ on, attrs }">
-              <v-text-field
-                v-bind="attrs"
-                v-on="on"
-                v-model="search"
-                append-icon="mdi-magnify"
-                rounded
-                label="Search...."
-                solo
-                hide-details
-              ></v-text-field>
-            </template>
-            <span>Cari Data</span>
-          </v-tooltip>
+            >Input Data
+            <v-icon right>mdi-plus-circle</v-icon>
+          </v-btn>
         </b-col>
       </b-row>
     </v-container>
-
     <v-divider class="d-flex d-none d-sm-block" style="margin-right: 40px"></v-divider>
     <br />
+    <b-row style="margin-top: 1px">
+      <b-col cols="12" lg="3">
+        <KecamatanSelected
+          v-show="!firstLoad"
+          v-model="kecamatan"
+          @selected="kecamatanSelected"
+        ></KecamatanSelected>
+      </b-col>
+      <b-col cols="12" lg="4">
+        <div>
+          <v-autocomplete
+            v-show="!firstLoad"
+            outlined
+            single-line
+            style="border-radius: 10px; font-size: 13px; width: 250px"
+            item-text="name"
+            item-value="name"
+            v-model="role"
+            :items="roles"
+            required
+            append-icon=""
+            clearable
+            return-object
+            label="Role"
+            dense
+            @input="roleSelected"
+          >
+          </v-autocomplete>
+        </div>
+      </b-col>
+    </b-row>
 
     <v-skeleton-loader
       v-if="firstLoad"
@@ -60,6 +75,10 @@
       :items="userTable"
       class="elevation-1"
     >
+      <template v-slot:[`item.role`]="{ item }">
+        <div v-if="item.role == 'User'">Admin Kecamatan</div>
+        <div v-else>{{ item.role }}</div>
+      </template>
       <template v-slot:[`item.actions`]="{ item }">
         <v-menu offset-y>
           <template v-slot:activator="{ on, attrs }">
@@ -110,16 +129,25 @@
         </div>
       </div>
     </b-modal>
-    <v-overlay :value="overlay">
-      <v-progress-circular indeterminate color="blue"></v-progress-circular>
-    </v-overlay>
+    <v-dialog v-model="dialogOverlay" persistent max-width="300">
+      <div>
+        <v-card color="primary" dark class="text-center">
+          <v-card-text>
+            Mohon tunggu sebentar......
+            <v-progress-linear indeterminate color="white" class="mb-0"></v-progress-linear>
+          </v-card-text>
+        </v-card>
+      </div>
+    </v-dialog>
   </div>
 </template>
 
 <script>
   import { mapGetters } from "vuex";
+  import KecamatanSelected from "../../components/SelectKecamatan.vue";
 
   export default {
+    components: { KecamatanSelected },
     data() {
       return {
         dialog: false,
@@ -127,6 +155,7 @@
         firstLoad: true,
         overlay: false,
         isLoading: true,
+        dialogOverlay: false,
         idData: "",
         nama: "",
         username: "",
@@ -134,6 +163,8 @@
         role: "",
         kecamatan: "",
         search: "",
+        kecamatan: [],
+        filterRole: "",
         table: [
           {
             text: "Nama",
@@ -160,6 +191,16 @@
             sortable: false,
           },
         ],
+        roles: [
+          {
+            name: "Admin Kecamatan",
+            value: "User",
+          },
+          {
+            name: "Camat",
+            value: "Camat",
+          },
+        ],
       };
     },
     watch: {
@@ -178,9 +219,6 @@
     },
     created() {
       this.renderData();
-      if (this.user.role != "Admin") {
-        this.$router.push("/dashboard");
-      }
     },
     watch: {
       clearable: {
@@ -197,9 +235,14 @@
     },
     methods: {
       renderData(search) {
-        this.firstLoad = true;
+        this.isLoading = true;
         this.$http
-          .get("/user")
+          .get("/user", {
+            params: {
+              instansi_id: this.kecamatan.value,
+              role: this.role.value,
+            },
+          })
           .then((response) => {
             this.userTable = response.data.data;
             this.firstLoad = false;
@@ -219,18 +262,48 @@
         this.kecamatan = item.nama_instansi;
       },
       hapusData(idData) {
-        this.overlay = true;
+        this.dialogOverlay = true;
         this.firstLoad = true;
-        this.$http.delete("/user/" + idData).then((response) => {
-          let self = this;
-          setTimeout(function () {
-            self.dialog = false;
-            self.renderData();
-            self.overlay = false;
-            self.$toast.success("Data Berhasil Dihapus");
-            self.isLoading = false;
+        this.$http
+          .delete("/user/" + idData)
+          .then((response) => {
+            let self = this;
+            setTimeout(function () {
+              self.dialog = false;
+              self.renderData();
+              self.dialogOverlay = false;
+              self.$toast.success("Data Berhasil Dihapus");
+              self.isLoading = false;
+            });
+          })
+          .catch((error) => {
+            this.dialogOverlay = false;
           });
-        });
+      },
+      kecamatanSelected(kecamatan) {
+        this.kecamatan = "";
+        this.filterKecamatan = null;
+        this.date_filter = false;
+        if (kecamatan) {
+          this.kecamatan = kecamatan;
+          this.filterKecamatan = kecamatan.id;
+        } else {
+          this.downloadDisabled = true;
+          this.kelurahanDisabled = true;
+        }
+        if (this.date && this.kecamatan) {
+          this.downloadDisabled = false;
+        } else {
+          this.downloadDisabled = true;
+        }
+        this.renderData();
+      },
+      roleSelected(role) {
+        this.role = "";
+        if (role) {
+          this.role = role;
+        }
+        this.renderData();
       },
     },
   };

@@ -1,7 +1,7 @@
 <template>
   <div>
     <v-tooltip top>
-      <template v-slot:activator="{ on, attrs }" v-if="this.user.role == 'User'">
+      <template v-slot:activator="{ on, attrs }" v-if="this.user.role == 'Kelurahan'">
         <v-select
           v-bind="attrs"
           v-on="on"
@@ -23,10 +23,10 @@
         >
         </v-select>
       </template>
-      <span>Select Status</span>
+      <span>Cari Berdasarkan Status</span>
     </v-tooltip>
     <v-tooltip top>
-      <template v-slot:activator="{ on, attrs }" v-if="this.user.role == 'Camat'">
+      <template v-slot:activator="{ on, attrs }" v-if="this.user.role == 'User'">
         <v-select
           v-bind="attrs"
           v-on="on"
@@ -48,63 +48,63 @@
         >
         </v-select>
       </template>
-      <span>Select Status</span>
+      <span>Cari Berdasarkan Status</span>
     </v-tooltip>
   </div>
 </template>
 
 <script>
-  import { mapGetters } from "vuex";
-  export default {
-    name: "SelectStatus",
-    data() {
-      return {
-        statusUser: [
-          {
-            text: "Menunggu Validasi",
-            value: 0,
-          },
-          {
-            text: "Sudah Divalidasi",
-            value: 1,
-          },
-          {
-            text: "Ditolak",
-            value: 2,
-          },
-        ],
-        statusCamat: [
-          {
-            text: "Menunggu Validasi",
-            value: 0,
-          },
-          {
-            text: "Sudah Divalidasi",
-            value: 1,
-          },
-        ],
-        statusSelected: null,
-        search: null,
-      };
-    },
-    props: ["clear"],
-    watch: {
-      clear: {
-        handler: function (val) {
-          this.renderData("");
+import { mapGetters } from "vuex";
+export default {
+  name: "SelectStatus",
+  data() {
+    return {
+      statusUser: [
+        {
+          text: "Menunggu Validasi",
+          value: 1,
         },
-        deep: true,
+        {
+          text: "Sudah Divalidasi",
+          value: 2,
+        },
+        {
+          text: "Ditolak",
+          value: 3,
+        },
+      ],
+      statusCamat: [
+        {
+          text: "Menunggu Validasi",
+          value: 1,
+        },
+        {
+          text: "Sudah Divalidasi",
+          value: 2,
+        },
+      ],
+      statusSelected: null,
+      search: null,
+    };
+  },
+  props: ["clear"],
+  watch: {
+    clear: {
+      handler: function (val) {
+        this.renderData("");
       },
+      deep: true,
     },
-    methods: {
-      selected(event) {
-        this.$emit("selected", event);
-      },
+  },
+  methods: {
+    selected(event) {
+      this.$emit("selected", event);
     },
-    computed: {
-      ...mapGetters({
-        user: "auth/user",
-      }),
-    },
-  };
+  },
+  computed: {
+    ...mapGetters({
+      user: "auth/user",
+    }),
+  },
+};
 </script>

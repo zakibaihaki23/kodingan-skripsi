@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Instansi extends Model
 {
-    protected $fillable = ['nama_instansi','pimpinan', 'lat','lng'];
+    protected $fillable = ['nama_instansi', 'lat', 'lng'];
     protected $hidden = ['created_at', 'updated_at'];
     protected $table = 'instansi';
 
@@ -16,9 +16,6 @@ class Instansi extends Model
     }
 
 
-    public function pbb() {
-        return $this->hasMany('App\PBB','instansi_id');
-    }
     public function paten() {
         return $this->hasMany('App\Paten','instansi_id');
     }

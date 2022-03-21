@@ -25,7 +25,7 @@
             </template>
             <b-card
               border-variant="primary"
-              header-html="Total Data yang belum divalidasi <br>(Bulan Ini)"
+              header-html="Total Data yang Ditolak <b>(Bulan Ini)</b>"
               header-bg-variant="primary"
               header-text-variant="white"
               align="center"
@@ -82,7 +82,7 @@
             >
               <template #header>
                 <!-- <v-badge inline :content="notif" :value="notif" color="red"> -->
-                <p class="mt-0 mb-0">Informasi untuk {{ user.nama_instansi }}</p>
+                <p class="mt-0 mb-0">Informasi untuk {{ user.instansi.nama_instansi }}</p>
                 <!-- </v-badge> -->
               </template>
               <b-list-group v-for="(item, index) in informasi" :key="item.id">
@@ -109,7 +109,7 @@
 
             <b-card
               border-variant="primary"
-              header-html="Total Data yang Sudah Diinput<br>(Bulan Ini)"
+              header-html="Total Seluruh Data yang Sudah Diinput <b>(Bulan Ini)</b>"
               header-bg-variant="primary"
               header-text-variant="white"
               align="center"
@@ -163,12 +163,19 @@
         loading: false,
         pbb_invalid: "",
         pbb_valid: "",
+        pbb_tolak: "",
         paten_invalid: "",
         paten_valid: "",
+        paten_tolak: "",
         kependudukan_invalid: "",
         kependudukan_valid: "",
+        kependudukan_tolak: "",
+        imunisasi_invalid: "",
+        imunisasi_valid: "",
+        imunisasi_tolak: "",
         bencana_invalid: "",
         bencana_valid: "",
+        bencana_tolak: "",
         notvalid: "",
         informasi: "",
         notif_all: "",
@@ -223,7 +230,7 @@
         this.$http
           .get("/kelurahan", {
             params: {
-              instansi_id: this.user.id,
+              instansi_id: this.user.instansi_id,
             },
           })
           .then((response) => {
@@ -266,7 +273,7 @@
 
         //DATA BELUM VALID
         this.$http
-          .get("/notvalid", {
+          .get("/tolak", {
             params: {
               periode: this.$moment(this.waktu).format("YYYY-MM"),
               instansi_id: this.user.instansi_id,
@@ -288,18 +295,25 @@
           .then((response) => {
             this.pbb_invalid = response.data.data[0].pbb_invalid;
             this.pbb_valid = response.data.data[1].pbb_valid;
-            this.paten_invalid = response.data.data[2].paten_invalid;
-            this.paten_valid = response.data.data[3].paten_valid;
-            this.kependudukan_invalid = response.data.data[4].kependudukan_invalid;
-            this.kependudukan_valid = response.data.data[5].kependudukan_valid;
-            this.bencana_invalid = response.data.data[6].bencana_invalid;
-            this.bencana_valid = response.data.data[7].bencana_valid;
+            this.pbb_tolak = response.data.data[2].pbb_tolak;
+            this.paten_invalid = response.data.data[3].paten_invalid;
+            this.paten_valid = response.data.data[4].paten_valid;
+            this.paten_tolak = response.data.data[5].paten_tolak;
+            this.kependudukan_invalid = response.data.data[6].kependudukan_invalid;
+            this.kependudukan_valid = response.data.data[7].kependudukan_valid;
+            this.kependudukan_tolak = response.data.data[8].kependudukan_tolak;
+            this.imunisasi_invalid = response.data.data[9].imunisasi_invalid;
+            this.imunisasi_valid = response.data.data[10].imunisasi_valid;
+            this.imunisasi_tolak = response.data.data[11].imunisasi_tolak;
+            this.bencana_invalid = response.data.data[12].bencana_invalid;
+            this.bencana_valid = response.data.data[13].bencana_valid;
+            this.bencana_tolak = response.data.data[14].bencana_tolak;
             this.loaded = true;
 
             // UNTUK INFORMASI
             // console.log(this.$moment(test).fromNow());
             this.datacollection = {
-              labels: ["PBB", "PATEN", "Kependudukan", "Bencana Alam"],
+              labels: ["PBB", "PATEN", "Kependudukan", "Imunisasi", "Bencana Alam"],
               datasets: [
                 {
                   label: "Belum Divalidasi",
@@ -308,6 +322,7 @@
                     `${this.pbb_invalid}`,
                     `${this.paten_invalid}`,
                     `${this.kependudukan_invalid}`,
+                    `${this.imunisasi_invalid}`,
                     `${this.bencana_invalid}`,
                   ],
                   borderWidth: 1,
@@ -319,7 +334,20 @@
                     `${this.pbb_valid}`,
                     `${this.paten_valid}`,
                     `${this.kependudukan_valid}`,
+                    `${this.imunisasi_valid}`,
                     `${this.bencana_valid}`,
+                  ],
+                  borderWidth: 1,
+                },
+                {
+                  label: "Ditolak",
+                  backgroundColor: "rgba(233, 27, 54, 0.8)",
+                  data: [
+                    `${this.pbb_tolak}`,
+                    `${this.paten_tolak}`,
+                    `${this.kependudukan_tolak}`,
+                    `${this.imunisasi_tolak}`,
+                    `${this.bencana_tolak}`,
                   ],
                   borderWidth: 1,
                 },

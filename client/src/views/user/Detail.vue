@@ -1,195 +1,203 @@
 <template>
-  <div v-if="this.user.role == 'Admin'">
-    <!-- <b-row>
-      <b-col cols="6">
-        <b-skeleton-wrapper :loading="loading">
-          <template #loading>
-            <b-skeleton></b-skeleton>
-          </template>
-          <b-container>
-            <b-card
-              border-variant="primary"
-              header="Total User"
-              header-bg-variant="primary"
-              header-text-variant="white"
-              align="center"
-            >
-              <pie-chart loading="Loading...." :data="[total_user,total_admin]"></pie-chart>
-            </b-card>
-          </b-container>
-        </b-skeleton-wrapper>
-      </b-col>
-      <b-col cols="6">
-        <b-skeleton-wrapper :loading="loading">
-          <template #loading>
-            <b-skeleton></b-skeleton>
-          </template>
-          <b-container>
-            <b-card
-              border-variant="primary"
-              header="Total Data Yang Diinputkan"
-              header-bg-variant="primary"
-              header-text-variant="white"
-              align="center"
-            >
-              <column-chart
-                :refresh="1"
-                :download="true"
-                :library="barchartOptions"
-                loading="loading"
-                label="Total Data yang Diinputkan dan Sudah Divalidasi"
-                :data="[['PBB', this.total_pbb ], ['PATEN', 2], ['Kependudukan', 1],['Akta', 3], ['Bencana Alam', 2]]"
-              ></column-chart>
-            </b-card>
-          </b-container>
-        </b-skeleton-wrapper>
-      </b-col>
-    </b-row> -->
-    <div class="container">
-      <column-chart :options="options" v-if="loaded" :chartdata="datacollection" />
-    </div>
+  <div class="profile">
+    <h1>Edit User</h1>
+    <v-form>
+      <div class="row">
+        <div class="col-md-10 mx-auto">
+          <form>
+            <div class="form-group row">
+              <div class="col-sm-6">
+                <p>
+                  Nama
+                  <span style="color: red">*</span>
+                </p>
+                <v-text-field
+                  v-model="data_user.name"
+                  single-line
+                  label="Nama"
+                  outlined
+                  class="form"
+                ></v-text-field>
+              </div>
+              <div class="col-sm-6">
+                <p>
+                  Email
+                  <span style="color: red">*</span>
+                </p>
+                <v-text-field
+                  v-model="data_user.email"
+                  single-line
+                  label="Email"
+                  outlined
+                  class="form"
+                ></v-text-field>
+              </div>
+            </div>
+            <div class="form-group row">
+              <div class="col-md-4">
+                <p>
+                  Username
+                  <span style="color: red">*</span>
+                </p>
+                <v-text-field
+                  v-model="data_user.username"
+                  single-line
+                  label="Username"
+                  outlined
+                  class="form"
+                ></v-text-field>
+              </div>
+              <div class="col-md-4">
+                <p>
+                  Password Baru
+                  <span style="color: red">*</span>
+                </p>
+                <v-text-field
+                  v-model="password_baru"
+                  single-line
+                  label="Password Baru"
+                  :type="val_pwd ? 'password' : 'text'"
+                  :append-icon="val_pwd ? 'mdi-eye' : 'mdi-eye-off'"
+                  @click:append="() => (val_pwd = !val_pwd)"
+                  outlined
+                  class="form"
+                ></v-text-field>
+              </div>
+              <div class="col-md-4">
+                <p>
+                  Konfirmasi Password
+                  <span style="color: red">*</span>
+                </p>
+                <v-text-field
+                  v-model="password_confirmation"
+                  single-line
+                  label="Konfirmasi Password"
+                  :type="val_cpwd ? 'password' : 'text'"
+                  :append-icon="val_cpwd ? 'mdi-eye' : 'mdi-eye-off'"
+                  @click:append="() => (val_cpwd = !val_cpwd)"
+                  outlined
+                  class="form"
+                ></v-text-field>
+              </div>
+            </div>
+          </form>
+          <v-divider></v-divider>
+          <b-row no-gutters>
+            <b-col class="text-right">
+              <v-btn
+                :to="{ path: '/user' }"
+                color="#4FC3F7"
+                class="button"
+                outlined
+                style="
+                  box-sizing: content-box;
+                  border-radius: 25px;
+                  width: 100px;
+                  height: 45px;
+                  padding: 4px;
+                "
+                >Batalkan</v-btn
+              >&nbsp;
+              <v-btn
+                style="
+                  background: #007bff;
+                  color: white;
+                  box-sizing: content-box;
+                  border-radius: 25px;
+                  width: 100px;
+                  height: 45px;
+                  padding: 4px;
+                "
+                class="save"
+                @click="save()"
+                >Simpan</v-btn
+              >
+            </b-col>
+          </b-row>
+          <v-dialog v-model="dialogOverlay" persistent max-width="300">
+            <div>
+              <v-card color="primary" dark class="text-center">
+                <v-card-text>
+                  Mohon tunggu sebentar......
+                  <v-progress-linear indeterminate color="white" class="mb-0"></v-progress-linear>
+                </v-card-text>
+              </v-card>
+            </div>
+          </v-dialog>
+        </div>
+      </div>
+    </v-form>
   </div>
 </template>
 
 <script>
-  import ColumnChart from "../../components/BarChart.vue";
-
+  import { mapGetters } from "vuex";
   export default {
-    components: {
-      ColumnChart,
-    },
     data() {
       return {
-        loaded: false,
-        date_input: null,
-        number_of_morality: null,
-        chicken_age: null,
-        datacollection: null,
-        pbb: null,
-        options: {
-          responsive: true,
-          lineTension: 1,
-          scales: {
-            yAxes: [
-              {
-                ticks: {
-                  beginAtZero: true,
-                  stepSize: 1,
-                  beginAtZero: true,
-                },
-              },
-            ],
-          },
-        },
+        overlay: false,
+        password_baru: null,
+        password_confirmation: null,
+        dialogOverlay: false,
+        data_user: {},
+        val_pwd: String,
+        val_cpwd: String,
       };
     },
     created() {
-      this.fillData();
-      if (this.user.role != "Admin") {
-        this.$router.push("/dashboard");
-      }
+      this.renderData();
     },
-    mounted() {
-      this.fillData();
+    computed: {
+      ...mapGetters({
+        user: "auth/user",
+      }),
     },
     methods: {
-      fillData() {
-        this.loaded = false;
+      renderData() {
+        this.$http.get(`/user/${this.$route.params.id}`).then((response) => {
+          this.data_user = response.data.data;
+        });
+      },
+      save() {
+        this.dialogOverlay = true;
         this.$http
-          .get("/counter")
+          .put(`/user/update/${this.$route.params.id}`, {
+            instansi_id: this.user.instansi_id,
+            name: this.data_user.name,
+            email: this.data_user.email,
+            username: this.data_user.username,
+            password: this.password_baru,
+            password_confirmation: this.password_confirmation,
+          })
           .then((response) => {
-            let results = response.data.data;
-            let total_pbb = results.map((a) => a.total);
-
-            this.pbb = total_pbb;
-            this.loaded = true;
-            // let results = response.data.data
-            // let dateresult = results.map(a => a.date_input)
-            // let mortalityresult = results.map(a => a.number_of_morality)
-            // let chickenageresult = results.map(a => a.chicken_age)
-            // this.date_input = dateresult
-            // this.number_of_morality= mortalityresult
-            // this.chicken_age= chickenageresult
-            this.datacollection = {
-              labels: ["PBB", "PATEN", "Kependudukan", "AKTA", "Bencana Alam"],
-              datasets: [
-                {
-                  label: "PBB",
-                  backgroundColor: "#f87979",
-                  data: this.pbb,
-                },
-                {
-                  label: "PATEN",
-                  backgroundColor: "#2E6E89",
-                  data: "3",
-                },
-              ],
-              options: {
-                responsive: true,
-                lineTension: 1,
-                scales: {
-                  yAxes: [
-                    {
-                      ticks: {
-                        beginAtZero: true,
-                        padding: 1,
-                      },
-                    },
-                  ],
-                },
-              },
-            };
+            let self = this;
+            setTimeout(function () {
+              self.dialogOverlay = false;
+              self.$router.push("/user");
+              self.$toast.success("Data Berhasil Diubah");
+            }, 10 * 10 * 10);
           })
           .catch((error) => {
-            console.log(error);
+            this.dialogOverlay = false;
+            if (!error.response.data.errors.password && error.response.data.errors.username) {
+              this.$toast.error("Username telah digunakan");
+            } else if (
+              error.response.data.errors.password &&
+              !error.response.data.errors.username
+            ) {
+              this.$toast.error("Konfirmasi password tidak sesuai");
+            } else if (error.response.data.errors.password && error.response.data.errors.username) {
+              this.$toast.error("Username sudah digunakan dan konfirmasi password tidak sesuai");
+            }
           });
       },
     },
   };
-  // export default {
-  //   data() {
-  //     return {
-  //       user: [],
-  //       total_user: "",
-  //       total_admin: "",
-  //       total_pbb: "",
-  //       loading: false,
-  //       test: [],
-  //       barchartOptions: {
-  //         responsive: true,
-  //         lineTension: 1,
-  //         scales: {
-  //           yAxes: [
-  //             {
-  //               ticks: {
-  //                 beginAtZero: true,
-  //                 padding: 1,
-  //               },
-  //             },
-  //           ],
-  //         },
-  //       },
-  //     };
-  //   },
-  //   mounted() {
-  //     this.renderData();
-  //   },
-
-  //   methods: {
-  //     renderData() {
-  //       this.loading = true;
-  //       this.$http.get(`/user`).then((response) => {
-  //         this.total_user = [response.data.total[0].role, response.data.total[0].total];
-  //         this.total_admin = [response.data.total[1].role, response.data.total[1].total];
-  //         this.loading = false;
-  //       });
-  //       this.$http.get(`/counter`).then((response) => {
-  //         this.total_pbb = response.data.data[0].total;
-  //         this.loading = false;
-  //       });
-  //     },
-  //   },
-  // };
 </script>
 
-<style></style>
+<style scoped>
+  .profile {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+</style>

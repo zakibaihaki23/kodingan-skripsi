@@ -1,59 +1,28 @@
 <template>
   <div id="app" style="margin-left: 25px; margin-right: 25px">
-    <h1>Laporan Rekapitulasi PATEN</h1>
     <!-- FOR ALL DEVICE -->
     <v-container>
-      <b-row class="mt-3">
-        <b-col> </b-col>
-        <b-col lg="6">
-          <v-tooltip bottom>
-            <template v-slot:activator="{ on, attrs }">
-              <v-text-field
-                v-bind="attrs"
-                v-on="on"
-                v-model="search"
-                append-icon="mdi-magnify"
-                rounded
-                label="Search...."
-                solo
-                hide-details
-              ></v-text-field>
-            </template>
-            <span>Cari Berdasarkan Kelurahan</span>
-          </v-tooltip>
-        </b-col>
-        <!-- <v-col>
-          <div>
-            <v-tooltip bottom>
-              <template v-slot:activator="{ on, attrs }">
-                <v-text-field
-                  v-bind="attrs"
-                  v-on="on"
-                  v-model="search"
-                  append-icon="mdi-magnify"
-                  rounded
-                  label="Search...."
-                  solo
-                  hide-details
-                  class="search d-sm-none d-md-none d-lg-none d-xl-none"
-                >
-                </v-text-field>
-              </template>
-              <span>search by helper code, name, or phone number</span>
-            </v-tooltip>
+      <b-row>
+        <b-col>
+          <div style="margin: 0px; padding: 0px">
+            <h4>Laporan Rekapitulasi PATEN</h4>
           </div>
-        </v-col>-->
+        </b-col>
+        <b-col> </b-col>
       </b-row>
     </v-container>
-    <p class="mt-5" style="font-size: 25px">Filter</p>
     <v-divider class="d-flex d-none d-sm-block"></v-divider>
 
-    <b-row style="margin-top: 1px">
-      <b-col cols="12" lg="2">
+    <b-row style="margin-top: 1px" cols-lg="5" cols-md="1">
+      <b-col>
         <StatusSelected v-show="!firstLoad" v-model="status" @selected="statusSelected">
         </StatusSelected>
       </b-col>
-      <b-col cols="12" lg="3">
+      <b-col>
+        <KelurahanSelected v-show="!firstLoad" v-model="kelurahan" @selected="KelurahanSelected">
+        </KelurahanSelected>
+      </b-col>
+      <b-col lg="3">
         <v-menu
           ref="menu"
           v-model="date_filter"
@@ -70,13 +39,13 @@
                     v-show="!firstLoad"
                     v-bind="attrs"
                     v-on="on"
-                    style="border-radius: 10px; font-size: 13px"
+                    style="border-radius: 10px; font-size: 13px; width: 250px"
                     prepend-inner-icon="mdi-calendar"
                     outlined
                     single-line
                     clearable
-                    dense
                     readonly
+                    dense
                     @click:clear="(date = ''), renderData(search)"
                     :value="format_date"
                   >
@@ -87,15 +56,19 @@
               </v-tooltip>
             </div>
           </template>
-          <v-date-picker locale="id" v-model="date" type="month" no-title scrollable>
-            <v-spacer></v-spacer>
-            <v-btn text color="primary" @click="date_filter = false">Cancel</v-btn>
-            <v-btn text color="primary" @click="(date_filter = false), renderData(search)"
-              >OK</v-btn
-            >
+          <v-date-picker
+            locale="id"
+            v-model="date"
+            type="month"
+            no-title
+            scrollable
+            @input="(date_filter = false), renderData(search)"
+          >
           </v-date-picker>
         </v-menu>
       </b-col>
+      <b-col lg="1"></b-col>
+      <b-col></b-col>
     </b-row>
     <br />
     <v-skeleton-loader
@@ -104,92 +77,263 @@
       type="table-tbody"
       :types="{ 'table-row': 'table-cell@8' }"
     ></v-skeleton-loader>
-    <div id="app">
-      <v-data-table
-        loading-text="Memuat Data"
-        v-show="!firstLoad"
-        :loading="isLoading"
-        :headers="table"
-        :search="search"
-        :items="paten"
-        :hide-header="isMobile"
-        :class="{ mobile: isMobile }"
-        class="elevation-1"
-      >
-        <template v-slot:header="props">
-          <thead>
-            <tr>
-              <th>{{ props.props.headers.text }}</th>
-              <th rowspan="2"></th>
-              <th
-                colspan="13"
-                class="text-center text-dark"
-                style="border-style: solid; border-width: 2px; border-color: black"
-              >
-                Jumlah Pelayanan Non Perizinan
-              </th>
-              <th
-                colspan="5"
-                class="text-center text-dark"
-                style="border-style: solid; border-width: 2px; border-color: black"
-              >
-                Jumlah Pelayanan Perizinan
-              </th>
-              <th rowspan="2" colspan="2"></th>
-            </tr>
-          </thead>
-        </template>
-        <template v-slot:[`item.periode`]="{ item }">
-          {{ item.periode | moment("MMMM - YYYY") }}
-        </template>
-        <template v-slot:[`item.is_verified`]="{ item }">
-          <span v-if="item.is_verified == 0">Menunggu Validasi</span>
-          <span v-if="item.is_verified == 1">Sudah Divalidasi</span>
-        </template>
-        <template v-slot:[`item.actions`]="{ item }">
-          <v-menu offset-y v-if="item.is_verified == 0">
-            <template v-slot:activator="{ on, attrs }">
-              <v-btn v-bind="attrs" v-on="on" icon>
-                <v-icon dark>mdi-dots-horizontal</v-icon>
-              </v-btn>
-            </template>
-            <v-list>
-              <template class="menu">
-                <v-list-item link>
-                  <div>
-                    <v-list-item-title @click="dialogValid(item)">Validasi</v-list-item-title>
-                  </div>
-                </v-list-item>
-              </template>
-              <v-divider style="margin-left: 10px; margin-right: 10px"></v-divider>
+    <v-progress-linear :active="isLoading" :indeterminate="isLoading" middle></v-progress-linear>
+    <v-simple-table v-show="!firstLoad">
+      <template v-slot:default>
+        <thead style="border-style: solid; border-width: 2px; border-color: #d7d0d0">
+          <td rowspan="2">Periode</td>
+          <td rowspan="2">Desa/Kelurahan</td>
+          <td colspan="13">Jumlah Pelayanan Non Perizinan</td>
+          <td colspan="5">Jumlah Pelayanan Perizinan</td>
+          <td rowspan="2">Keterangan</td>
+          <td rowspan="2">Status</td>
+          <td rowspan="2"></td>
 
-              <v-list-item @click="dialogTolak(item)">Tolak</v-list-item>
-            </v-list>
-          </v-menu>
-        </template>
-      </v-data-table>
-      <b-modal v-model="validDialog" centered no-close-on-backdrop @ok="validasi(idData)">
-        Apakah anda ingin melakukan <b>Validasi</b> data dari
-        <b>{{ this.kell }}</b>
-        <br />Pada Periode Laporan <b>{{ this.perr }}</b
-        >?
-      </b-modal>
-      <b-modal v-model="tolakDialog" centered no-close-on-backdrop @ok="tolak(idData)">
-        Apakah anda ingin <b>Menolak</b> data dari
-        <b>{{ this.kell }}</b>
-        <br />Pada Periode Laporan <b>{{ this.perr }}</b
-        >?
-      </b-modal>
+          <tr>
+            <th>Perekaman Data KTP-E</th>
+            <th>Pengantar Kartu Keluraga (KK)</th>
+            <th>Keterangan Pindah</th>
+            <th>Keterangan Domisili</th>
+            <th>Pengantar Akte Kelahiran</th>
+            <th>Pencatatan Lahir/Mati</th>
+            <th>Pencatatan Perkawinan</th>
+            <th>Pencatatan Perceraian</th>
+            <th>Pengantar Catatan Kepolisian<br />(SKCK)</th>
+            <th>Keterangan Tidak Mampu<br />(SKTM)</th>
+            <th>Rekomendasi</th>
+            <th>Legalisasi Umum</th>
+            <th>Keterangan/Pengantar Lainnya</th>
+            <th>
+              Izin Mendirikan Bangunan (IMB), <br />
+              Luas &lt;100 m2
+            </th>
+            <th>Izin Usaha Perdagangan<br />(SITU/SIUP), Modal &lt;50.000.000</th>
+            <th>
+              Izin Merobohkan Bangunan,<br />
+              Luas &lt;100 m2
+            </th>
+            <th>Izin Keramaian</th>
+            <th>Izin Domisili Partai</th>
+          </tr>
+        </thead>
+        <tbody v-if="paten == ''">
+          <td colspan="23" style="font-weight: bold">No Data Available</td>
+        </tbody>
+        <tbody v-else>
+          <tr v-for="item in paten" :key="item.id">
+            <template>
+              <td class="text-left" v-if="item.periode == null" style="font-weight: bold">Nihil</td>
+              <td class="text-left" v-else>{{ item.periode | moment("MMMM - YYYY") }}</td>
+            </template>
+            <template>
+              <td class="text-left" v-if="item.kelurahan == null" style="font-weight: bold">
+                Nihil
+              </td>
+              <td class="text-left" v-else>{{ item.kelurahan }}</td>
+            </template>
+            <template>
+              <td class="text-left" v-if="item.perekaman_ktp == null" style="font-weight: bold">
+                Nihil
+              </td>
+              <td v-else>{{ item.perekaman_ktp }}</td>
+            </template>
+            <template>
+              <td class="text-left" v-if="item.pengantar_kk == null" style="font-weight: bold">
+                Nihil
+              </td>
+              <td v-else>{{ item.pengantar_kk }}</td>
+            </template>
+            <template>
+              <td class="text-left" v-if="item.ket_pindah == null" style="font-weight: bold">
+                Nihil
+              </td>
+              <td v-else>{{ item.ket_pindah }}</td>
+            </template>
+            <template>
+              <td class="text-left" v-if="item.ket_domisili == null" style="font-weight: bold">
+                Nihil
+              </td>
+              <td v-else>{{ item.ket_domisili }}</td>
+            </template>
+            <template>
+              <td
+                class="text-left"
+                v-if="item.pengantar_akta_lahir == null"
+                style="font-weight: bold"
+              >
+                Nihil
+              </td>
+              <td v-else>{{ item.pengantar_akta_lahir }}</td>
+            </template>
+            <template>
+              <td
+                class="text-left"
+                v-if="item.pengantar_akta_mati == null"
+                style="font-weight: bold"
+              >
+                Nihil
+              </td>
+              <td v-else>{{ item.pengantar_akta_mati }}</td>
+            </template>
+            <template>
+              <td
+                class="text-left"
+                v-if="item.pencatatan_perkawinan == null"
+                style="font-weight: bold"
+              >
+                Nihil
+              </td>
+              <td v-else>{{ item.pencatatan_perkawinan }}</td>
+            </template>
+            <template>
+              <td
+                class="text-left"
+                v-if="item.pencatatan_perceraian == null"
+                style="font-weight: bold"
+              >
+                Nihil
+              </td>
+              <td v-else>{{ item.pencatatan_perceraian }}</td>
+            </template>
+            <template>
+              <td class="text-left" v-if="item.skck == null" style="font-weight: bold">Nihil</td>
+              <td v-else>{{ item.skck }}</td>
+            </template>
+            <template>
+              <td class="text-left" v-if="item.sktm == null" style="font-weight: bold">Nihil</td>
+              <td v-else>{{ item.sktm }}</td>
+            </template>
+            <template>
+              <td class="text-left" v-if="item.rekomendasi == null" style="font-weight: bold">
+                Nihil
+              </td>
+              <td v-else>{{ item.rekomendasi }}</td>
+            </template>
+            <template>
+              <td class="text-left" v-if="item.legalisasi == null" style="font-weight: bold">
+                Nihil
+              </td>
+              <td v-else>{{ item.legalisasi }}</td>
+            </template>
+            <template>
+              <td class="text-left" v-if="item.ket_lain == null" style="font-weight: bold">
+                Nihil
+              </td>
+              <td v-else>{{ item.ket_lain }}</td>
+            </template>
+            <template>
+              <td class="text-left" v-if="item.imb == null" style="font-weight: bold">Nihil</td>
+              <td v-else>{{ item.imb }}</td>
+            </template>
+            <template>
+              <td class="text-left" v-if="item.situ_siup == null" style="font-weight: bold">
+                Nihil
+              </td>
+              <td v-else>{{ item.situ_siup }}</td>
+            </template>
+            <template>
+              <td
+                class="text-left"
+                v-if="item.izin_merobohkan_bangunan == null"
+                style="font-weight: bold"
+              >
+                Nihil
+              </td>
+              <td v-else>{{ item.izin_merobohkan_bangunan }}</td>
+            </template>
+            <template>
+              <td class="text-left" v-if="item.izin_keramaian == null" style="font-weight: bold">
+                Nihil
+              </td>
+              <td v-else>{{ item.izin_keramaian }}</td>
+            </template>
+            <template>
+              <td class="text-left" v-if="item.izin_partai == null" style="font-weight: bold">
+                Nihil
+              </td>
+              <td v-else>{{ item.izin_partai }}</td>
+            </template>
+            <template>
+              <td class="text-left" v-if="item.keterangan == null" style="font-weight: bold">
+                Nihil
+              </td>
+              <td
+                v-else
+                style="width: 100%; white-space: normal; vertical-align: center !important"
+              >
+                {{ item.keterangan }}
+              </td>
+            </template>
+            <td v-if="item.is_verified == 1">Menunggu Validasi</td>
+            <td v-if="item.is_verified == 2">Sudah Divalidasi</td>
+            <td>
+              <v-menu offset-y v-if="item.is_verified == 1">
+                <template v-slot:activator="{ on, attrs }">
+                  <v-btn v-bind="attrs" v-on="on" icon>
+                    <v-icon dark>mdi-dots-horizontal</v-icon>
+                  </v-btn>
+                </template>
+                <v-list>
+                  <v-list-item link @click="dialogValid(item)">
+                    <v-list-item-title class="text-center">Validasi</v-list-item-title>
+                  </v-list-item>
+                  <v-list-item link @click="dialogTolak(item)">
+                    <v-list-item-title style="text-align: center"> Tolak </v-list-item-title>
+                  </v-list-item>
+                </v-list>
+              </v-menu>
+            </td>
+          </tr>
+        </tbody>
+      </template>
+    </v-simple-table>
+    <div class="mt-5">
+      <b-pagination
+        align="center"
+        v-model="pagination.current_page"
+        :total-rows="pagination.total"
+        @input="onPageChange"
+        :per-page="data.per_page"
+        first-number
+        last-number
+      ></b-pagination>
     </div>
+    <v-dialog v-model="dialogOverlay" persistent max-width="300">
+      <div>
+        <v-card color="primary" dark class="text-center">
+          <v-card-text>
+            Mohon tunggu sebentar......
+            <v-progress-linear indeterminate color="white" class="mb-0"></v-progress-linear>
+          </v-card-text>
+        </v-card>
+      </div>
+    </v-dialog>
+    <b-modal v-model="validDialog" centered no-close-on-backdrop @ok="validasi(idData)">
+      <p v-if="this.kell != null">
+        Apakah anda ingin <b>Validasi</b> data dari <b>{{ this.kell }}</b
+        >?
+      </p>
+      <p v-else>Apakah Anda ingin <b>Validasi</b> Data ini?</p>
+      Pada Periode Laporan <b>{{ this.perr }}</b>
+    </b-modal>
+    <b-modal v-model="tolakDialog" centered no-close-on-backdrop @ok="tolak(idData)">
+      <p v-if="this.kell != null">
+        Apakah anda ingin <b>Menolak</b> data dari <b>{{ this.kell }}</b
+        >?
+      </p>
+      <p v-else>Apakah Anda ingin Menolak Data ini?</p>
+      Pada Periode Laporan <b>{{ this.perr }}</b>
+    </b-modal>
   </div>
 </template>
 
 <script>
   import { mapGetters } from "vuex";
   import StatusSelected from "../../../components/StatusSelected.vue";
+  import KelurahanSelected from "../../../components/SelectKelurahan.vue";
 
   export default {
-    components: { StatusSelected },
+    components: { StatusSelected, KelurahanSelected },
     data() {
       return {
         search: "",
@@ -197,7 +341,11 @@
         date_filter: "",
         date: "",
         isMobile: false,
-        page: 1,
+        data: [],
+        pagination: {
+          current_page: 1,
+          total: 0,
+        },
         dialog: false,
         validDialog: false,
         tolakDialog: false,
@@ -212,124 +360,10 @@
         idData: "",
         id: "",
         period: "",
-        table: [
-          {
-            text: "Desa/Kelurahan",
-            value: "kelurahan",
-          },
-          {
-            text: "Periode Laporan",
-            value: "periode",
-            align: "center",
-          },
-          {
-            text: "Perekaman Data KTP-E",
-            value: "perekaman_ktp",
-            align: "center",
-          },
-          {
-            text: "Pengantar Kartu Keluarga (KK)",
-            value: "pengantar_kk",
-            align: "center",
-          },
-          {
-            text: "Keterangan Pindah",
-            value: "ket_pindah",
-            align: "center",
-          },
-          {
-            text: "Keterangan Domisili",
-            value: "ket_domisili",
-            align: "center",
-          },
-          {
-            text: "Pengantar Akte Kelahiran",
-            value: "pengantar_akta_lahir",
-            align: "center",
-          },
-          {
-            text: "Pencatatan Lahir/Mati",
-            value: "pengantar_akta_mati",
-            align: "center",
-          },
-          {
-            text: "Pencatatan Perkawinan",
-            value: "pencatatan_perkawinan",
-            align: "center",
-          },
-          {
-            text: "Pencatatan Perceraian",
-            value: "pencatatan_perceraian",
-            align: "center",
-          },
-          {
-            text: "Pengantar Catatan Kepolisian (SKCK)",
-            value: "skck",
-            align: "center",
-          },
-          {
-            text: "Keterangan Tidak Mampu (SKTM)",
-            value: "sktm",
-            align: "center",
-          },
-          {
-            text: "Rekomendasi",
-            value: "rekomendasi",
-            align: "center",
-          },
-          {
-            text: "Legalisasi Umum",
-            value: "legalisasi",
-            align: "center",
-          },
-          {
-            text: "Ket./Pengantar Lainnya",
-            value: "ket_lain",
-            align: "center",
-          },
-          {
-            text: "Izin Mendirikan Bangunan (IMB), Luas <100 m2",
-            value: "imb",
-            align: "center",
-          },
-          {
-            text: "Izin Usaha Perdagangan (SITU/SIUP), Modal <50.000.000",
-            value: "situ_siup",
-            align: "center",
-          },
-          {
-            text: "Izin Merobohkan Bangunan, Luas <100 m2",
-            value: "izin_merobohkan_bangunan",
-            align: "center",
-          },
-          {
-            text: "Izin Keramaian",
-            value: "izin_keramaian",
-            align: "center",
-          },
-          {
-            text: "Izin Domisili Partai",
-            value: "izin_partai",
-            align: "center",
-          },
-          {
-            text: "Keterangan",
-            value: "keterangan",
-            align: "center",
-          },
-          {
-            text: "Status",
-            value: "is_verified",
-            align: "center",
-          },
-          {
-            value: "actions",
-            sortable: false,
-          },
-        ],
         status: null,
         filterActive: null,
         paten: [],
+        kelurahan: [],
         status: null,
         filterStatus: null,
         perr: "",
@@ -374,8 +408,18 @@
         let val = (value / 1).toFixed(0).replace(".", ",");
         return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
       },
+      onPageChange() {
+        this.renderData();
+      },
       renderData(search) {
-        this.firstLoad = true;
+        this.isLoading = true;
+
+        let kelurahan = "";
+        if (this.filterKelurahan || this.filterKelurahan == 0) {
+          kelurahan = this.filterKelurahan;
+        } else {
+          kelurahan = null;
+        }
 
         let is_verified = "";
         if (this.filterStatus || this.filterStatus == 0) {
@@ -393,20 +437,25 @@
         // UNTUK USER
 
         this.$http
-          .get("/camat/paten", {
+          .get("/camat-view/paten", {
             params: {
+              page: this.pagination.current_page,
               instansi_id: `${this.user.instansi_id}`,
+              kelurahan,
               periode,
               is_verified,
             },
           })
           .then((response) => {
-            this.paten = response.data.data;
+            this.paten = response.data.data.data;
             this.firstLoad = false;
             this.dialog = false;
             this.dialogOverlay = false;
             this.overlay = true;
             this.isLoading = false;
+            this.pagination.current_page = response.data.data.current_page;
+            this.pagination.total = response.data.data.total;
+            this.data = response.data.data;
           })
           .catch((error) => {
             if (error) {
@@ -429,11 +478,10 @@
         this.idData = item.id;
       },
       validasi(id) {
-        this.validDialog = false;
         this.dialogOverlay = true;
         this.$http
           .put(`/valid/paten/${id}`, {
-            is_verified: 1,
+            is_verified: 2,
           })
           .then((response) => {
             this.renderData();
@@ -451,11 +499,10 @@
           });
       },
       tolak(id) {
-        this.tolakDialog = false;
         this.dialogOverlay = true;
         this.$http
           .put(`/valid/paten/${id}`, {
-            is_verified: 2,
+            is_verified: 3,
           })
           .then((response) => {
             this.renderData();
@@ -464,7 +511,20 @@
               self.dialogOverlay = false;
               self.$toast.success("Data Berhasil Ditolak");
             }, 10 * 10 * 10);
+          })
+          .catch((error) => {
+            if (error) {
+              this.dialogOverlay = false;
+              this.renderData();
+            }
           });
+      },
+      KelurahanSelected(kelurahan) {
+        this.filterKelurahan = null;
+        if (kelurahan) {
+          this.filterKelurahan = kelurahan.name;
+        }
+        this.renderData();
       },
       statusSelected(status) {
         this.status = "";
@@ -495,4 +555,49 @@
   };
 </script>
 
-<style></style>
+<style scoped>
+  .v-data-table > .v-data-table__wrapper > table > tbody > tr > td {
+    font-size: 17px;
+    margin: auto;
+    white-space: nowrap;
+  }
+
+  tbody td {
+    text-align: center;
+    border-style: solid;
+    border-width: 2px;
+    border-color: #d7d0d0;
+  }
+  thead tr th {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell,
+      "Open Sans", "Helvetica Neue", sans-serif;
+    font-weight: bold;
+    color: black !important;
+    font-size: 10pt !important;
+    text-align: center !important;
+    border-style: solid;
+    border-width: 2px;
+    border-color: #d7d0d0;
+  }
+  thead td {
+    color: black !important;
+    font-weight: bold;
+    text-align: center;
+    border-style: solid;
+    border-width: 2px;
+    border-color: #d7d0d0;
+    font-weight: bold;
+  }
+  .v-menu__content {
+    border-radius: 8px;
+    border: 1px solid #c4c4c4;
+    outline-style: inherit;
+    outline-color: white;
+    box-shadow: none;
+
+    outline-color: #e8eff2;
+  }
+  .v-sheet.v-list {
+    background: #e8eff2;
+  }
+</style>

@@ -30,6 +30,8 @@ Route::group(['middleware' => ['json.response']], function () {
     Route::put('/user/update/{id}', 'AuthController@update');
     Route::get('/user/{id}', 'AuthController@show');
     Route::delete('/user/{id}', 'AuthController@destroy');
+    Route::get('/role', 'AuthController@role');
+
 
 
     
@@ -38,6 +40,12 @@ Route::group(['middleware' => ['json.response']], function () {
     Route::post('/informasi', 'InformasiController@addInformasi');
     Route::get('/informasi', 'InformasiController@filterInformasi');
     Route::get('/informasi/all', 'InformasiController@index');
+    Route::put('/informasi/{id}', 'InformasiController@updateInformasi');
+    Route::get('/informasi/{id}', 'InformasiController@show');
+    Route::delete('/informasi/{id}', 'InformasiController@destroy');
+
+
+
 
 
     // INSTANSI
@@ -49,6 +57,8 @@ Route::group(['middleware' => ['json.response']], function () {
     Route::get('/notvalid','PbbController@totalData');
     Route::get('/total', 'InstansiController@totalSemua');
     Route::get('/chart', 'PbbController@dataBelumValid');
+    Route::get('/tolak', 'PbbController@dataDitolak');
+
 
     //PBB
     Route::get('/pbb', 'PbbController@index');
@@ -57,7 +67,7 @@ Route::group(['middleware' => ['json.response']], function () {
     Route::delete('/pbb/{id}', 'PbbController@destroy');
     Route::put('/pbb/{id}', 'PbbController@updatePBB');
     Route::put('/valid/pbb/{id}', 'PbbController@validasiPbb');
-    Route::get('/camat/pbb','PbbController@indexCamat');
+    Route::get('/camat-view/pbb','PbbController@indexKelurahan');
 
     
     //PATEN
@@ -67,7 +77,7 @@ Route::group(['middleware' => ['json.response']], function () {
     Route::get('/paten/{id}', 'PatenController@show');
     Route::put('/paten/{id}', 'PatenController@updatePaten');
     Route::put('/valid/paten/{id}', 'PatenController@ValidasiPaten');
-    Route::get('/camat/paten','PatenController@indexCamat');
+    Route::get('/camat-view/paten','PatenController@indexCamat');
 
 
 
@@ -78,14 +88,16 @@ Route::group(['middleware' => ['json.response']], function () {
     Route::get('/kependudukan/{id}', 'KependudukanController@show');
     Route::put('/kependudukan/{id}', 'KependudukanController@updateKependudukan');
     Route::put('/valid/kependudukan/{id}', 'KependudukanController@ValidasiKependudukan');
-    Route::get('/camat/kependudukan','KependudukanController@indexCamat');
+    Route::get('/camat-view/kependudukan','KependudukanController@indexCamat');
 
-     //AKTA
-     Route::get('/akta', 'AktaController@index');
-     Route::post('/akta', 'AktaController@createAkta');
-     Route::delete('/akta/{id}', 'AktaController@destroy');
-     Route::get('/akta/{id}', 'AktaController@show');
-     Route::put('/akta/{id}', 'AktaController@updateAkta');
+    //IMUNISASI
+    Route::get('/imunisasi', 'ImunisasiController@index');
+    Route::post('/imunisasi', 'ImunisasiController@createImunisasi');
+    Route::delete('/imunisasi/{id}', 'ImunisasiController@destroy');
+    Route::get('/imunisasi/{id}', 'ImunisasiController@show');
+    Route::get('/camat-view/imunisasi','ImunisasiController@indexCamat');
+    Route::put('/imunisasi/{id}', 'ImunisasiController@updateImunisasi');
+    Route::put('/valid/imunisasi/{id}', 'ImunisasiController@validasiImunisasi');
 
     //BENCANA
     Route::get('/bencana', 'BencanaController@index');
@@ -94,7 +106,7 @@ Route::group(['middleware' => ['json.response']], function () {
     Route::get('/bencana/{id}', 'BencanaController@show');
     Route::put('/bencana/{id}', 'BencanaController@updateBencana');
     Route::put('/valid/bencana/{id}', 'BencanaController@validasiBencana');
-    Route::get('/camat/bencana','BencanaController@indexCamat');
+    Route::get('/camat-view/bencana','BencanaController@indexCamat');
 
     
 });

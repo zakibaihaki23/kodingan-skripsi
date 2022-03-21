@@ -90,31 +90,15 @@ td.item {
         </center>
     <div class="row"> 
     @foreach ($periode as $waktu => $per)
-            @php
-            $bln = array (
-                '01' => 'Januari',
-                '02' => 'Februari',
-                '03' => 'Maret',
-                '04' => 'April',
-                '05' => 'Mei',
-                '06' => 'Juni',
-                '07' => 'Juli',
-                '08' => 'Agustus',
-                '09' => 'September',
-                '10' => 'Oktober',
-                '11' => 'November',
-                '12' => 'Desember'
-        );
-                        @endphp
-                @if ($waktu == 0)
-        @foreach ($kecamatan as $kec)  
+        @foreach ($kependudukan as $kec)  
         <div class="column" style="list-style-type: none;vertical-align: bottom; font-weight: bold; margin-top: 40px">
             <li>Pemerintah Kabupaten Pandeglang</li>
             <li>{{$kec->nama_instansi}}</li>
         </div>
         <div class="column text-center" style="list-style-type: none; font-weight: bold; font-size: 18pt; margin-top: 20px">
         <li>Laporan Kependudukan</li>
-                <li>Bulan  {{$bln[$per->bulan]}} Tahun {{$per->tahun}}</li>
+                <li>Bulan  {{ \Carbon\Carbon::parse($per->periode)->translatedFormat('F') }}
+                     Tahun  {{ \Carbon\Carbon::parse($per->periode)->translatedFormat('Y') }}</li>
         </div>
         <div class="column text-right" style="list-style-type: none; font-weight: bold; margin-top: 35px; margin-right: 60px">
             <li style="border: 1px solid black; margin-left: 300px;" class="text-center">Lampiran B 5</li>
@@ -126,7 +110,7 @@ td.item {
         <thead>
             <tr>
                 <th rowspan="2" style="border-left: 2px black; border-top: 2px black; border: black">No</th>
-                <th rowspan="2" style="white-space: nowrap; border-top: 2px black; border: black">Desa/Kelurahan</th>
+                <th rowspan="2" style="white-space: normal; border-top: 2px black; border: black">Desa / Kelurahan</th>
                 <th colspan="3" style="white-space: nowrap; border-top: 2px black; border-bottom: 2px black; border: black">Jumlah Penduduk Awal Bulan Lalu</th>
                 <th colspan="3" style="white-space: nowrap; border-top: 2px black; border-bottom: 2px black; border: black">Lahir</th>
                 <th colspan="3" style="white-space: nowrap; border-top: 2px black; border-bottom: 2px black; border: black">Meninggal</th>
@@ -182,26 +166,35 @@ td.item {
             @php $i=1 @endphp
             @foreach($kependudukan as $item)
             <tr>
-                <td style="text-align: center; border-left: 2px black; border: black">{{ $i++ }}</td>
-                <td style="width: 15%; border: black">{{$item->kelurahan}}</td>
-                <td style="text-align: center; width: 5%; border: black">{{$item->jmlh_penduduk_bln_lalu_l}}</td>
-                <td style="text-align: center; width: 5%; border: black">{{$item->jmlh_penduduk_bln_lalu_p}}</td>
-                <td style="text-align: center; width: 5%; border: black">{{$item->total_penduduk_bln_lalu}}</td>
-                <td style="text-align: center; border: black">{{$item->lahir_l}}</td>
-                <td style="text-align: center; border: black">{{$item->lahir_p}}</td>
-                <td style="text-align: center; border: black">{{$item->total_lahir}}</td>
-                <td style="text-align: center; border: black">{{$item->meninggal_l}}</td>
-                <td style="text-align: center; border: black">{{$item->meninggal_p}}</td>
-                <td style="text-align: center; border: black">{{$item->total_meninggal}}</td>
-                <td style="text-align: center; border: black">{{$item->datang_l}}</td>
-                <td style="text-align: center; border: black">{{$item->datang_p}}</td>
-                <td style="text-align: center; border: black">{{$item->total_datang}}</td>
-                <td style="text-align: center; border: black">{{$item->pindah_l}}</td>
-                <td style="text-align: center; border: black">{{$item->pindah_p}}</td>
-                <td style="text-align: center; border: black">{{$item->total_pindah}}</td>
-                <td style="text-align: center; border: black">{{$item->jmlh_penduduk_bln_ini_l}}</td>
-                <td style="text-align: center; border: black">{{$item->jmlh_penduduk_bln_ini_p}}</td>
-                <td style="text-align: center; border: black; border-right: 2px black">{{$item->total_penduduk_bln_ini}}</td>
+                
+                @if($item->kelurahan == null) {
+                    <td style="font-weight: bold; font-size: 20pt;border: black; border-right: 2px black" 
+                    colspan="20" 
+                    class="text-center">
+                    NIHIL
+                  </td>
+                } @else {
+                    <td style="text-align: center; border-left: 2px black; border: black">{{ $i++ }}</td>
+                    <td style="width: 15%; border: black">{{$item->kelurahan}}</td>
+                    <td style="text-align: center; width: 5%; border: black">{{$item->jmlh_penduduk_bln_lalu_l}}</td>
+                    <td style="text-align: center; width: 5%; border: black">{{$item->jmlh_penduduk_bln_lalu_p}}</td>
+                    <td style="text-align: center; width: 5%; border: black">{{$item->total_penduduk_bln_lalu}}</td>
+                    <td style="text-align: center; border: black">{{$item->lahir_l}}</td>
+                    <td style="text-align: center; border: black">{{$item->lahir_p}}</td>
+                    <td style="text-align: center; border: black">{{$item->total_lahir}}</td>
+                    <td style="text-align: center; border: black">{{$item->meninggal_l}}</td>
+                    <td style="text-align: center; border: black">{{$item->meninggal_p}}</td>
+                    <td style="text-align: center; border: black">{{$item->total_meninggal}}</td>
+                    <td style="text-align: center; border: black">{{$item->datang_l}}</td>
+                    <td style="text-align: center; border: black">{{$item->datang_p}}</td>
+                    <td style="text-align: center; border: black">{{$item->total_datang}}</td>
+                    <td style="text-align: center; border: black">{{$item->pindah_l}}</td>
+                    <td style="text-align: center; border: black">{{$item->pindah_p}}</td>
+                    <td style="text-align: center; border: black">{{$item->total_pindah}}</td>
+                    <td style="text-align: center; border: black">{{$item->jmlh_penduduk_bln_ini_l}}</td>
+                    <td style="text-align: center; border: black">{{$item->jmlh_penduduk_bln_ini_p}}</td>
+                    <td style="text-align: center; border: black; border-right: 2px black">{{$item->total_penduduk_bln_ini}}</td>
+                } @endif
             </tr>
             @endforeach
         </tbody>
@@ -269,7 +262,9 @@ td.item {
         </div>
         </div>
         <div class="col text-right" style="font-size: 13px">
-            <p>{{$kec->nama_instansi}}, {{$bln[$per->bulan]}} {{$per->tahun}}</p>
+            <p>{{$kec->nama_instansi}}, 
+                {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }} 
+            </p>
             <p style="margin-right: 40px">Kasi Pemerintahan</p>
             <br>
             <p style="margin-top: 20px; text-decoration: underline; margin-right: 4px">
@@ -282,7 +277,6 @@ td.item {
         </div>
     </div>
     @endforeach
-            @endif
             @endforeach
 </body>
 </html>

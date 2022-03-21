@@ -8,27 +8,48 @@
     <div class="row">
       <div class="col mx-auto" style="font-size: 17pt">
         <div class="form-group row">
-          <div class="col-lg-2">
-            <span>Kelurahan</span>
-          </div>
-          <div class="col-lg-6">
-            <p style="font-weight: bold">{{ paten.kelurahan }}</p>
-          </div>
-        </div>
-
-        <div class="form-group row">
-          <div class="col-lg-2">
-            <p>Periode</p>
-          </div>
-          <div class="col-lg-6">
-            <p style="font-weight: bold">
-              {{ this.$moment(paten.periode).format("MMMM - YYYY") }}
-            </p>
-          </div>
+          <b-skeleton-wrapper :loading="loading">
+            <template #loading>
+              <b-skeleton></b-skeleton>
+            </template>
+            <div class="col-lg-3">
+              <p>Periode</p>
+            </div>
+            <div class="col-lg-9">
+              <p style="font-weight: bold">
+                {{ this.$moment(paten.periode).format("MMMM - YYYY") }}
+              </p>
+            </div>
+            <div class="col-lg-3">
+              <p>Kelurahan/Desa</p>
+            </div>
+            <div class="col-lg-9">
+              <p style="font-weight: bold">
+                {{ this.paten.kelurahan }}
+              </p>
+            </div>
+          </b-skeleton-wrapper>
         </div>
       </div>
     </div>
     <v-form>
+      <div class="row">
+        <div class="col mx-auto">
+          <div class="form-group row">
+            <div class="form-group row">
+              <v-checkbox
+                class="mt-0"
+                v-model="nihil"
+                true-value="null"
+                false-value="0"
+                :label="`Tidak ada laporan (NIHIL)`"
+                @change="checkBox"
+              >
+              </v-checkbox>
+            </div>
+          </div>
+        </div>
+      </div>
       <div class="row">
         <div class="col mx-auto">
           <div class="mt-5 text-center bg-primary text-light">
@@ -43,9 +64,10 @@
                 clearable
                 single-line
                 class="form"
-                v-model="paten.perekaman_ktp"
+                v-model="form.perekaman_ktp"
                 maxlength="15"
                 onkeypress="return event.charCode >= 48 && event.charCode <= 57"
+                :disabled="nihil == 'null'"
               ></v-text-field>
             </div>
             <div class="col-md-4">
@@ -56,9 +78,10 @@
                 clearable
                 single-line
                 class="form"
-                v-model="paten.pengantar_kk"
+                v-model="form.pengantar_kk"
                 maxlength="15"
                 onkeypress="return event.charCode >= 48 && event.charCode <= 57"
+                :disabled="nihil == 'null'"
               ></v-text-field>
             </div>
             <div class="col-md-4">
@@ -69,9 +92,10 @@
                 clearable
                 single-line
                 class="form"
-                v-model="paten.ket_pindah"
+                v-model="form.ket_pindah"
                 maxlength="15"
                 onkeypress="return event.charCode >= 48 && event.charCode <= 57"
+                :disabled="nihil == 'null'"
               ></v-text-field>
             </div>
           </div>
@@ -84,9 +108,10 @@
                 clearable
                 single-line
                 class="form"
-                v-model="paten.ket_domisili"
+                v-model="form.ket_domisili"
                 maxlength="15"
                 onkeypress="return event.charCode >= 48 && event.charCode <= 57"
+                :disabled="nihil == 'null'"
               ></v-text-field>
             </div>
             <div class="col-md-4">
@@ -97,9 +122,10 @@
                 clearable
                 single-line
                 class="form"
-                v-model="paten.pengantar_akta_lahir"
+                v-model="form.pengantar_akta_lahir"
                 maxlength="15"
                 onkeypress="return event.charCode >= 48 && event.charCode <= 57"
+                :disabled="nihil == 'null'"
               ></v-text-field>
             </div>
             <div class="col-md-4">
@@ -110,9 +136,10 @@
                 clearable
                 single-line
                 class="form"
-                v-model="paten.pengantar_akta_mati"
+                v-model="form.pengantar_akta_mati"
                 maxlength="15"
                 onkeypress="return event.charCode >= 48 && event.charCode <= 57"
+                :disabled="nihil == 'null'"
               ></v-text-field>
             </div>
           </div>
@@ -125,9 +152,10 @@
                 clearable
                 single-line
                 class="form"
-                v-model="paten.pencatatan_perkawinan"
+                v-model="form.pencatatan_perkawinan"
                 maxlength="15"
                 onkeypress="return event.charCode >= 48 && event.charCode <= 57"
+                :disabled="nihil == 'null'"
               ></v-text-field>
             </div>
             <div class="col-md-4">
@@ -138,9 +166,10 @@
                 clearable
                 single-line
                 class="form"
-                v-model="paten.pencatatan_perceraian"
+                v-model="form.pencatatan_perceraian"
                 maxlength="15"
                 onkeypress="return event.charCode >= 48 && event.charCode <= 57"
+                :disabled="nihil == 'null'"
               ></v-text-field>
             </div>
             <div class="col-md-4">
@@ -151,9 +180,10 @@
                 clearable
                 single-line
                 class="form"
-                v-model="paten.skck"
+                v-model="form.skck"
                 maxlength="15"
                 onkeypress="return event.charCode >= 48 && event.charCode <= 57"
+                :disabled="nihil == 'null'"
               ></v-text-field>
             </div>
           </div>
@@ -166,9 +196,10 @@
                 clearable
                 single-line
                 class="form"
-                v-model="paten.sktm"
+                v-model="form.sktm"
                 maxlength="15"
                 onkeypress="return event.charCode >= 48 && event.charCode <= 57"
+                :disabled="nihil == 'null'"
               ></v-text-field>
             </div>
             <div class="col-md-4">
@@ -179,9 +210,10 @@
                 clearable
                 single-line
                 class="form"
-                v-model="paten.rekomendasi"
+                v-model="form.rekomendasi"
                 maxlength="15"
                 onkeypress="return event.charCode >= 48 && event.charCode <= 57"
+                :disabled="nihil == 'null'"
               ></v-text-field>
             </div>
             <div class="col-md-4">
@@ -192,9 +224,10 @@
                 clearable
                 single-line
                 class="form"
-                v-model="paten.legalisasi"
+                v-model="form.legalisasi"
                 maxlength="15"
                 onkeypress="return event.charCode >= 48 && event.charCode <= 57"
+                :disabled="nihil == 'null'"
               ></v-text-field>
             </div>
           </div>
@@ -207,9 +240,10 @@
                 clearable
                 single-line
                 class="form"
-                v-model="paten.ket_lain"
+                v-model="form.ket_lain"
                 maxlength="15"
                 onkeypress="return event.charCode >= 48 && event.charCode <= 57"
+                :disabled="nihil == 'null'"
               ></v-text-field>
             </div>
           </div>
@@ -225,9 +259,10 @@
                 clearable
                 single-line
                 class="form"
-                v-model="paten.imb"
+                v-model="form.imb"
                 maxlength="15"
                 onkeypress="return event.charCode >= 48 && event.charCode <= 57"
+                :disabled="nihil == 'null'"
               ></v-text-field>
             </div>
             <div class="col-md-4">
@@ -238,9 +273,10 @@
                 clearable
                 single-line
                 class="form"
-                v-model="paten.situ_siup"
+                v-model="form.situ_siup"
                 maxlength="15"
                 onkeypress="return event.charCode >= 48 && event.charCode <= 57"
+                :disabled="nihil == 'null'"
               ></v-text-field>
             </div>
             <div class="col-md-4">
@@ -251,9 +287,10 @@
                 clearable
                 single-line
                 class="form"
-                v-model="paten.izin_merobohkan_bangunan"
+                v-model="form.izin_merobohkan_bangunan"
                 maxlength="15"
                 onkeypress="return event.charCode >= 48 && event.charCode <= 57"
+                :disabled="nihil == 'null'"
               ></v-text-field>
             </div>
           </div>
@@ -266,9 +303,10 @@
                 clearable
                 single-line
                 class="form"
-                v-model="paten.izin_keramaian"
+                v-model="form.izin_keramaian"
                 maxlength="15"
                 onkeypress="return event.charCode >= 48 && event.charCode <= 57"
+                :disabled="nihil == 'null'"
               ></v-text-field>
             </div>
             <div class="col-md-4">
@@ -279,9 +317,10 @@
                 clearable
                 single-line
                 class="form"
-                v-model="paten.izin_partai"
+                v-model="form.izin_partai"
                 maxlength="15"
                 onkeypress="return event.charCode >= 48 && event.charCode <= 57"
+                :disabled="nihil == 'null'"
               ></v-text-field>
             </div>
           </div>
@@ -297,7 +336,8 @@
                 single-line
                 outlined
                 class="form"
-                v-model="paten.keterangan"
+                v-model="form.keterangan"
+                :disabled="nihil == 'null'"
               ></v-textarea>
             </div>
           </div>
@@ -354,10 +394,25 @@
               "
               class="save"
               @click="save"
+              :disabled="paten.is_verified != 3"
               >Simpan</v-btn
             >
           </b-col>
         </b-row>
+        <v-dialog v-model="dialogOverlay" max-width="300" persistent>
+          <div>
+            <v-card color="primary" dark class="text-center">
+              <v-card-text>
+                Mohon tunggu sebentar......
+                <v-progress-linear
+                  indeterminate
+                  color="white"
+                  class="mb-0"
+                ></v-progress-linear>
+              </v-card-text>
+            </v-card>
+          </div>
+        </v-dialog>
         <v-overlay :value="overlay">
           <v-progress-circular indeterminate color="blue"></v-progress-circular>
         </v-overlay>
@@ -369,147 +424,220 @@
 </template>
 
 <script>
-  export default {
-    data() {
-      return {
-        paten: [],
-        overlay: false,
-        form: {
-          kelurahan: "",
-          perekaman_ktp: 0,
-          pengantar_kk: 0,
-          ket_pindah: 0,
-          ket_domisili: 0,
-          pengantar_akta_lahir: 0,
-          pengantar_akta_mati: 0,
-          pencatatan_perkawinan: 0,
-          pencatatan_perceraian: 0,
-          skck: 0,
-          sktm: 0,
-          rekomendasi: 0,
-          legalisasi: 0,
-          ket_lain: 0,
-          imb: 0,
-          situ_siup: 0,
-          izin_merobohkan_bangunan: 0,
-          izin_keramaian: 0,
-          izin_partai: 0,
-          keterangan: "",
-        },
+import { mapGetters } from "vuex";
 
-        kosong: "",
-        placeholder: " ",
-        readonly: false,
-        disabled: false,
-        outlined: true,
-        clearable: true,
-        status: [],
-      };
-    },
-    watch: {
-      search: {
-        handler: function (val) {
-          this.renderData(val);
-        },
-        deep: true,
+export default {
+  data() {
+    return {
+      loading: false,
+      paten: [],
+      overlay: false,
+      nihil: null,
+      dialogOverlay: false,
+      form: {
+        kelurahan: "",
+        perekaman_ktp: null,
+        pengantar_kk: null,
+        ket_pindah: null,
+        ket_domisili: null,
+        pengantar_akta_lahir: null,
+        pengantar_akta_mati: null,
+        pencatatan_perkawinan: null,
+        pencatatan_perceraian: null,
+        skck: null,
+        sktm: null,
+        rekomendasi: null,
+        legalisasi: null,
+        ket_lain: null,
+        imb: null,
+        situ_siup: null,
+        izin_merobohkan_bangunan: null,
+        izin_keramaian: null,
+        izin_partai: null,
+        keterangan: null,
       },
-    },
-
-    created() {
-      this.renderData();
-    },
-
-    methods: {
-      renderData() {
-        this.$http
-          .get("/paten/" + this.$route.params.id)
-
-          .then((response) => {
-            this.paten = response.data.data;
-          });
-      }, // CLOSE RENDER DATA
-
-      save() {
-        this.overlay = true;
-        this.$http
-          .put("/paten/" + this.$route.params.id, {
-            instansi_id: this.paten.instansi_id,
-            kelurahan: this.paten.kelurahan,
-            perekaman_ktp: parseInt(this.paten.perekaman_ktp),
-            pengantar_kk: parseInt(this.paten.pengantar_kk),
-            ket_pindah: parseInt(this.paten.ket_pindah),
-            ket_domisili: parseInt(this.paten.ket_domisili),
-            pengantar_akta_lahir: parseInt(this.paten.pengantar_akta_lahir),
-            pengantar_akta_mati: parseInt(this.paten.pengantar_akta_mati),
-            pencatatan_perkawinan: parseInt(this.paten.pencatatan_perkawinan),
-            pencatatan_perceraian: parseInt(this.paten.pencatatan_perceraian),
-            skck: parseInt(this.paten.skck),
-            sktm: parseInt(this.paten.sktm),
-            rekomendasi: parseInt(this.paten.rekomendasi),
-            legalisasi: parseInt(this.paten.legalisasi),
-            ket_lain: parseInt(this.paten.ket_lain),
-            imb: parseInt(this.paten.imb),
-            situ_siup: parseInt(this.paten.situ_siup),
-            izin_merobohkan_bangunan: parseInt(this.paten.izin_merobohkan_bangunan),
-            izin_keramaian: parseInt(this.paten.izin_keramaian),
-            izin_partai: parseInt(this.paten.izin_partai),
-            keterangan: this.paten.keterangan,
-            periode: this.paten.periode,
-            is_verified: 0,
-          })
-          .then((response) => {
-            let self = this;
-            setTimeout(function () {
-              self.overlay = false;
-              self.$router.push("/paten");
-              self.$toast.success("Data Berhasil Diupdate");
-            }, 10 * 10 * 10);
-          });
+      kelurahan_id: "",
+      kelurahan: [],
+      status: [],
+    };
+  },
+  watch: {
+    search: {
+      handler: function (val) {
+        this.renderData(val);
       },
-    }, // CLOSE METHODS
-  };
+      deep: true,
+    },
+  },
+
+  computed: {
+    ...mapGetters({
+      user: "auth/user",
+    }),
+  },
+
+  created() {
+    this.renderData();
+  },
+
+  methods: {
+    renderData() {
+      this.loading = true;
+      this.$http
+        .get("/paten/" + this.$route.params.id)
+
+        .then((response) => {
+          this.paten = response.data.data;
+          this.kelurahan_id = response.data.data.kelurahan;
+          this.loading = false;
+          this.form.perekaman_ktp = response.data.data.perekaman_ktp;
+          this.form.pengantar_kk = response.data.data.pengantar_kk;
+          this.form.ket_pindah = response.data.data.ket_pindah;
+          this.form.ket_domisili = response.data.data.ket_domisili;
+          this.form.pengantar_akta_lahir = response.data.data.pengantar_akta_lahir;
+          this.form.pengantar_akta_mati = response.data.data.pengantar_akta_mati;
+          this.form.pencatatan_perkawinan = response.data.data.pencatatan_perkawinan;
+          this.form.pencatatan_perceraian = response.data.data.pencatatan_perceraian;
+          this.form.skck = response.data.data.skck;
+          this.form.sktm = response.data.data.sktm;
+          this.form.rekomendasi = response.data.data.rekomendasi;
+          this.form.legalisasi = response.data.data.legalisasi;
+          this.form.ket_lain = response.data.data.ket_lain;
+          this.form.imb = response.data.data.imb;
+          this.form.situ_siup = response.data.data.situ_siup;
+          this.form.izin_merobohkan_bangunan =
+            response.data.data.izin_merobohkan_bangunan;
+          this.form.izin_keramaian = response.data.data.izin_keramaian;
+          this.form.izin_partai = response.data.data.izin_partai;
+          this.form.keterangan = response.data.data.keterangan;
+        });
+
+      this.$http
+        .get(`/kecamatan`, {
+          params: {
+            id: this.user.instansi_id,
+          },
+        })
+        .then((response) => {
+          // this.kelurahan = [];
+          this.kelurahan = response.data.data[0].kelurahan;
+          // for (let i = 0; i < array.length; i++) {
+          //   this.kelurahan.push({
+          //     name: array[i].nama_kelurahan,
+          //     id: array[i].id,
+          //   });
+          // }
+        });
+    },
+
+    save() {
+      this.dialogOverlay = true;
+      this.$http
+        .put("/paten/" + this.$route.params.id, {
+          instansi_id: this.paten.instansi_id,
+          kelurahan: this.paten.kelurahan,
+          perekaman_ktp: parseInt(this.form.perekaman_ktp),
+          pengantar_kk: parseInt(this.form.pengantar_kk),
+          ket_pindah: parseInt(this.form.ket_pindah),
+          ket_domisili: parseInt(this.form.ket_domisili),
+          pengantar_akta_lahir: parseInt(this.form.pengantar_akta_lahir),
+          pengantar_akta_mati: parseInt(this.form.pengantar_akta_mati),
+          pencatatan_perkawinan: parseInt(this.form.pencatatan_perkawinan),
+          pencatatan_perceraian: parseInt(this.form.pencatatan_perceraian),
+          skck: parseInt(this.form.skck),
+          sktm: parseInt(this.form.sktm),
+          rekomendasi: parseInt(this.form.rekomendasi),
+          legalisasi: parseInt(this.form.legalisasi),
+          ket_lain: parseInt(this.form.ket_lain),
+          imb: parseInt(this.form.imb),
+          situ_siup: parseInt(this.form.situ_siup),
+          izin_merobohkan_bangunan: parseInt(this.form.izin_merobohkan_bangunan),
+          izin_keramaian: parseInt(this.form.izin_keramaian),
+          izin_partai: parseInt(this.form.izin_partai),
+          keterangan: this.form.keterangan,
+          periode: this.paten.periode,
+          is_verified: 1,
+        })
+        .then((response) => {
+          let self = this;
+          setTimeout(function () {
+            self.dialogOverlay = false;
+            self.$router.push("/paten");
+            self.$toast.success("Data Berhasil Diupdate");
+          }, 10 * 10 * 10);
+        });
+    },
+    checkBox(val) {
+      if (val == "null") {
+        this.kelurahan_id = "";
+        this.form.perekaman_ktp = null;
+        this.form.pengantar_kk = null;
+        this.form.ket_pindah = null;
+        this.form.ket_domisili = null;
+        this.form.pengantar_akta_lahir = null;
+        this.form.pengantar_akta_mati = null;
+        this.form.pencatatan_perkawinan = null;
+        this.form.pencatatan_perceraian = null;
+        this.form.skck = null;
+        this.form.sktm = null;
+        this.form.rekomendasi = null;
+        this.form.legalisasi = null;
+        this.form.ket_lain = null;
+        this.form.imb = null;
+        this.form.situ_siup = null;
+        this.form.izin_merobohkan_bangunan = null;
+        this.form.izin_keramaian = null;
+        this.form.izin_partai = null;
+        this.form.keterangan = null;
+      }
+      if (val == "0") {
+        this.renderData();
+      }
+    },
+  }, // CLOSE METHODS
+};
 </script>
 
 <style scoped>
-  .xlsx-button {
-    border-radius: 30%;
-    width: 200px;
-  }
-  .helper {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell,
-      "Open Sans", "Helvetica Neue", sans-serif;
-    padding-left: 80px;
-    padding-right: 50px;
-  }
-  .v-data-table > .v-data-table__wrapper > table > tbody > tr > td {
-    font-size: 17px;
-  }
+.xlsx-button {
+  border-radius: 30%;
+  width: 200px;
+}
+.helper {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu,
+    Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+  padding-left: 80px;
+  padding-right: 50px;
+}
+.v-data-table > .v-data-table__wrapper > table > tbody > tr > td {
+  font-size: 17px;
+}
 
-  thead {
-    border-radius: 60px;
-  }
-  .form {
-    border-style: none;
-    text-decoration: none;
-  }
-  .search {
-    padding-left: 100px;
-    padding-right: 50px;
-    margin-top: 50px;
-  }
-  .search2 {
-    margin-top: 150px;
-    margin-right: 150px;
-    box-sizing: content-box;
-    width: 150px;
-  }
-  thead[data-v-8056b2e8] {
-    background: #f0f2f7;
-    border: 1px solid #dee2e6;
-    box-sizing: border-box;
-    border-radius: 20px;
-  }
-  /* .v-btn:not(.v-btn--round).v-size--default {
+thead {
+  border-radius: 60px;
+}
+.form {
+  border-style: none;
+  text-decoration: none;
+}
+.search {
+  padding-left: 100px;
+  padding-right: 50px;
+  margin-top: 50px;
+}
+.search2 {
+  margin-top: 150px;
+  margin-right: 150px;
+  box-sizing: content-box;
+  width: 150px;
+}
+thead[data-v-8056b2e8] {
+  background: #f0f2f7;
+  border: 1px solid #dee2e6;
+  box-sizing: border-box;
+  border-radius: 20px;
+}
+/* .v-btn:not(.v-btn--round).v-size--default {
   position: absolute;
   width: 200px;
   font-size: 16px;
@@ -524,7 +652,7 @@
   padding: 5px;
 } */
 
-  /* .cancel {
+/* .cancel {
     margin-top: 50px;
     background: #4662d4;
     color: white;
@@ -533,12 +661,12 @@
     width: 111px;
     height: 45px;
   } */
-  .button {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell,
-      "Open Sans", "Helvetica Neue", sans-serif;
-    font-weight: bold;
-    vertical-align: middle;
-    align-content: center;
-    text-align: center;
-  }
+.button {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu,
+    Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+  font-weight: bold;
+  vertical-align: middle;
+  align-content: center;
+  text-align: center;
+}
 </style>

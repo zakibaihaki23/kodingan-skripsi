@@ -25,7 +25,7 @@
             </template>
             <b-card
               border-variant="primary"
-              header-html="Total Data yang Harus divalidasi <br>(Bulan Ini)"
+              header-html="Total Data yang Harus divalidasi <b>(Bulan Ini)</b>"
               header-bg-variant="primary"
               header-text-variant="white"
               align="center"
@@ -82,7 +82,7 @@
             >
               <template #header>
                 <!-- <v-badge inline :content="notif" :value="notif" color="red"> -->
-                <p class="mt-0 mb-0">Informasi untuk {{ user.nama_instansi }}</p>
+                <p class="mt-0 mb-0">Informasi untuk {{ user.instansi.nama_instansi }}</p>
                 <!-- </v-badge> -->
               </template>
               <b-list-group v-for="(item, index) in informasi" :key="item.id">
@@ -109,7 +109,7 @@
 
             <b-card
               border-variant="primary"
-              header-html="Total Data yang Sudah Divalidasi<br>(Bulan Ini)"
+              header-html="Total Data yang Sudah Divalidasi <b>(Bulan Ini)</b>"
               header-bg-variant="primary"
               header-text-variant="white"
               align="center"
@@ -161,13 +161,10 @@
         interval: null,
         waktu: new Date(),
         loading: false,
-        pbb_invalid: "",
         pbb_valid: "",
-        paten_invalid: "",
         paten_valid: "",
-        kependudukan_invalid: "",
         kependudukan_valid: "",
-        bencana_invalid: "",
+        camat_valid: "",
         bencana_valid: "",
         notvalid: "",
         informasi: "",
@@ -223,7 +220,7 @@
         this.$http
           .get("/kelurahan", {
             params: {
-              instansi_id: this.user.id,
+              instansi_id: this.user.instansi_id,
             },
           })
           .then((response) => {
@@ -287,20 +284,17 @@
             },
           })
           .then((response) => {
-            this.pbb_invalid = response.data.data[0].pbb_invalid;
             this.pbb_valid = response.data.data[1].pbb_valid;
-            this.paten_invalid = response.data.data[2].paten_invalid;
-            this.paten_valid = response.data.data[3].paten_valid;
-            this.kependudukan_invalid = response.data.data[4].kependudukan_invalid;
-            this.kependudukan_valid = response.data.data[5].kependudukan_valid;
-            this.bencana_invalid = response.data.data[6].bencana_invalid;
-            this.bencana_valid = response.data.data[7].bencana_valid;
+            this.paten_valid = response.data.data[4].paten_valid;
+            this.kependudukan_valid = response.data.data[7].kependudukan_valid;
+            this.camat_valid = response.data.data[10].camat_valid;
+            this.bencana_valid = response.data.data[13].bencana_valid;
             this.loaded = true;
 
             // UNTUK INFORMASI
             // console.log(this.$moment(test).fromNow());
             this.datacollection = {
-              labels: ["PBB", "PATEN", "Kependudukan", "Bencana Alam"],
+              labels: ["PBB", "PATEN", "Kependudukan", "Kegiatan Camat", "Bencana Alam"],
               datasets: [
                 {
                   label: "Sudah Divalidasi",
@@ -309,6 +303,7 @@
                     `${this.pbb_valid}`,
                     `${this.paten_valid}`,
                     `${this.kependudukan_valid}`,
+                    `${this.camat_valid}`,
                     `${this.bencana_valid}`,
                   ],
                   borderWidth: 1,

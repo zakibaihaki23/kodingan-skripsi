@@ -1,23 +1,31 @@
 <template>
   <div>
-    <v-autocomplete
-      outlined
-      single-line
-      :search-input.sync="search"
-      style="border-radius: 10px; width: 250px; font-size: 13px"
-      item-text="name"
-      item-value="value"
-      v-model="item_list"
-      :items="items"
-      required
-      @change="selected"
-      append-icon=""
-      clearable
-      return-object
-      label="Kecamatan"
-      dense
-    >
-    </v-autocomplete>
+    <v-tooltip top>
+      <template v-slot:activator="{ on, attrs }">
+        <v-autocomplete
+          v-on="on"
+          v-bind="attrs"
+          outlined
+          single-line
+          :search-input.sync="search"
+          style="border-radius: 10px; width: 250px; font-size: 13px"
+          item-text="name"
+          item-value="value"
+          v-model="item_list"
+          :items="items"
+          required
+          @change="selected"
+          append-icon=""
+          clearable
+          return-object
+          :disabled="disabled"
+          label="Kecamatan"
+          dense
+        >
+        </v-autocomplete>
+      </template>
+      <span>Car Berdasarkan Kecamatan</span>
+    </v-tooltip>
   </div>
 </template>
 
@@ -31,7 +39,7 @@
         items: [],
       };
     },
-    props: ["clear", "item"],
+    props: ["clear", "disabled", "item"],
 
     mounted() {
       this.renderData("", this.kelurahanId);

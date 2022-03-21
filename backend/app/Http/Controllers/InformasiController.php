@@ -90,10 +90,6 @@ class InformasiController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
-    {
-        //
-    }
 
     /**
      * Show the form for editing the specified resource.
@@ -126,7 +122,7 @@ class InformasiController extends Controller
      */
     public function destroy($id)
     {
-        //
+        return Informasi::destroy($id);
     }
 
     public function addInformasi(Request $request) 
@@ -183,5 +179,24 @@ class InformasiController extends Controller
             //         ->get()->count();
             // }
         
+    }
+    public function updateInformasi (Request $request, $id) {
+        $informasi = Informasi::find($id);
+        $informasi->instansi_id = $request->input('instansi_id');
+        $informasi->informasi = $request->input('informasi');
+        $informasi->waktu = $request->input('waktu');
+
+        $informasi->save();
+        $response = ["message"=>"Data Berhasil Diubah"];
+
+        return response()->json($response);
+    }
+
+    public function show($id)
+    {
+        $informasi = Informasi::select('instansi.id','instansi.nama_instansi', 'db_informasi.*')
+        ->leftJoin('instansi','instansi.id','=', 'db_informasi.instansi_id')
+        ->find($id);
+        return response(['message' => 'Success', 'data' => $informasi], 200);
     }
 }
