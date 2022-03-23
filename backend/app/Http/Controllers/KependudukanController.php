@@ -177,6 +177,73 @@ class KependudukanController extends Controller
 
     public function export(Request $request)
     {
+        if ($request->filled('instansi_id', 'periode','kelurahan')) {
+
+            $kependudukan = DB::table('db_kependudukan')
+                ->where('instansi_id', '=', $request->get('instansi_id'))
+                ->where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode'))
+                ->where('kelurahan','=', $request->get('kelurahan'))
+                ->where('is_verified','=',2)
+                ->orderBy('id', 'DESC')
+                ->get();
+            $count = DB::table('db_kependudukan')
+                ->select(
+                    DB::raw('SUM(jmlh_penduduk_bln_lalu_l) as total_penduduk_bln_lalu_l'),
+                    DB::raw('SUM(jmlh_penduduk_bln_lalu_p) as total_penduduk_bln_lalu_p'),
+                    DB::raw('SUM(total_penduduk_bln_lalu) as total_penduduk_bln_lalu'),
+                    DB::raw('SUM(lahir_l) as total_lahir_l'),
+                    DB::raw('SUM(lahir_p) as total_lahir_p'),
+                    DB::raw('SUM(total_lahir) as total_lahir'),
+                    DB::raw('SUM(meninggal_l) as total_meninggal_l'),
+                    DB::raw('SUM(meninggal_p) as total_meninggal_p'),
+                    DB::raw('SUM(total_meninggal) as total_meninggal'),
+                    DB::raw('SUM(datang_l) as total_datang_l'),
+                    DB::raw('SUM(datang_p) as total_datang_p'),
+                    DB::raw('SUM(total_datang) as total_datang'),
+                    DB::raw('SUM(pindah_l) as total_pindah_l'),
+                    DB::raw('SUM(pindah_p) as total_pindah_p'),
+                    DB::raw('SUM(total_pindah) as total_pindah'),
+                    DB::raw('SUM(jmlh_penduduk_bln_ini_l) as total_penduduk_bln_ini_l'),
+                    DB::raw('SUM(jmlh_penduduk_bln_ini_p) as total_penduduk_bln_ini_p'),
+                    DB::raw('SUM(total_penduduk_bln_ini) as total_penduduk_bln_ini'),
+
+
+                    
+                    )
+                ->where('instansi_id', '=', $request->get('instansi_id'))
+                ->where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode'))
+                ->where('kelurahan','=', $request->get('kelurahan'))
+                ->where('is_verified','=',2)
+                ->orderBy('id', 'DESC')
+                ->get();
+            $periode = DB::table('db_kependudukan')
+                ->select('periode')
+                ->where('instansi_id', '=', $request->get('instansi_id'))
+                ->where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode'))
+                ->where('kelurahan','=', $request->get('kelurahan'))
+                ->where('is_verified','=',2)
+                ->orderBy('id', 'DESC')
+                ->take(1)
+                ->get();
+            $instansi = DB::table('db_kependudukan')
+                ->select('db_kependudukan.instansi_id','instansi.nama_instansi')
+                ->leftJoin('instansi','instansi.id','db_kependudukan.instansi_id')
+                ->where('instansi_id', '=', $request->get('instansi_id'))
+                ->where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode'))
+                ->where('kelurahan','=', $request->get('kelurahan'))
+                ->where('is_verified','=',2)
+                ->take(1)
+                ->get();
+
+                foreach ($instansi as $kecamatan){
+
+                    foreach ($periode as $per) {
+                        
+                        $pdf = PDF::loadView('reportKependudukan', ['kependudukan' => $kependudukan, 'count' => $count, 'periode' => $periode,'kecamatan' => $instansi])->setPaper([0, 0, 700, 1200], 'landscape');
+                        return $pdf->stream('Laporan_Kependudukan_' . $kecamatan->nama_instansi . '_' . $per->periode . '.pdf');
+                    }
+                }               
+        }
         if ($request->filled('instansi_id', 'periode')) {
 
             $kependudukan = DB::table('db_kependudukan')

@@ -234,6 +234,82 @@ class BencanaController extends Controller
 
     public function export(Request $request)
     {
+        if ($request->filled('instansi_id', 'periode','kelurahan')) {
+
+            $bencana = DB::table('db_bencana_alam')
+                ->select('kelurahan', DB::raw("DATE_FORMAT(db_bencana_alam.periode, '%b-%Y') as periode"), 
+                'jmlh_kk','jmlh_jiwa','rumah_rusak_berat','rumah_rusak_sedang','rumah_rusak_ringan','kantor_rusak_berat',
+                'kantor_rusak_sedang','kantor_rusak_ringan','pendidikan_rusak_berat','pendidikan_rusak_sedang','pendidikan_rusak_ringan',
+                'ibadah_rusak_berat','ibadah_rusak_sedang','ibadah_rusak_ringan','jembatan_rusak_berat','jembatan_rusak_sedang',
+                'jembatan_rusak_ringan','lainnya_rusak_berat','lainnya_rusak_sedang','lainnya_rusak_ringan','korban_menderita','korban_luka', 'korban_meninggal',
+                'kerugian')
+                ->where('instansi_id', '=', $request->get('instansi_id'))
+                ->where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode'))
+                ->where('kelurahan','=', $request->get('kelurahan'))
+                ->where('is_verified','=',2)
+                ->orderBy('id', 'DESC')
+                ->get();
+            $count = DB::table('db_bencana_alam')
+                ->select(
+                    DB::raw('SUM(jmlh_kk) AS total_kk'),
+                    DB::raw('SUM(jmlh_jiwa) AS total_jiwa'),
+                    DB::raw('SUM(rumah_rusak_berat) AS total_rumah_rusak_berat'),
+                    DB::raw('SUM(rumah_rusak_sedang) AS total_rumah_rusak_sedang'),
+                    DB::raw('SUM(rumah_rusak_ringan) AS total_rumah_rusak_ringan'),
+                    DB::raw('SUM(kantor_rusak_berat) AS total_kantor_rusak_berat'),
+                    DB::raw('SUM(kantor_rusak_sedang) AS total_kantor_rusak_sedang'),
+                    DB::raw('SUM(kantor_rusak_ringan) AS total_kantor_rusak_ringan'),
+                    DB::raw('SUM(pendidikan_rusak_berat) AS total_pendidikan_rusak_berat'),
+                    DB::raw('SUM(pendidikan_rusak_sedang) AS total_pendidikan_rusak_sedang'),
+                    DB::raw('SUM(pendidikan_rusak_ringan) AS total_pendidikan_rusak_ringan'),
+                    DB::raw('SUM(ibadah_rusak_berat) AS total_ibadah_rusak_berat'),
+                    DB::raw('SUM(ibadah_rusak_sedang) AS total_ibadah_rusak_sedang'),
+                    DB::raw('SUM(ibadah_rusak_ringan) AS total_ibadah_rusak_ringan'),
+                    DB::raw('SUM(jembatan_rusak_berat) AS total_jembatan_rusak_berat'),
+                    DB::raw('SUM(jembatan_rusak_sedang) AS total_jembatan_rusak_sedang'),
+                    DB::raw('SUM(jembatan_rusak_ringan) AS total_jembatan_rusak_ringan'),
+                    DB::raw('SUM(lainnya_rusak_berat) AS total_lainnya_rusak_berat'),
+                    DB::raw('SUM(lainnya_rusak_sedang) AS total_lainnya_rusak_sedang'),
+                    DB::raw('SUM(lainnya_rusak_ringan) AS total_lainnya_rusak_ringan'),
+                    DB::raw('SUM(korban_menderita) AS total_korban_menderita'),
+                    DB::raw('SUM(korban_luka) AS total_korban_luka'),
+                    DB::raw('SUM(korban_meninggal) AS total_korban_meninggal'),
+                    DB::raw('SUM(kerugian) AS total_kerugian')
+                    )
+                ->where('instansi_id', '=', $request->get('instansi_id'))
+                ->where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode'))
+                ->where('kelurahan','=', $request->get('kelurahan'))
+                ->where('is_verified','=',2)
+                ->orderBy('id', 'DESC')
+                ->get();
+            $periode = DB::table('db_bencana_alam')
+                ->select('periode')
+                ->where('instansi_id', '=', $request->get('instansi_id'))
+                ->where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode'))
+                ->where('kelurahan','=', $request->get('kelurahan'))
+                ->where('is_verified','=',2)
+                ->orderBy('id', 'DESC')
+                ->take(1)
+                ->get();
+            $instansi = DB::table('db_bencana_alam')
+                ->select('db_bencana_alam.instansi_id','instansi.nama_instansi')
+                ->leftJoin('instansi','instansi.id','db_bencana_alam.instansi_id')
+                ->where('instansi_id', '=', $request->get('instansi_id'))
+                ->where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode'))
+                ->where('kelurahan','=', $request->get('kelurahan'))
+                ->where('is_verified','=',2)
+                ->take(1)
+                ->get();
+
+                foreach ($instansi as $kecamatan){
+
+                    foreach ($periode as $per) {
+                        
+                        $pdf = PDF::loadView('reportBencana', ['bencana' => $bencana, 'count' => $count, 'periode' => $periode,'kecamatan' => $instansi])->setPaper([0, 0, 600, 1500], 'landscape');
+                        return $pdf->stream('Laporan_Bencana_Alam_' . $kecamatan->nama_instansi . '_' . $per->periode . '.pdf');
+                    }
+                }               
+        }
         if ($request->filled('instansi_id', 'periode')) {
 
             $bencana = DB::table('db_bencana_alam')

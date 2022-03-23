@@ -15,11 +15,11 @@
     <v-divider class="d-flex d-none d-sm-block"></v-divider>
     <b-row style="margin-top: 1px" cols-lg="5" cols-md="1">
       <b-col>
-        <StatusSelected v-show="!firstLoad" v-model="status" @selected="statusSelected">
-        </StatusSelected>
-      </b-col>
-      <b-col>
-        <KelurahanSelected v-show="!firstLoad" v-model="kelurahan" @selected="KelurahanSelected">
+        <KelurahanSelected
+          v-show="!firstLoad"
+          v-model="kelurahan"
+          @selected="KelurahanSelected"
+        >
         </KelurahanSelected>
       </b-col>
       <b-col lg="3">
@@ -78,7 +78,11 @@
         type="table-tbody"
         :types="{ 'table-row': 'table-cell@8' }"
       ></v-skeleton-loader>
-      <v-progress-linear :active="isLoading" :indeterminate="isLoading" middle></v-progress-linear>
+      <v-progress-linear
+        :active="isLoading"
+        :indeterminate="isLoading"
+        middle
+      ></v-progress-linear>
       <v-simple-table v-show="!firstLoad">
         <template v-slot:default>
           <thead style="border-style: solid; border-width: 2px; border-color: #d7d0d0">
@@ -89,8 +93,6 @@
             <td colspan="15">Jenis Bangunan</td>
             <td colspan="3">Korban Manusia</td>
             <td rowspan="3">Perkiraan Kerugian (Rp)</td>
-            <td rowspan="3">Status</td>
-            <td rowspan="3"></td>
             <tr>
               <th rowspan="2" class="text-center">KK</th>
               <th rowspan="2" class="text-center">Jiwa</th>
@@ -129,22 +131,38 @@
           </tbody>
           <tbody>
             <tr v-for="item in bencana" :key="item.id">
-              <td v-if="item.periode == null" style="font-weight: bold" class="text-center">
+              <td
+                v-if="item.periode == null"
+                style="font-weight: bold"
+                class="text-center"
+              >
                 NIHIL
               </td>
               <td class="text-left" v-else>{{ item.periode | moment("MMMM - YYYY") }}</td>
 
-              <td v-if="item.kelurahan == null" style="font-weight: bold" class="text-center">
+              <td
+                v-if="item.kelurahan == null"
+                style="font-weight: bold"
+                class="text-center"
+              >
                 NIHIL
               </td>
               <td class="text-left" v-else>{{ item.kelurahan }}</td>
 
-              <td v-if="item.jmlh_kk == null" style="font-weight: bold" class="text-center">
+              <td
+                v-if="item.jmlh_kk == null"
+                style="font-weight: bold"
+                class="text-center"
+              >
                 NIHIL
               </td>
               <td class="text-center" v-else>{{ item.jmlh_kk }}</td>
 
-              <td v-if="item.jmlh_jiwa == null" style="font-weight: bold" class="text-center">
+              <td
+                v-if="item.jmlh_jiwa == null"
+                style="font-weight: bold"
+                class="text-center"
+              >
                 NIHIL
               </td>
               <td class="text-center" v-else>{{ item.jmlh_jiwa }}</td>
@@ -320,7 +338,11 @@
               </td>
               <td class="text-center" v-else>{{ item.korban_menderita }}</td>
 
-              <td v-if="item.korban_luka == null" style="font-weight: bold" class="text-center">
+              <td
+                v-if="item.korban_luka == null"
+                style="font-weight: bold"
+                class="text-center"
+              >
                 NIHIL
               </td>
               <td class="text-center" v-else>{{ item.korban_luka }}</td>
@@ -342,26 +364,6 @@
                 NIHIL
               </td>
               <td class="text-center" v-else>Rp. {{ formatPrice(item.kerugian) }}</td>
-
-              <td v-if="item.is_verified == 1">Menunggu Validasi</td>
-              <td v-if="item.is_verified == 2">Sudah Divalidasi</td>
-              <td>
-                <v-menu offset-y v-if="item.is_verified == 1">
-                  <template v-slot:activator="{ on, attrs }">
-                    <v-btn v-bind="attrs" v-on="on" icon>
-                      <v-icon dark>mdi-dots-horizontal</v-icon>
-                    </v-btn>
-                  </template>
-                  <v-list>
-                    <v-list-item link @click="dialogValid(item)">
-                      <v-list-item-title class="text-center">Validasi</v-list-item-title>
-                    </v-list-item>
-                    <v-list-item link @click="dialogTolak(item)">
-                      <v-list-item-title style="text-align: center"> Tolak </v-list-item-title>
-                    </v-list-item>
-                  </v-list>
-                </v-menu>
-              </td>
             </tr>
           </tbody>
         </template>
@@ -382,7 +384,11 @@
           <v-card color="primary" dark class="text-center">
             <v-card-text>
               Mohon tunggu sebentar......
-              <v-progress-linear indeterminate color="white" class="mb-0"></v-progress-linear>
+              <v-progress-linear
+                indeterminate
+                color="white"
+                class="mb-0"
+              ></v-progress-linear>
             </v-card-text>
           </v-card>
         </div>
@@ -408,278 +414,278 @@
 </template>
 
 <script>
-  import { mapGetters } from "vuex";
-  import StatusSelected from "../../../components/StatusSelected.vue";
-  import KelurahanSelected from "../../../components/SelectKelurahan.vue";
+import { mapGetters } from "vuex";
+import StatusSelected from "../../../components/StatusSelected.vue";
+import KelurahanSelected from "../../../components/SelectKelurahan.vue";
 
-  export default {
-    components: { StatusSelected, KelurahanSelected },
-    data() {
-      return {
-        dialog: false,
-        firstLoad: true,
-        search: "",
-        date_filter: "",
-        date: "",
-        loadingBtn: false,
-        isLoading: true,
-        loading: false,
-        dialogOverlay: false,
-        validDialog: false,
-        tolakDialog: false,
-        kell: "",
-        perr: "",
-        data: [],
-        pagination: {
-          current_page: 1,
-          total: 0,
-        },
-        idData: "",
-        status: null,
-        filterStatus: null,
-        dataTable: [],
-        warehouse: null,
-        warehouse_id: "",
-        type: "",
-        status: null,
-        filterStatus: null,
-        bencana: [],
-        kelurahan: [],
-      };
+export default {
+  components: { StatusSelected, KelurahanSelected },
+  data() {
+    return {
+      dialog: false,
+      firstLoad: true,
+      search: "",
+      date_filter: "",
+      date: "",
+      loadingBtn: false,
+      isLoading: true,
+      loading: false,
+      dialogOverlay: false,
+      validDialog: false,
+      tolakDialog: false,
+      kell: "",
+      perr: "",
+      data: [],
+      pagination: {
+        current_page: 1,
+        total: 0,
+      },
+      idData: "",
+      status: null,
+      filterStatus: null,
+      dataTable: [],
+      warehouse: null,
+      warehouse_id: "",
+      type: "",
+      status: null,
+      filterStatus: null,
+      bencana: [],
+      kelurahan: [],
+    };
+  },
+  created() {
+    this.renderData();
+  },
+  computed: {
+    ...mapGetters({
+      user: "auth/user",
+    }),
+    format_date() {
+      if (this.date) return this.$moment(this.date).format("MMMM - YYYY");
     },
-    created() {
+  },
+  methods: {
+    formatPrice(value) {
+      let val = (value / 1).toFixed(0).replace(".", ",");
+      return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    },
+    hapusDialog(item) {
+      this.dialog = true;
+      this.idData = item.id;
+      this.kel = item.kelurahan;
+      this.period = this.$moment(item.periode).format("MMMM - YYYY");
+    },
+    onPageChange() {
       this.renderData();
     },
-    computed: {
-      ...mapGetters({
-        user: "auth/user",
-      }),
-      format_date() {
-        if (this.date) return this.$moment(this.date).format("MMMM - YYYY");
-      },
-    },
-    methods: {
-      formatPrice(value) {
-        let val = (value / 1).toFixed(0).replace(".", ",");
-        return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-      },
-      hapusDialog(item) {
-        this.dialog = true;
-        this.idData = item.id;
-        this.kel = item.kelurahan;
-        this.period = this.$moment(item.periode).format("MMMM - YYYY");
-      },
-      onPageChange() {
-        this.renderData();
-      },
-      renderData() {
-        this.isLoading = true;
+    renderData() {
+      this.isLoading = true;
 
-        let kelurahan = "";
-        if (this.filterKelurahan || this.filterKelurahan == 0) {
-          kelurahan = this.filterKelurahan;
-        } else {
-          kelurahan = null;
-        }
+      let kelurahan = "";
+      if (this.filterKelurahan || this.filterKelurahan == 0) {
+        kelurahan = this.filterKelurahan;
+      } else {
+        kelurahan = null;
+      }
 
-        let is_verified = "";
-        if (this.filterStatus || this.filterStatus == 0) {
-          is_verified = this.filterStatus;
-        } else {
-          is_verified = null;
-        }
+      let is_verified = "";
+      if (this.filterStatus || this.filterStatus == 0) {
+        is_verified = this.filterStatus;
+      } else {
+        is_verified = null;
+      }
 
-        let periode = "";
-        if (this.date) {
-          periode = this.date;
-        } else {
-          periode = null;
-        }
+      let periode = "";
+      if (this.date) {
+        periode = this.date;
+      } else {
+        periode = null;
+      }
 
-        this.$http
-          .get(`/camat-view/bencana`, {
-            params: {
-              page: this.pagination.current_page,
-              instansi_id: this.user.instansi_id,
-              kelurahan,
-              periode,
-              is_verified,
-            },
-          })
-          .then((response) => {
-            this.bencana = response.data.data.data;
-            this.firstLoad = false;
-            this.isLoading = false;
-            this.pagination.current_page = response.data.data.current_page;
-            this.pagination.total = response.data.data.total;
-            this.data = response.data.data;
-          });
-      },
-      dialogValid(item) {
-        this.validDialog = true;
-        this.kell = item.kelurahan;
-        this.perr = this.$moment(item.periode).format("MMMM - YYYY");
-        this.verif = item.is_verified;
-        this.idData = item.id;
-      },
-      dialogTolak(item) {
-        this.tolakDialog = true;
-        this.kell = item.kelurahan;
-        this.perr = this.$moment(item.periode).format("MMMM - YYYY");
-        this.verif = item.is_verified;
-        this.idData = item.id;
-      },
-      validasi(id) {
-        this.dialogOverlay = true;
-        this.$http
-          .put(`/valid/bencana/${id}`, {
+      this.$http
+        .get(`/camat-view/bencana`, {
+          params: {
+            page: this.pagination.current_page,
+            instansi_id: this.user.instansi_id,
+            kelurahan,
+            periode,
             is_verified: 2,
-          })
-          .then((response) => {
-            this.renderData();
-            let self = this;
-            setTimeout(function () {
-              self.dialogOverlay = false;
-              self.$toast.success("Data Berhasil Divalidasi");
-            }, 10 * 10 * 10);
-          })
-          .catch((error) => {
-            if (error) {
-              this.dialogOverlay = false;
-              this.renderData();
-            }
-          });
-      },
-      tolak(id) {
-        this.dialogOverlay = true;
-        this.$http
-          .put(`/valid/bencana/${id}`, {
-            is_verified: 3,
-          })
-          .then((response) => {
-            this.renderData();
-            let self = this;
-            setTimeout(function () {
-              self.dialogOverlay = false;
-              self.$toast.success("Data Berhasil Ditolak");
-            }, 10 * 10 * 10);
-          })
-          .catch((error) => {
-            if (error) {
-              this.dialogOverlay = false;
-              this.renderData();
-            }
-          });
-      },
-      KelurahanSelected(kelurahan) {
-        this.filterKelurahan = null;
-        if (kelurahan) {
-          this.filterKelurahan = kelurahan.name;
-        }
-        this.renderData();
-      },
-      statusSelected(status) {
-        this.status = "";
-        this.filterStatus = null;
-        if (status) {
-          this.status = status;
-          this.filterStatus = status.value;
-        }
-        this.renderData();
-      },
+          },
+        })
+        .then((response) => {
+          this.bencana = response.data.data.data;
+          this.firstLoad = false;
+          this.isLoading = false;
+          this.pagination.current_page = response.data.data.current_page;
+          this.pagination.total = response.data.data.total;
+          this.data = response.data.data;
+        });
     },
-  };
+    dialogValid(item) {
+      this.validDialog = true;
+      this.kell = item.kelurahan;
+      this.perr = this.$moment(item.periode).format("MMMM - YYYY");
+      this.verif = item.is_verified;
+      this.idData = item.id;
+    },
+    dialogTolak(item) {
+      this.tolakDialog = true;
+      this.kell = item.kelurahan;
+      this.perr = this.$moment(item.periode).format("MMMM - YYYY");
+      this.verif = item.is_verified;
+      this.idData = item.id;
+    },
+    validasi(id) {
+      this.dialogOverlay = true;
+      this.$http
+        .put(`/valid/bencana/${id}`, {
+          is_verified: 2,
+        })
+        .then((response) => {
+          this.renderData();
+          let self = this;
+          setTimeout(function () {
+            self.dialogOverlay = false;
+            self.$toast.success("Data Berhasil Divalidasi");
+          }, 10 * 10 * 10);
+        })
+        .catch((error) => {
+          if (error) {
+            this.dialogOverlay = false;
+            this.renderData();
+          }
+        });
+    },
+    tolak(id) {
+      this.dialogOverlay = true;
+      this.$http
+        .put(`/valid/bencana/${id}`, {
+          is_verified: 3,
+        })
+        .then((response) => {
+          this.renderData();
+          let self = this;
+          setTimeout(function () {
+            self.dialogOverlay = false;
+            self.$toast.success("Data Berhasil Ditolak");
+          }, 10 * 10 * 10);
+        })
+        .catch((error) => {
+          if (error) {
+            this.dialogOverlay = false;
+            this.renderData();
+          }
+        });
+    },
+    KelurahanSelected(kelurahan) {
+      this.filterKelurahan = null;
+      if (kelurahan) {
+        this.filterKelurahan = kelurahan.name;
+      }
+      this.renderData();
+    },
+    statusSelected(status) {
+      this.status = "";
+      this.filterStatus = null;
+      if (status) {
+        this.status = status;
+        this.filterStatus = status.value;
+      }
+      this.renderData();
+    },
+  },
+};
 </script>
 
 <style scoped lang="scss">
-  .mytable table tr {
-    border: none;
-  }
+.mytable table tr {
+  border: none;
+}
 
-  .v-data-table > .v-data-table__wrapper > table > tbody > tr > td {
-    font-size: 17px;
-    margin: auto;
-    white-space: nowrap;
-  }
+.v-data-table > .v-data-table__wrapper > table > tbody > tr > td {
+  font-size: 17px;
+  margin: auto;
+  white-space: nowrap;
+}
 
-  tbody td {
-    text-align: center;
-    border-style: solid;
-    border-width: 2px;
-    border-color: #d7d0d0;
-  }
-  thead tr th {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell,
-      "Open Sans", "Helvetica Neue", sans-serif;
-    font-weight: bold;
-    color: black !important;
-    font-size: 10pt !important;
-    vertical-align: middle;
-    text-align: center;
-    border-style: solid;
-    border-width: 2px;
-    border-color: #d7d0d0;
-  }
-  thead td {
-    color: black !important;
-    font-weight: bold;
-    border-style: solid;
-    border-width: 2px;
-    border-color: #d7d0d0;
-    text-align: center;
-  }
-  // .v-btn:not(.v-btn--round).v-size--default {
-  //   position: absolute;
-  //   width: 200px;
-  //   height: 50px;
-  //   background: #4662d4;
-  //   color: white;
-  //   border-radius: 30px;
-  //   font-size: 16px;
-  //   margin-top: 50px;
-  //   font-weight: bold;
-  //   text-transform: capitalize;
-  //   cursor: pointer;
-  //   padding: 5px;
-  // }
-  .search {
-    padding-left: 100px;
-    padding-right: 50px;
-    margin-top: 50px;
-  }
-  .search2 {
-    margin-top: 150px;
-    margin-right: 150px;
-    box-sizing: content-box;
-    width: 150px;
-  }
-  .v-menu__content {
-    border-radius: 8px;
-    border: 1px solid #c4c4c4;
-    outline-style: inherit;
-    outline-color: white;
-    box-shadow: none;
+tbody td {
+  text-align: center;
+  border-style: solid;
+  border-width: 2px;
+  border-color: #d7d0d0;
+}
+thead tr th {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu,
+    Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+  font-weight: bold;
+  color: black !important;
+  font-size: 10pt !important;
+  vertical-align: middle;
+  text-align: center;
+  border-style: solid;
+  border-width: 2px;
+  border-color: #d7d0d0;
+}
+thead td {
+  color: black !important;
+  font-weight: bold;
+  border-style: solid;
+  border-width: 2px;
+  border-color: #d7d0d0;
+  text-align: center;
+}
+// .v-btn:not(.v-btn--round).v-size--default {
+//   position: absolute;
+//   width: 200px;
+//   height: 50px;
+//   background: #4662d4;
+//   color: white;
+//   border-radius: 30px;
+//   font-size: 16px;
+//   margin-top: 50px;
+//   font-weight: bold;
+//   text-transform: capitalize;
+//   cursor: pointer;
+//   padding: 5px;
+// }
+.search {
+  padding-left: 100px;
+  padding-right: 50px;
+  margin-top: 50px;
+}
+.search2 {
+  margin-top: 150px;
+  margin-right: 150px;
+  box-sizing: content-box;
+  width: 150px;
+}
+.v-menu__content {
+  border-radius: 8px;
+  border: 1px solid #c4c4c4;
+  outline-style: inherit;
+  outline-color: white;
+  box-shadow: none;
 
-    outline-color: #e8eff2;
-  }
-  .v-sheet.v-list {
-    background: #e8eff2;
-  }
-  .card {
-    background: #fff;
-  }
+  outline-color: #e8eff2;
+}
+.v-sheet.v-list {
+  background: #e8eff2;
+}
+.card {
+  background: #fff;
+}
 
-  .card-1 {
-    border: solid 1px #ddeeee;
-    border-collapse: collapse;
-    border-spacing: 0;
-    width: 80%;
-    text-align: center;
-    vertical-align: middle;
-    font-weight: bold;
-  }
+.card-1 {
+  border: solid 1px #ddeeee;
+  border-collapse: collapse;
+  border-spacing: 0;
+  width: 80%;
+  text-align: center;
+  vertical-align: middle;
+  font-weight: bold;
+}
 
-  // .card-1:hover {
-  //   box-shadow: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
-  // }
+// .card-1:hover {
+//   box-shadow: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
+// }
 </style>

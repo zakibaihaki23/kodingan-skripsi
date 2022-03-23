@@ -15,11 +15,11 @@
 
     <b-row style="margin-top: 1px" cols-lg="5" cols-md="1">
       <b-col>
-        <StatusSelected v-show="!firstLoad" v-model="status" @selected="statusSelected">
-        </StatusSelected>
-      </b-col>
-      <b-col>
-        <KelurahanSelected v-show="!firstLoad" v-model="kelurahan" @selected="KelurahanSelected">
+        <KelurahanSelected
+          v-show="!firstLoad"
+          v-model="kelurahan"
+          @selected="KelurahanSelected"
+        >
         </KelurahanSelected>
       </b-col>
       <b-col lg="3">
@@ -75,7 +75,11 @@
         <v-card color="primary" dark class="text-center">
           <v-card-text>
             Mohon tunggu sebentar......
-            <v-progress-linear indeterminate color="white" class="mb-0"></v-progress-linear>
+            <v-progress-linear
+              indeterminate
+              color="white"
+              class="mb-0"
+            ></v-progress-linear>
           </v-card-text>
         </v-card>
       </div>
@@ -161,27 +165,6 @@
           {{ item.keterangan }}
         </div>
       </template>
-      <template v-slot:[`item.is_verified`]="{ item }">
-        <span v-if="item.is_verified == 1"> Menunggu Validasi </span>
-        <span v-if="item.is_verified == 2"> Sudah Divalidasi </span>
-      </template>
-      <template v-slot:[`item.actions`]="{ item }">
-        <v-menu offset-y v-if="item.is_verified == 1">
-          <template v-slot:activator="{ on, attrs }">
-            <v-btn v-bind="attrs" v-on="on" icon>
-              <v-icon dark>mdi-dots-horizontal</v-icon>
-            </v-btn>
-          </template>
-          <v-list>
-            <v-list-item link @click="dialogValid(item)">
-              <v-list-item-title class="text-center">Validasi</v-list-item-title>
-            </v-list-item>
-            <v-list-item link @click="dialogTolak(item)">
-              <v-list-item-title style="text-align: center"> Tolak </v-list-item-title>
-            </v-list-item>
-          </v-list>
-        </v-menu>
-      </template>
     </v-data-table>
     <div class="mt-5">
       <b-pagination
@@ -214,401 +197,390 @@
 </template>
 
 <script>
-  import { mapGetters } from "vuex";
-  import StatusSelected from "../../../components/StatusSelected.vue";
-  import KelurahanSelected from "../../../components/SelectKelurahan.vue";
+import { mapGetters } from "vuex";
+import StatusSelected from "../../../components/StatusSelected.vue";
+import KelurahanSelected from "../../../components/SelectKelurahan.vue";
 
-  export default {
-    components: { StatusSelected, KelurahanSelected },
-    data() {
-      return {
-        search: "",
-        searchBox: "",
-        date_filter: "",
-        date: "",
-        isMobile: false,
-        page: 1,
-        validDialog: false,
-        tolakDialog: false,
-        firstLoad: true,
-        loadingBtn: false,
-        isLoading: true,
-        loading: false,
-        dialogOverlay: false,
-        overlay: false,
-        data: [],
-        pagination: {
-          current_page: 1,
-          total: 0,
-        },
-        kelurahans: "",
-        status: null,
-        kel: "",
-        idData: "",
-        id: "",
-        period: "",
-        kelurahan: [],
-        filterStatus: null,
-        table: [
-          {
-            text: "Periode Laporan",
-            value: "periode",
-            class: "black--text subheading",
-            width: "140px",
-          },
-          {
-            text: "Desa/Kelurahan",
-            value: "kelurahan",
-            class: "black--text subheading",
-            width: "150px",
-          },
-          {
-            text: "Target PBB (Rp.)",
-            value: "target_pbb",
-            align: "center",
-            class: "black--text subheading",
-            align: "center",
-          },
-          {
-            text: "Realisasi Bulan yang Lalu",
-            value: "realisasi_bln_lalu",
-            align: "center",
-            class: "black--text subheading",
-            align: "center",
-          },
-          {
-            text: "Realisasi Bulan Ini",
-            value: "realisasi_bln_ini",
-            align: "center",
-            class: "black--text subheading",
-            align: "center",
-          },
-
-          {
-            text: "Jumlah Realisasi S/D Bulan Ini",
-            value: "jmlh_realisasi",
-            align: "center",
-            class: "black--text subheading",
-            align: "center",
-          },
-          {
-            text: "Sisa Target",
-            value: "sisa_target",
-            align: "center",
-            class: "black--text subheading",
-            align: "center",
-          },
-          {
-            text: "Keterangan (%)",
-            value: "keterangan",
-            align: "center",
-            class: "black--text subheading",
-            align: "center",
-          },
-          {
-            text: "Status",
-            value: "is_verified",
-            align: "center",
-            class: "black--text subheading",
-            align: "center",
-          },
-          {
-            value: "actions",
-            sortable: false,
-          },
-        ],
-
-        dataTable: [],
-        warehouse: null,
-        warehouse_id: "",
-        type: "",
-        status: null,
-        filterStatus: null,
-        warehouseList: [],
-        kecamatan: [],
-        pbb: [],
-        kelurahan: [],
-        kelurahanDisabled: true,
-        downloadDisabled: true,
-        perr: "",
-        kell: "",
-      };
-    },
-    watch: {
-      search: {
-        handler: function (val) {
-          this.renderData(val);
-        },
-        deep: true,
+export default {
+  components: { StatusSelected, KelurahanSelected },
+  data() {
+    return {
+      search: "",
+      searchBox: "",
+      date_filter: "",
+      date: "",
+      isMobile: false,
+      page: 1,
+      validDialog: false,
+      tolakDialog: false,
+      firstLoad: true,
+      loadingBtn: false,
+      isLoading: true,
+      loading: false,
+      dialogOverlay: false,
+      overlay: false,
+      data: [],
+      pagination: {
+        current_page: 1,
+        total: 0,
       },
-      overlay(val) {
-        val &&
-          setTimeout(() => {
-            this.overlay = false;
-          }, 1000);
+      kelurahans: "",
+      status: null,
+      kel: "",
+      idData: "",
+      id: "",
+      period: "",
+      kelurahan: [],
+      filterStatus: null,
+      table: [
+        {
+          text: "Periode Laporan",
+          value: "periode",
+          class: "black--text subheading",
+          width: "140px",
+        },
+        {
+          text: "Desa/Kelurahan",
+          value: "kelurahan",
+          class: "black--text subheading",
+          width: "150px",
+        },
+        {
+          text: "Target PBB (Rp.)",
+          value: "target_pbb",
+          align: "center",
+          class: "black--text subheading",
+          align: "center",
+        },
+        {
+          text: "Realisasi Bulan yang Lalu",
+          value: "realisasi_bln_lalu",
+          align: "center",
+          class: "black--text subheading",
+          align: "center",
+        },
+        {
+          text: "Realisasi Bulan Ini",
+          value: "realisasi_bln_ini",
+          align: "center",
+          class: "black--text subheading",
+          align: "center",
+        },
+
+        {
+          text: "Jumlah Realisasi S/D Bulan Ini",
+          value: "jmlh_realisasi",
+          align: "center",
+          class: "black--text subheading",
+          align: "center",
+        },
+        {
+          text: "Sisa Target",
+          value: "sisa_target",
+          align: "center",
+          class: "black--text subheading",
+          align: "center",
+        },
+        {
+          text: "Keterangan (%)",
+          value: "keterangan",
+          align: "center",
+          class: "black--text subheading",
+          align: "center",
+        },
+      ],
+
+      dataTable: [],
+      warehouse: null,
+      warehouse_id: "",
+      type: "",
+      status: null,
+      filterStatus: null,
+      warehouseList: [],
+      kecamatan: [],
+      pbb: [],
+      kelurahan: [],
+      kelurahanDisabled: true,
+      downloadDisabled: true,
+      perr: "",
+      kell: "",
+    };
+  },
+  watch: {
+    search: {
+      handler: function (val) {
+        this.renderData(val);
       },
+      deep: true,
     },
-    created() {
+    overlay(val) {
+      val &&
+        setTimeout(() => {
+          this.overlay = false;
+        }, 1000);
+    },
+  },
+  created() {
+    this.renderData();
+  },
+  // mounted() {
+  //   this.renderData('', this.status)
+  // },
+  watch: {
+    clearable: {
+      handler: function (val) {
+        this.renderData("");
+      },
+      deep: true,
+    },
+  },
+  computed: {
+    ...mapGetters({
+      user: "auth/user",
+    }),
+    format_date() {
+      if (this.date) return this.$moment(this.date).format("MMMM - YYYY");
+    },
+  },
+  methods: {
+    formatPrice(value) {
+      let val = (value / 1).toFixed(0).replace(".", ",");
+      return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    },
+    onPageChange() {
       this.renderData();
     },
-    // mounted() {
-    //   this.renderData('', this.status)
-    // },
-    watch: {
-      clearable: {
-        handler: function (val) {
-          this.renderData("");
-        },
-        deep: true,
-      },
-    },
-    computed: {
-      ...mapGetters({
-        user: "auth/user",
-      }),
-      format_date() {
-        if (this.date) return this.$moment(this.date).format("MMMM - YYYY");
-      },
-    },
-    methods: {
-      formatPrice(value) {
-        let val = (value / 1).toFixed(0).replace(".", ",");
-        return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-      },
-      onPageChange() {
-        this.renderData();
-      },
-      renderData(search) {
-        this.isLoading = true;
+    renderData(search) {
+      this.isLoading = true;
 
-        let kelurahan = "";
-        if (this.filterKelurahan || this.filterKelurahan == 0) {
-          kelurahan = this.filterKelurahan;
-        } else {
-          kelurahan = null;
-        }
+      let kelurahan = "";
+      if (this.filterKelurahan || this.filterKelurahan == 0) {
+        kelurahan = this.filterKelurahan;
+      } else {
+        kelurahan = null;
+      }
 
-        let is_verified = "";
-        if (this.filterStatus || this.filterStatus == 0) {
-          is_verified = this.filterStatus;
-        } else {
-          is_verified = null;
-        }
+      let is_verified = "";
+      if (this.filterStatus || this.filterStatus == 0) {
+        is_verified = this.filterStatus;
+      } else {
+        is_verified = null;
+      }
 
-        let periode = "";
-        if (this.date) {
-          periode = this.date;
-        } else {
-          periode = null;
-        }
+      let periode = "";
+      if (this.date) {
+        periode = this.date;
+      } else {
+        periode = null;
+      }
 
-        this.$http
-          .get("/camat-view/pbb", {
-            params: {
-              page: this.pagination.current_page,
-              instansi_id: this.user.instansi_id,
-              kelurahan,
-              periode,
-              is_verified,
-            },
-          })
-          .then((response) => {
-            this.pbb = response.data.data.data;
-            this.firstLoad = false;
-            this.isLoading = false;
-            this.pagination.current_page = response.data.data.current_page;
-            this.pagination.total = response.data.data.total;
-            this.data = response.data.data;
-          })
-          .catch((error) => {
-            if (error) {
-              console.log(error);
-            }
-            this.isLoading = false;
-          });
-      },
-      dialogValid(item) {
-        this.validDialog = true;
-        this.kell = item.kelurahan;
-        this.perr = this.$moment(item.periode).format("MMMM - YYYY");
-        this.verif = item.is_verified;
-        this.idData = item.id;
-      },
-      dialogTolak(item) {
-        this.tolakDialog = true;
-        this.kell = item.kelurahan;
-        this.perr = this.$moment(item.periode).format("MMMM - YYYY");
-        this.verif = item.is_verified;
-        this.idData = item.id;
-      },
-      validasi(id) {
-        this.dialogOverlay = true;
-        this.$http
-          .put(`/valid/pbb/${id}`, {
+      this.$http
+        .get("/camat-view/pbb", {
+          params: {
+            page: this.pagination.current_page,
+            instansi_id: this.user.instansi_id,
+            kelurahan,
+            periode,
             is_verified: 2,
-          })
-          .then((response) => {
-            this.renderData();
-            let self = this;
-            setTimeout(function () {
-              self.dialogOverlay = false;
-              self.$toast.success("Data Berhasil Divalidasi");
-            }, 10 * 10 * 10);
-          })
-          .catch((error) => {
-            if (error) {
-              this.dialogOverlay = false;
-              this.renderData();
-            }
-          });
-      },
-      tolak(id) {
-        this.dialogOverlay = true;
-        this.$http
-          .put(`/valid/pbb/${id}`, {
-            is_verified: 3,
-          })
-          .then((response) => {
-            this.renderData();
-            let self = this;
-            setTimeout(function () {
-              self.dialogOverlay = false;
-              self.$toast.success("Data Berhasil Ditolak");
-            }, 10 * 10 * 10);
-          })
-          .catch((error) => {
-            if (error) {
-              this.dialogOverlay = false;
-              this.renderData();
-            }
-          });
-      },
-      KelurahanSelected(kelurahan) {
-        this.filterKelurahan = null;
-        if (kelurahan) {
-          this.filterKelurahan = kelurahan.name;
-        }
-        this.renderData();
-      },
-      statusSelected(status) {
-        this.status = "";
-        this.filterStatus = null;
-        if (status) {
-          this.status = status;
-          this.filterStatus = status.value;
-        }
-        this.renderData();
-      },
+          },
+        })
+        .then((response) => {
+          this.pbb = response.data.data.data;
+          this.firstLoad = false;
+          this.isLoading = false;
+          this.pagination.current_page = response.data.data.current_page;
+          this.pagination.total = response.data.data.total;
+          this.data = response.data.data;
+        })
+        .catch((error) => {
+          if (error) {
+            console.log(error);
+          }
+          this.isLoading = false;
+        });
     },
-  };
+    dialogValid(item) {
+      this.validDialog = true;
+      this.kell = item.kelurahan;
+      this.perr = this.$moment(item.periode).format("MMMM - YYYY");
+      this.verif = item.is_verified;
+      this.idData = item.id;
+    },
+    dialogTolak(item) {
+      this.tolakDialog = true;
+      this.kell = item.kelurahan;
+      this.perr = this.$moment(item.periode).format("MMMM - YYYY");
+      this.verif = item.is_verified;
+      this.idData = item.id;
+    },
+    validasi(id) {
+      this.dialogOverlay = true;
+      this.$http
+        .put(`/valid/pbb/${id}`, {
+          is_verified: 2,
+        })
+        .then((response) => {
+          this.renderData();
+          let self = this;
+          setTimeout(function () {
+            self.dialogOverlay = false;
+            self.$toast.success("Data Berhasil Divalidasi");
+          }, 10 * 10 * 10);
+        })
+        .catch((error) => {
+          if (error) {
+            this.dialogOverlay = false;
+            this.renderData();
+          }
+        });
+    },
+    tolak(id) {
+      this.dialogOverlay = true;
+      this.$http
+        .put(`/valid/pbb/${id}`, {
+          is_verified: 3,
+        })
+        .then((response) => {
+          this.renderData();
+          let self = this;
+          setTimeout(function () {
+            self.dialogOverlay = false;
+            self.$toast.success("Data Berhasil Ditolak");
+          }, 10 * 10 * 10);
+        })
+        .catch((error) => {
+          if (error) {
+            this.dialogOverlay = false;
+            this.renderData();
+          }
+        });
+    },
+    KelurahanSelected(kelurahan) {
+      this.filterKelurahan = null;
+      if (kelurahan) {
+        this.filterKelurahan = kelurahan.name;
+      }
+      this.renderData();
+    },
+    statusSelected(status) {
+      this.status = "";
+      this.filterStatus = null;
+      if (status) {
+        this.status = status;
+        this.filterStatus = status.value;
+      }
+      this.renderData();
+    },
+  },
+};
 </script>
 
 <style scoped lang="scss">
-  // .mytable table tr {
-  //   border: none;
-  // }
-  // .v-data-table > .v-data-table__wrapper > table > tbody > tr > td {
-  //   font-size: 17px;
-  // }
-  .helper {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell,
-      "Open Sans", "Helvetica Neue", sans-serif;
-    padding-left: 80px;
-    padding-right: 50px;
+// .mytable table tr {
+//   border: none;
+// }
+// .v-data-table > .v-data-table__wrapper > table > tbody > tr > td {
+//   font-size: 17px;
+// }
+.helper {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu,
+    Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+  padding-left: 80px;
+  padding-right: 50px;
+}
+
+// .v-btn:not(.v-btn--round).v-size--default {
+//   position: absolute;
+//   width: 200px;
+//   height: 50px;
+//   background: #4662d4;
+//   color: white;
+//   border-radius: 30px;
+//   font-size: 16px;
+//   margin-top: 50px;
+//   font-weight: bold;
+//   text-transform: capitalize;
+//   cursor: pointer;
+//   padding: 5px;
+// }
+.search {
+  padding-left: 100px;
+  padding-right: 50px;
+  margin-top: 50px;
+}
+.search2 {
+  margin-top: 150px;
+  margin-right: 150px;
+  box-sizing: content-box;
+  width: 150px;
+}
+.v-menu__content {
+  border-radius: 8px;
+  border: 1px solid #c4c4c4;
+  outline-style: inherit;
+  outline-color: white;
+  box-shadow: none;
+
+  outline-color: #e8eff2;
+}
+.v-sheet.v-list {
+  background: #e8eff2;
+}
+.mobile {
+  color: #333;
+}
+
+@media screen and (max-width: 768px) {
+  .mobile table.v-table tr {
+    max-width: 100%;
+    position: relative;
+    display: block;
   }
 
-  // .v-btn:not(.v-btn--round).v-size--default {
-  //   position: absolute;
-  //   width: 200px;
-  //   height: 50px;
-  //   background: #4662d4;
-  //   color: white;
-  //   border-radius: 30px;
-  //   font-size: 16px;
-  //   margin-top: 50px;
-  //   font-weight: bold;
-  //   text-transform: capitalize;
-  //   cursor: pointer;
-  //   padding: 5px;
-  // }
-  .search {
-    padding-left: 100px;
-    padding-right: 50px;
-    margin-top: 50px;
-  }
-  .search2 {
-    margin-top: 150px;
-    margin-right: 150px;
-    box-sizing: content-box;
-    width: 150px;
-  }
-  .v-menu__content {
-    border-radius: 8px;
-    border: 1px solid #c4c4c4;
-    outline-style: inherit;
-    outline-color: white;
-    box-shadow: none;
-
-    outline-color: #e8eff2;
-  }
-  .v-sheet.v-list {
-    background: #e8eff2;
-  }
-  .mobile {
-    color: #333;
+  .mobile table.v-table tr:nth-child(odd) {
+    border-left: 6px solid deeppink;
   }
 
-  @media screen and (max-width: 768px) {
-    .mobile table.v-table tr {
-      max-width: 100%;
-      position: relative;
-      display: block;
-    }
-
-    .mobile table.v-table tr:nth-child(odd) {
-      border-left: 6px solid deeppink;
-    }
-
-    .mobile table.v-table tr:nth-child(even) {
-      border-left: 6px solid cyan;
-    }
-
-    .mobile table.v-table tr td {
-      display: flex;
-      width: 100%;
-      border-bottom: 1px solid #f5f5f5;
-      height: auto;
-      padding: 10px;
-    }
-
-    .mobile table.v-table tr td ul li:before {
-      content: attr(data-label);
-      padding-right: 0.5em;
-      text-align: left;
-      display: block;
-      color: #999;
-    }
-    .v-datatable__actions__select {
-      width: 50%;
-      margin: 0px;
-      justify-content: flex-start;
-    }
-    .mobile .theme--light.v-table tbody tr:hover:not(.v-datatable__expand-row) {
-      background: transparent;
-    }
+  .mobile table.v-table tr:nth-child(even) {
+    border-left: 6px solid cyan;
   }
-  .flex-content {
-    padding: 0;
-    margin: 0;
-    list-style: none;
+
+  .mobile table.v-table tr td {
     display: flex;
-    flex-wrap: wrap;
     width: 100%;
+    border-bottom: 1px solid #f5f5f5;
+    height: auto;
+    padding: 10px;
   }
 
-  .flex-item {
-    padding: 5px;
-    width: 50%;
-    height: 60px;
+  .mobile table.v-table tr td ul li:before {
+    content: attr(data-label);
+    padding-right: 0.5em;
+    text-align: left;
+    display: block;
+    color: #999;
   }
+  .v-datatable__actions__select {
+    width: 50%;
+    margin: 0px;
+    justify-content: flex-start;
+  }
+  .mobile .theme--light.v-table tbody tr:hover:not(.v-datatable__expand-row) {
+    background: transparent;
+  }
+}
+.flex-content {
+  padding: 0;
+  margin: 0;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  width: 100%;
+}
+
+.flex-item {
+  padding: 5px;
+  width: 50%;
+  height: 60px;
+}
 </style>

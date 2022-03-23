@@ -194,6 +194,7 @@ export default {
           params: {
             periode: this.$moment(this.waktu).format("YYYY-MM"),
             instansi_id: this.user.instansi_id,
+            kelurahan: `${this.user.kelurahan.nama_kelurahan}`,
           },
         })
         .then((response) => {
@@ -207,6 +208,7 @@ export default {
           params: {
             periode: this.$moment(this.waktu).format("YYYY-MM"),
             instansi_id: this.user.instansi_id,
+            kelurahan: `${this.user.kelurahan.nama_kelurahan}`,
           },
         })
         .then((response) => {

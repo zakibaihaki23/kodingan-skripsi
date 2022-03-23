@@ -22,6 +22,7 @@ Route::group(['middleware' => ['json.response']], function () {
     // USER
     Route::get('/admin', 'AdminController@index');
     Route::get('/user', 'AuthController@index');
+    Route::get('/user-camat', 'AuthController@indexKecamatan');
     Route::post('/logout', 'AuthController@logout');
     Route::post('/register', 'AuthController@register');
     Route::post('/login', 'AuthController@login');
@@ -31,6 +32,8 @@ Route::group(['middleware' => ['json.response']], function () {
     Route::get('/user/{id}', 'AuthController@show');
     Route::delete('/user/{id}', 'AuthController@destroy');
     Route::get('/role', 'AuthController@role');
+    Route::get('/role-camat', 'AuthController@roleKecamatan');
+
 
 
 

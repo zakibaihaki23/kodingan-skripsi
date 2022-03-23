@@ -207,5 +207,59 @@ class AuthController extends Controller
 
         return response(['user' => $user, 'camat' => $camat], 200);
     }
-   
+    public function roleKecamatan(Request $request) {
+        
+        // $data = User::select('role', DB::raw('count(*) as total'))
+        //     ->where('role','!=','Admin')
+        //     ->groupBy('role')
+        //     ->get();
+        // $total = DB::table('users')
+        // ->where('role','!=','Admin')
+        // ->count();
+        $kelurahan = User::select('role', DB::raw('count(*) as total'))
+            ->where('instansi_id','=', $request->input('instansi_id'))
+            ->where('role','=','Kelurahan')
+            ->get();
+        $lurah = User::select('role', DB::raw('count(*) as total'))
+            ->where('instansi_id','=', $request->input('instansi_id'))
+            ->where('role','=','Lurr')
+            ->get();
+
+        return response(['user' => $kelurahan, 'camat' => $lurah], 200);
+    }
+    public function indexKecamatan(Request $request)
+    {
+        $instansi_id = $request->input('instansi_id');
+        $role = $request->input('role');
+
+    
+       if($request->filled('instansi_id','role')) {
+           $instansi = User::select('users.id','users.instansi_id','users.name','users.username','users.email','users.role','kelurahan.nama_kelurahan')
+           ->leftJoin('kelurahan','kelurahan.id','users.kelurahan_id')
+           ->when($instansi_id, function ($query, $instansi_id) {
+               return $query->where('users.instansi_id', $instansi_id);
+           })
+           ->when($role, function ($query, $role) {
+               return $query->where('users.role', $role);
+           })
+           ->orderBy('users.role','ASC')
+           ->paginate(10);
+           
+       } else {
+        $instansi = User::select('users.id','users.instansi_id','users.name','users.username','users.email','users.role','kelurahan.nama_kelurahan')
+        ->leftJoin('kelurahan','kelurahan.id','users.kelurahan_id')
+        ->when($instansi_id, function ($query, $instansi_id) {
+            return $query->where('users.instansi_id', $instansi_id);
+        })
+        ->where(
+            function($query) {
+              return $query
+                     ->where('users.role', '=', 'Kelurahan')
+                     ->orWhere('users.role', '=', 'Lurr');
+             })
+        ->orderBy('users.role','ASC')
+        ->paginate(10);
+       }
+        return response(['data' => $instansi], 200);
+    }
 }

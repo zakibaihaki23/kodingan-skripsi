@@ -35,14 +35,7 @@
         <StatusSelected v-show="!firstLoad" v-model="status" @selected="statusSelected">
         </StatusSelected>
       </b-col>
-      <b-col>
-        <KelurahanSelected
-          v-show="!firstLoad"
-          v-model="kelurahan"
-          @selected="KelurahanSelected"
-        >
-        </KelurahanSelected>
-      </b-col>
+
       <b-col lg="3">
         <v-menu
           ref="menu"

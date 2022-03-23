@@ -119,7 +119,11 @@
               <v-card color="primary" dark class="text-center">
                 <v-card-text>
                   Mohon tunggu sebentar......
-                  <v-progress-linear indeterminate color="white" class="mb-0"></v-progress-linear>
+                  <v-progress-linear
+                    indeterminate
+                    color="white"
+                    class="mb-0"
+                  ></v-progress-linear>
                 </v-card-text>
               </v-card>
             </div>
@@ -131,73 +135,81 @@
 </template>
 
 <script>
-  import { mapGetters } from "vuex";
-  export default {
-    data() {
-      return {
-        overlay: false,
-        password_baru: null,
-        password_confirmation: null,
-        dialogOverlay: false,
-        data_user: {},
-        val_pwd: String,
-        val_cpwd: String,
-      };
+import { mapGetters } from "vuex";
+export default {
+  data() {
+    return {
+      overlay: false,
+      password_baru: null,
+      password_confirmation: null,
+      dialogOverlay: false,
+      data_user: {},
+      val_pwd: String,
+      val_cpwd: String,
+    };
+  },
+  created() {
+    this.renderData();
+  },
+  computed: {
+    ...mapGetters({
+      user: "auth/user",
+    }),
+  },
+  methods: {
+    renderData() {
+      this.$http.get(`/user/${this.$route.params.id}`).then((response) => {
+        this.data_user = response.data.data;
+      });
     },
-    created() {
-      this.renderData();
-    },
-    computed: {
-      ...mapGetters({
-        user: "auth/user",
-      }),
-    },
-    methods: {
-      renderData() {
-        this.$http.get(`/user/${this.$route.params.id}`).then((response) => {
-          this.data_user = response.data.data;
+    save() {
+      this.dialogOverlay = true;
+      this.$http
+        .put(`/user/update/${this.$route.params.id}`, {
+          instansi_id: this.user.instansi_id,
+          name: this.data_user.name,
+          email: this.data_user.email,
+          username: this.data_user.username,
+          password: this.password_baru,
+          password_confirmation: this.password_confirmation,
+        })
+        .then((response) => {
+          let self = this;
+          setTimeout(function () {
+            self.dialogOverlay = false;
+            self.$router.push("/user");
+            self.$toast.success("Data Berhasil Diubah");
+          }, 10 * 10 * 10);
+        })
+        .catch((error) => {
+          this.dialogOverlay = false;
+          if (
+            !error.response.data.errors.password &&
+            error.response.data.errors.username
+          ) {
+            this.$toast.error("Username telah digunakan");
+          } else if (
+            error.response.data.errors.password &&
+            !error.response.data.errors.username
+          ) {
+            this.$toast.error("Konfirmasi password tidak sesuai");
+          } else if (
+            error.response.data.errors.password &&
+            error.response.data.errors.username
+          ) {
+            this.$toast.error(
+              "Username sudah digunakan dan konfirmasi password tidak sesuai"
+            );
+          }
         });
-      },
-      save() {
-        this.dialogOverlay = true;
-        this.$http
-          .put(`/user/update/${this.$route.params.id}`, {
-            instansi_id: this.user.instansi_id,
-            name: this.data_user.name,
-            email: this.data_user.email,
-            username: this.data_user.username,
-            password: this.password_baru,
-            password_confirmation: this.password_confirmation,
-          })
-          .then((response) => {
-            let self = this;
-            setTimeout(function () {
-              self.dialogOverlay = false;
-              self.$router.push("/user");
-              self.$toast.success("Data Berhasil Diubah");
-            }, 10 * 10 * 10);
-          })
-          .catch((error) => {
-            this.dialogOverlay = false;
-            if (!error.response.data.errors.password && error.response.data.errors.username) {
-              this.$toast.error("Username telah digunakan");
-            } else if (
-              error.response.data.errors.password &&
-              !error.response.data.errors.username
-            ) {
-              this.$toast.error("Konfirmasi password tidak sesuai");
-            } else if (error.response.data.errors.password && error.response.data.errors.username) {
-              this.$toast.error("Username sudah digunakan dan konfirmasi password tidak sesuai");
-            }
-          });
-      },
     },
-  };
+  },
+};
 </script>
 
 <style scoped>
-  .profile {
-    padding-left: 20px;
-    padding-right: 20px;
-  }
+.profile {
+  padding-left: 20px;
+  padding-right: 20px;
+}
 </style>

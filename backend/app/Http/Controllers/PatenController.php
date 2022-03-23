@@ -297,8 +297,79 @@ class PatenController extends Controller
 
     public function export(Request $request)
     {
-        if ($request->filled('instansi_id', 'periode')) {
+        if ($request->filled('instansi_id', 'periode','kelurahan')) {
 
+            $paten = DB::table('db_rekapitulasi_paten')
+                ->select('kelurahan', DB::raw("DATE_FORMAT(db_rekapitulasi_paten.periode, '%b-%Y') as periode"), 
+                'perekaman_ktp',
+                'pengantar_kk', 'ket_pindah','ket_domisili',
+                'pengantar_akta_lahir','pengantar_akta_mati',
+                'pencatatan_perkawinan','pencatatan_perceraian',
+                'skck','sktm','rekomendasi','legalisasi','ket_lain',
+                'imb','situ_siup','izin_merobohkan_bangunan',
+                'izin_keramaian','izin_partai','keterangan')
+                ->where('instansi_id', '=', $request->get('instansi_id'))
+                ->where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode'))
+                ->where('kelurahan','=', $request->get('kelurahan'))
+                ->where('is_verified','=',2)
+                ->orderBy('id', 'DESC')
+                ->get();
+            $count = DB::table('db_rekapitulasi_paten')
+                ->select(
+                    DB::raw('SUM(perekaman_ktp) AS total_perekaman_ktp'),
+                    DB::raw('SUM(pengantar_kk) AS total_pengantar_kk'),
+                    DB::raw('SUM(ket_pindah) AS total_ket_pindah'),
+                    DB::raw('SUM(ket_domisili) AS total_ket_domisili'),
+                    DB::raw('SUM(pengantar_akta_lahir) AS total_pengantar_akta_lahir'),
+                    DB::raw('SUM(pengantar_akta_mati) AS total_pengantar_akta_mati'),
+                    DB::raw('SUM(pencatatan_perkawinan) AS total_pencatatan_perkawinan'),
+                    DB::raw('SUM(pencatatan_perceraian) AS total_pencatatan_perceraian'),
+                    DB::raw('SUM(skck) AS total_skck'),
+                    DB::raw('SUM(sktm) AS total_sktm'),
+                    DB::raw('SUM(rekomendasi) AS total_rekomendasi'),
+                    DB::raw('SUM(legalisasi) AS total_legalisasi'),
+                    DB::raw('SUM(ket_lain) AS total_ket_lain'),
+                    DB::raw('SUM(imb) AS total_imb'),
+                    DB::raw('SUM(situ_siup) AS total_situ_siup'),
+                    DB::raw('SUM(izin_merobohkan_bangunan) AS total_izin_merobohkan_bangunan'),
+                    DB::raw('SUM(izin_keramaian) AS total_izin_keramaian'),
+                    DB::raw('SUM(izin_partai) AS total_izin_partai')
+                    )
+                ->where('instansi_id', '=', $request->get('instansi_id'))
+                ->where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode'))
+                ->where('kelurahan','=', $request->get('kelurahan'))
+                ->where('is_verified','=',2)
+                ->orderBy('id', 'DESC')
+                ->get();
+            $periode = DB::table('db_rekapitulasi_paten')
+                ->select('periode')
+                ->where('instansi_id', '=', $request->get('instansi_id'))
+                ->where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode'))
+                ->where('kelurahan','=', $request->get('kelurahan'))
+                ->where('is_verified','=',2)
+                ->orderBy('id', 'DESC')
+                ->take(1)
+                ->get();
+            $instansi = DB::table('db_rekapitulasi_paten')
+                ->select('db_rekapitulasi_paten.instansi_id','instansi.nama_instansi')
+                ->leftJoin('instansi','instansi.id','db_rekapitulasi_paten.instansi_id')
+                ->where('instansi_id', '=', $request->get('instansi_id'))
+                ->where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode'))
+                ->where('kelurahan','=', $request->get('kelurahan'))
+                ->where('is_verified','=',2)
+                ->take(1)
+                ->get();
+
+                foreach ($instansi as $kecamatan){
+
+                    foreach ($periode as $per) {
+                        
+                        $pdf = PDF::loadView('reportPaten', ['paten' => $paten, 'count' => $count, 'periode' => $periode,'kecamatan' => $instansi])->setPaper([0, 0, 700, 1200], 'landscape');
+                        return $pdf->stream('Laporan_PATEN_' . $kecamatan->nama_instansi . '_' . $per->periode . '.pdf');
+                    }
+                }               
+        }
+        if ($request->filled('instansi_id','periode')) {
             $paten = DB::table('db_rekapitulasi_paten')
                 ->select('kelurahan', DB::raw("DATE_FORMAT(db_rekapitulasi_paten.periode, '%b-%Y') as periode"), 
                 'perekaman_ktp',

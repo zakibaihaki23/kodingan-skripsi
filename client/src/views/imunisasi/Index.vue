@@ -9,6 +9,15 @@
     <div v-if="this.user.role == 'Kelurahan'">
       <IndexKelurahan></IndexKelurahan>
     </div>
+    <div v-if="this.user.role == 'Lurr'">
+      <IndexLurah></IndexLurah>
+    </div>
+    <div v-if="this.user.role == 'Camat'">
+      <IndexCamat></IndexCamat>
+    </div>
+    <div v-if="this.user.role == 'Sekda'">
+      <IndexSekda></IndexSekda>
+    </div>
   </div>
 </template>
 
@@ -16,10 +25,20 @@
 import { mapGetters } from "vuex";
 import IndexAdmin from "./Admin/IndexAdmin.vue";
 import IndexUser from "./User/IndexUser.vue";
+import IndexCamat from "./Camat/IndexCamat.vue";
 import IndexKelurahan from "./Kelurahan/IndexKelurahan.vue";
+import IndexLurah from "./Lurah/IndexLurah.vue";
+import IndexSekda from "./Sekda/IndexSekda.vue";
 
 export default {
-  components: { IndexAdmin, IndexUser, IndexKelurahan },
+  components: {
+    IndexAdmin,
+    IndexUser,
+    IndexKelurahan,
+    IndexLurah,
+    IndexCamat,
+    IndexSekda,
+  },
   computed: {
     ...mapGetters({
       user: "auth/user",

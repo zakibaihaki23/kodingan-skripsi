@@ -250,6 +250,70 @@ class ImunisasiController extends Controller
 
     public function export(Request $request)
     {
+        if ($request->filled('instansi_id', 'periode','kelurahan')) {
+
+            $imunisasi = DB::table('db_imunisasi')
+                ->select('kelurahan', DB::raw("DATE_FORMAT(db_imunisasi.periode, '%b-%Y') as periode"), 
+                'bcg','dpt_1','dpt_2','dpt_3', 'polio_1','polio_2','polio_3','polio_4', 
+                'cmp','ibu_hamil_1','ibu_hamil_2', 'anak_sd_1','anak_sd_2','cp_1','cp_2', 'keterangan')
+                ->where('instansi_id', '=', $request->get('instansi_id'))
+                ->where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode'))
+                ->where('kelurahan','=', $request->get('kelurahan'))
+                ->where('is_verified','=',2)
+                ->orderBy('id', 'DESC')
+                ->get();
+            $count = DB::table('db_imunisasi')
+                ->select(
+                    DB::raw('SUM(bcg) AS total_bcg'),
+                    DB::raw('SUM(dpt_1) AS total_dpt_1'),
+                    DB::raw('SUM(dpt_2) AS total_dpt_2'),
+                    DB::raw('SUM(dpt_3) AS total_dpt_3'),
+                    DB::raw('SUM(polio_1) AS total_polio_1'),
+                    DB::raw('SUM(polio_2) AS total_polio_2'),
+                    DB::raw('SUM(polio_3) AS total_polio_3'),
+                    DB::raw('SUM(polio_4) AS total_polio_4'),
+                    DB::raw('SUM(cmp) AS total_cmp'),
+                    DB::raw('SUM(ibu_hamil_1) AS total_ibu_hamil_1'),
+                    DB::raw('SUM(ibu_hamil_2) AS total_ibu_hamil_2'),
+                    DB::raw('SUM(anak_sd_1) AS total_anak_sd_1'),
+                    DB::raw('SUM(anak_sd_2) AS total_anak_sd_2'),
+                    DB::raw('SUM(cp_1) AS total_cp_1'),
+                    DB::raw('SUM(cp_2) AS total_cp_2'),
+                )
+                ->where('instansi_id', '=', $request->get('instansi_id'))
+                ->where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode'))
+                ->where('kelurahan','=', $request->get('kelurahan'))
+                ->where('is_verified','=',2)
+                ->orderBy('id', 'DESC')
+                ->get();
+            $periode = DB::table('db_imunisasi')
+                ->select('periode')
+                ->where('instansi_id', '=', $request->get('instansi_id'))
+                ->where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode'))
+                ->where('kelurahan','=', $request->get('kelurahan'))
+                ->where('is_verified','=',2)
+                ->orderBy('id', 'DESC')
+                ->take(1)
+                ->get();
+            $instansi = DB::table('db_imunisasi')
+                ->select('db_imunisasi.instansi_id','instansi.nama_instansi')
+                ->leftJoin('instansi','instansi.id','db_imunisasi.instansi_id')
+                ->where('instansi_id', '=', $request->get('instansi_id'))
+                ->where(DB::raw("DATE_FORMAT(periode, '%Y-%m')"), '=', $request->get('periode'))
+                ->where('kelurahan','=', $request->get('kelurahan'))
+                ->where('is_verified','=',2)
+                ->take(1)
+                ->get();
+
+                foreach ($instansi as $kecamatan){
+
+                    foreach ($periode as $per) {
+                        
+                        $pdf = PDF::loadView('reportImunisasi', ['imunisasi' => $imunisasi, 'count' => $count, 'periode' => $periode,'kecamatan' => $instansi])->setPaper([0, 0, 600, 1500], 'landscape');
+                        return $pdf->stream('Laporan_Imunisasi_' . $kecamatan->nama_instansi . '_' . $per->periode . '.pdf');
+                    }
+                }               
+        }
         if ($request->filled('instansi_id', 'periode')) {
 
             $imunisasi = DB::table('db_imunisasi')

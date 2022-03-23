@@ -34,14 +34,6 @@
         <StatusSelected v-show="!firstLoad" v-model="status" @selected="statusSelected">
         </StatusSelected>
       </b-col>
-      <b-col>
-        <KelurahanSelected
-          v-show="!firstLoad"
-          v-model="kelurahan"
-          @selected="KelurahanSelected"
-        >
-        </KelurahanSelected>
-      </b-col>
       <b-col lg="3">
         <v-menu
           ref="menu"
@@ -275,7 +267,7 @@
                 </td>
                 <td class="text-center" v-else>{{ item.keterangan }}</td>
               </template>
-              <td v-if="item.is_verified == 1">Perlu Divalidasi</td>
+              <td v-if="item.is_verified == 1">Menunggu Divalidasi</td>
               <td v-if="item.is_verified == 2">Sudah Divalidasi</td>
               <td v-if="item.is_verified == 3">Ditolak</td>
               <td>

@@ -19,7 +19,7 @@
               max-width="60"
             ></v-img>
             <v-list-item-content>
-              <h1 style="color: white" class="text-center">SIMAK</h1>
+              <h1 style="color: white" class="text-center">SIPK</h1>
               <h2 style="color: white; font-size: 15px" class="text-center">
                 Kabupaten Pandeglang
               </h2>
@@ -31,7 +31,7 @@
       <v-list class="nav" v-if="user.role == 'User'">
         <v-list-item-group>
           <v-list-item
-            v-for="(userRoute, usr) in users"
+            v-for="(userRoute, usr) in kecamatan"
             :key="usr"
             :to="userRoute.path"
             link
@@ -138,7 +138,7 @@
       </v-list>
 
       <!-- Lurah -->
-      <v-list class="nav" v-if="user.role == 'Camat'">
+      <v-list class="nav" v-if="user.role == 'Lurr'">
         <v-list-item-group>
           <v-list-item v-for="(lurah, lrh) in users" :key="lrh" :to="lurah.path" link>
             <v-list-item-icon>
@@ -198,6 +198,48 @@ export default {
         name: "Bencana Alam",
         path: "/bencana",
         icon: "mdi-home-flood",
+      },
+      {
+        name: "Download Laporan",
+        path: "/report",
+        icon: "mdi-file-download",
+      },
+    ],
+    kecamatan: [
+      {
+        name: "Dashboard",
+        path: "/dashboard",
+        icon: "mdi-view-dashboard",
+      },
+      {
+        name: "PBB",
+        path: "/pbb",
+        icon: "mdi-city",
+      },
+      {
+        name: "Paten",
+        path: "/paten",
+        icon: "mdi-note-multiple",
+      },
+      {
+        name: "Kependudukan",
+        path: "/kependudukan",
+        icon: "mdi-account",
+      },
+      {
+        name: "Imunisasi",
+        path: "/imunisasi",
+        icon: "mdi-hospital",
+      },
+      {
+        name: "Bencana Alam",
+        path: "/bencana",
+        icon: "mdi-home-flood",
+      },
+      {
+        name: "Kelola User",
+        path: "/user",
+        icon: "mdi-account-multiple-outline",
       },
       {
         name: "Download Laporan",

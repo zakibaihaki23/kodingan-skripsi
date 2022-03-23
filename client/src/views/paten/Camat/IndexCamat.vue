@@ -15,11 +15,11 @@
 
     <b-row style="margin-top: 1px" cols-lg="5" cols-md="1">
       <b-col>
-        <StatusSelected v-show="!firstLoad" v-model="status" @selected="statusSelected">
-        </StatusSelected>
-      </b-col>
-      <b-col>
-        <KelurahanSelected v-show="!firstLoad" v-model="kelurahan" @selected="KelurahanSelected">
+        <KelurahanSelected
+          v-show="!firstLoad"
+          v-model="kelurahan"
+          @selected="KelurahanSelected"
+        >
         </KelurahanSelected>
       </b-col>
       <b-col lg="3">
@@ -77,7 +77,11 @@
       type="table-tbody"
       :types="{ 'table-row': 'table-cell@8' }"
     ></v-skeleton-loader>
-    <v-progress-linear :active="isLoading" :indeterminate="isLoading" middle></v-progress-linear>
+    <v-progress-linear
+      :active="isLoading"
+      :indeterminate="isLoading"
+      middle
+    ></v-progress-linear>
     <v-simple-table v-show="!firstLoad">
       <template v-slot:default>
         <thead style="border-style: solid; border-width: 2px; border-color: #d7d0d0">
@@ -86,8 +90,6 @@
           <td colspan="13">Jumlah Pelayanan Non Perizinan</td>
           <td colspan="5">Jumlah Pelayanan Perizinan</td>
           <td rowspan="2">Keterangan</td>
-          <td rowspan="2">Status</td>
-          <td rowspan="2"></td>
 
           <tr>
             <th>Perekaman Data KTP-E</th>
@@ -122,35 +124,57 @@
         <tbody v-else>
           <tr v-for="item in paten" :key="item.id">
             <template>
-              <td class="text-left" v-if="item.periode == null" style="font-weight: bold">Nihil</td>
+              <td class="text-left" v-if="item.periode == null" style="font-weight: bold">
+                Nihil
+              </td>
               <td class="text-left" v-else>{{ item.periode | moment("MMMM - YYYY") }}</td>
             </template>
             <template>
-              <td class="text-left" v-if="item.kelurahan == null" style="font-weight: bold">
+              <td
+                class="text-left"
+                v-if="item.kelurahan == null"
+                style="font-weight: bold"
+              >
                 Nihil
               </td>
               <td class="text-left" v-else>{{ item.kelurahan }}</td>
             </template>
             <template>
-              <td class="text-left" v-if="item.perekaman_ktp == null" style="font-weight: bold">
+              <td
+                class="text-left"
+                v-if="item.perekaman_ktp == null"
+                style="font-weight: bold"
+              >
                 Nihil
               </td>
               <td v-else>{{ item.perekaman_ktp }}</td>
             </template>
             <template>
-              <td class="text-left" v-if="item.pengantar_kk == null" style="font-weight: bold">
+              <td
+                class="text-left"
+                v-if="item.pengantar_kk == null"
+                style="font-weight: bold"
+              >
                 Nihil
               </td>
               <td v-else>{{ item.pengantar_kk }}</td>
             </template>
             <template>
-              <td class="text-left" v-if="item.ket_pindah == null" style="font-weight: bold">
+              <td
+                class="text-left"
+                v-if="item.ket_pindah == null"
+                style="font-weight: bold"
+              >
                 Nihil
               </td>
               <td v-else>{{ item.ket_pindah }}</td>
             </template>
             <template>
-              <td class="text-left" v-if="item.ket_domisili == null" style="font-weight: bold">
+              <td
+                class="text-left"
+                v-if="item.ket_domisili == null"
+                style="font-weight: bold"
+              >
                 Nihil
               </td>
               <td v-else>{{ item.ket_domisili }}</td>
@@ -196,37 +220,59 @@
               <td v-else>{{ item.pencatatan_perceraian }}</td>
             </template>
             <template>
-              <td class="text-left" v-if="item.skck == null" style="font-weight: bold">Nihil</td>
+              <td class="text-left" v-if="item.skck == null" style="font-weight: bold">
+                Nihil
+              </td>
               <td v-else>{{ item.skck }}</td>
             </template>
             <template>
-              <td class="text-left" v-if="item.sktm == null" style="font-weight: bold">Nihil</td>
+              <td class="text-left" v-if="item.sktm == null" style="font-weight: bold">
+                Nihil
+              </td>
               <td v-else>{{ item.sktm }}</td>
             </template>
             <template>
-              <td class="text-left" v-if="item.rekomendasi == null" style="font-weight: bold">
+              <td
+                class="text-left"
+                v-if="item.rekomendasi == null"
+                style="font-weight: bold"
+              >
                 Nihil
               </td>
               <td v-else>{{ item.rekomendasi }}</td>
             </template>
             <template>
-              <td class="text-left" v-if="item.legalisasi == null" style="font-weight: bold">
+              <td
+                class="text-left"
+                v-if="item.legalisasi == null"
+                style="font-weight: bold"
+              >
                 Nihil
               </td>
               <td v-else>{{ item.legalisasi }}</td>
             </template>
             <template>
-              <td class="text-left" v-if="item.ket_lain == null" style="font-weight: bold">
+              <td
+                class="text-left"
+                v-if="item.ket_lain == null"
+                style="font-weight: bold"
+              >
                 Nihil
               </td>
               <td v-else>{{ item.ket_lain }}</td>
             </template>
             <template>
-              <td class="text-left" v-if="item.imb == null" style="font-weight: bold">Nihil</td>
+              <td class="text-left" v-if="item.imb == null" style="font-weight: bold">
+                Nihil
+              </td>
               <td v-else>{{ item.imb }}</td>
             </template>
             <template>
-              <td class="text-left" v-if="item.situ_siup == null" style="font-weight: bold">
+              <td
+                class="text-left"
+                v-if="item.situ_siup == null"
+                style="font-weight: bold"
+              >
                 Nihil
               </td>
               <td v-else>{{ item.situ_siup }}</td>
@@ -242,47 +288,44 @@
               <td v-else>{{ item.izin_merobohkan_bangunan }}</td>
             </template>
             <template>
-              <td class="text-left" v-if="item.izin_keramaian == null" style="font-weight: bold">
+              <td
+                class="text-left"
+                v-if="item.izin_keramaian == null"
+                style="font-weight: bold"
+              >
                 Nihil
               </td>
               <td v-else>{{ item.izin_keramaian }}</td>
             </template>
             <template>
-              <td class="text-left" v-if="item.izin_partai == null" style="font-weight: bold">
+              <td
+                class="text-left"
+                v-if="item.izin_partai == null"
+                style="font-weight: bold"
+              >
                 Nihil
               </td>
               <td v-else>{{ item.izin_partai }}</td>
             </template>
             <template>
-              <td class="text-left" v-if="item.keterangan == null" style="font-weight: bold">
+              <td
+                class="text-left"
+                v-if="item.keterangan == null"
+                style="font-weight: bold"
+              >
                 Nihil
               </td>
               <td
                 v-else
-                style="width: 100%; white-space: normal; vertical-align: center !important"
+                style="
+                  width: 100%;
+                  white-space: normal;
+                  vertical-align: center !important;
+                "
               >
                 {{ item.keterangan }}
               </td>
             </template>
-            <td v-if="item.is_verified == 1">Menunggu Validasi</td>
-            <td v-if="item.is_verified == 2">Sudah Divalidasi</td>
-            <td>
-              <v-menu offset-y v-if="item.is_verified == 1">
-                <template v-slot:activator="{ on, attrs }">
-                  <v-btn v-bind="attrs" v-on="on" icon>
-                    <v-icon dark>mdi-dots-horizontal</v-icon>
-                  </v-btn>
-                </template>
-                <v-list>
-                  <v-list-item link @click="dialogValid(item)">
-                    <v-list-item-title class="text-center">Validasi</v-list-item-title>
-                  </v-list-item>
-                  <v-list-item link @click="dialogTolak(item)">
-                    <v-list-item-title style="text-align: center"> Tolak </v-list-item-title>
-                  </v-list-item>
-                </v-list>
-              </v-menu>
-            </td>
           </tr>
         </tbody>
       </template>
@@ -303,7 +346,11 @@
         <v-card color="primary" dark class="text-center">
           <v-card-text>
             Mohon tunggu sebentar......
-            <v-progress-linear indeterminate color="white" class="mb-0"></v-progress-linear>
+            <v-progress-linear
+              indeterminate
+              color="white"
+              class="mb-0"
+            ></v-progress-linear>
           </v-card-text>
         </v-card>
       </div>
@@ -328,276 +375,276 @@
 </template>
 
 <script>
-  import { mapGetters } from "vuex";
-  import StatusSelected from "../../../components/StatusSelected.vue";
-  import KelurahanSelected from "../../../components/SelectKelurahan.vue";
+import { mapGetters } from "vuex";
+import StatusSelected from "../../../components/StatusSelected.vue";
+import KelurahanSelected from "../../../components/SelectKelurahan.vue";
 
-  export default {
-    components: { StatusSelected, KelurahanSelected },
-    data() {
-      return {
-        search: "",
-        searchBox: "",
-        date_filter: "",
-        date: "",
-        isMobile: false,
-        data: [],
-        pagination: {
-          current_page: 1,
-          total: 0,
-        },
-        dialog: false,
-        validDialog: false,
-        tolakDialog: false,
-        firstLoad: true,
-        loadingBtn: false,
-        isLoading: true,
-        loading: false,
-        dialogOverlay: false,
-        overlay: false,
-        kelurahans: "",
-        kel: "",
-        idData: "",
-        id: "",
-        period: "",
-        status: null,
-        filterActive: null,
-        paten: [],
-        kelurahan: [],
-        status: null,
-        filterStatus: null,
-        perr: "",
-        kell: "",
-      };
-    },
-    watch: {
-      search: {
-        handler: function (val) {
-          this.renderData(val);
-        },
-        deep: true,
+export default {
+  components: { StatusSelected, KelurahanSelected },
+  data() {
+    return {
+      search: "",
+      searchBox: "",
+      date_filter: "",
+      date: "",
+      isMobile: false,
+      data: [],
+      pagination: {
+        current_page: 1,
+        total: 0,
       },
-      overlay(val) {
-        val &&
-          setTimeout(() => {
-            this.overlay = false;
-          }, 1000);
+      dialog: false,
+      validDialog: false,
+      tolakDialog: false,
+      firstLoad: true,
+      loadingBtn: false,
+      isLoading: true,
+      loading: false,
+      dialogOverlay: false,
+      overlay: false,
+      kelurahans: "",
+      kel: "",
+      idData: "",
+      id: "",
+      period: "",
+      status: null,
+      filterActive: null,
+      paten: [],
+      kelurahan: [],
+      status: null,
+      filterStatus: null,
+      perr: "",
+      kell: "",
+    };
+  },
+  watch: {
+    search: {
+      handler: function (val) {
+        this.renderData(val);
       },
+      deep: true,
     },
-    created() {
+    overlay(val) {
+      val &&
+        setTimeout(() => {
+          this.overlay = false;
+        }, 1000);
+    },
+  },
+  created() {
+    this.renderData();
+  },
+  watch: {
+    clearable: {
+      handler: function (val) {
+        this.renderData("");
+      },
+      deep: true,
+    },
+  },
+  computed: {
+    ...mapGetters({
+      user: "auth/user",
+    }),
+    format_date() {
+      if (this.date) return this.$moment(this.date).format("MMMM - YYYY");
+    },
+  },
+  methods: {
+    formatPrice(value) {
+      let val = (value / 1).toFixed(0).replace(".", ",");
+      return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    },
+    onPageChange() {
       this.renderData();
     },
-    watch: {
-      clearable: {
-        handler: function (val) {
-          this.renderData("");
-        },
-        deep: true,
-      },
-    },
-    computed: {
-      ...mapGetters({
-        user: "auth/user",
-      }),
-      format_date() {
-        if (this.date) return this.$moment(this.date).format("MMMM - YYYY");
-      },
-    },
-    methods: {
-      formatPrice(value) {
-        let val = (value / 1).toFixed(0).replace(".", ",");
-        return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-      },
-      onPageChange() {
-        this.renderData();
-      },
-      renderData(search) {
-        this.isLoading = true;
+    renderData(search) {
+      this.isLoading = true;
 
-        let kelurahan = "";
-        if (this.filterKelurahan || this.filterKelurahan == 0) {
-          kelurahan = this.filterKelurahan;
-        } else {
-          kelurahan = null;
-        }
+      let kelurahan = "";
+      if (this.filterKelurahan || this.filterKelurahan == 0) {
+        kelurahan = this.filterKelurahan;
+      } else {
+        kelurahan = null;
+      }
 
-        let is_verified = "";
-        if (this.filterStatus || this.filterStatus == 0) {
-          is_verified = this.filterStatus;
-        } else {
-          is_verified = null;
-        }
+      let is_verified = "";
+      if (this.filterStatus || this.filterStatus == 0) {
+        is_verified = this.filterStatus;
+      } else {
+        is_verified = null;
+      }
 
-        let periode = "";
-        if (this.date) {
-          periode = this.date;
-        } else {
-          periode = null;
-        }
-        // UNTUK USER
+      let periode = "";
+      if (this.date) {
+        periode = this.date;
+      } else {
+        periode = null;
+      }
+      // UNTUK USER
 
-        this.$http
-          .get("/camat-view/paten", {
-            params: {
-              page: this.pagination.current_page,
-              instansi_id: `${this.user.instansi_id}`,
-              kelurahan,
-              periode,
-              is_verified,
-            },
-          })
-          .then((response) => {
-            this.paten = response.data.data.data;
-            this.firstLoad = false;
-            this.dialog = false;
-            this.dialogOverlay = false;
-            this.overlay = true;
-            this.isLoading = false;
-            this.pagination.current_page = response.data.data.current_page;
-            this.pagination.total = response.data.data.total;
-            this.data = response.data.data;
-          })
-          .catch((error) => {
-            if (error) {
-              console.log(error);
-            }
-          });
-      },
-      dialogValid(item) {
-        this.validDialog = true;
-        this.kell = item.kelurahan;
-        this.perr = this.$moment(item.periode).format("MMMM - YYYY");
-        this.verif = item.is_verified;
-        this.idData = item.id;
-      },
-      dialogTolak(item) {
-        this.tolakDialog = true;
-        this.kell = item.kelurahan;
-        this.perr = this.$moment(item.periode).format("MMMM - YYYY");
-        this.verif = item.is_verified;
-        this.idData = item.id;
-      },
-      validasi(id) {
-        this.dialogOverlay = true;
-        this.$http
-          .put(`/valid/paten/${id}`, {
+      this.$http
+        .get("/camat-view/paten", {
+          params: {
+            page: this.pagination.current_page,
+            instansi_id: `${this.user.instansi_id}`,
+            kelurahan,
+            periode,
             is_verified: 2,
-          })
-          .then((response) => {
-            this.renderData();
-            let self = this;
-            setTimeout(function () {
-              self.dialogOverlay = false;
-              self.$toast.success("Data Berhasil Divalidasi");
-            }, 10 * 10 * 10);
-          })
-          .catch((error) => {
-            if (error) {
-              this.dialogOverlay = false;
-              this.renderData();
-            }
-          });
-      },
-      tolak(id) {
-        this.dialogOverlay = true;
-        this.$http
-          .put(`/valid/paten/${id}`, {
-            is_verified: 3,
-          })
-          .then((response) => {
-            this.renderData();
-            let self = this;
-            setTimeout(function () {
-              self.dialogOverlay = false;
-              self.$toast.success("Data Berhasil Ditolak");
-            }, 10 * 10 * 10);
-          })
-          .catch((error) => {
-            if (error) {
-              this.dialogOverlay = false;
-              this.renderData();
-            }
-          });
-      },
-      KelurahanSelected(kelurahan) {
-        this.filterKelurahan = null;
-        if (kelurahan) {
-          this.filterKelurahan = kelurahan.name;
-        }
-        this.renderData();
-      },
-      statusSelected(status) {
-        this.status = "";
-        this.filterStatus = null;
-        if (status) {
-          this.status = status;
-          this.filterStatus = status.value;
-        }
-        this.renderData();
-      },
-      dateSelected() {
-        if (this.user.role == "User") {
-          if (this.date) {
-            this.downloadDisabled = false;
-          } else {
-            this.downloadDisabled = true;
+          },
+        })
+        .then((response) => {
+          this.paten = response.data.data.data;
+          this.firstLoad = false;
+          this.dialog = false;
+          this.dialogOverlay = false;
+          this.overlay = true;
+          this.isLoading = false;
+          this.pagination.current_page = response.data.data.current_page;
+          this.pagination.total = response.data.data.total;
+          this.data = response.data.data;
+        })
+        .catch((error) => {
+          if (error) {
+            console.log(error);
           }
-        } else {
-          if (this.kecamatan.value) {
-            this.downloadDisabled = false;
-          }
-          if (this.date == "") {
-            this.downloadDisabled = true;
-          }
-        }
-      },
+        });
     },
-  };
+    dialogValid(item) {
+      this.validDialog = true;
+      this.kell = item.kelurahan;
+      this.perr = this.$moment(item.periode).format("MMMM - YYYY");
+      this.verif = item.is_verified;
+      this.idData = item.id;
+    },
+    dialogTolak(item) {
+      this.tolakDialog = true;
+      this.kell = item.kelurahan;
+      this.perr = this.$moment(item.periode).format("MMMM - YYYY");
+      this.verif = item.is_verified;
+      this.idData = item.id;
+    },
+    validasi(id) {
+      this.dialogOverlay = true;
+      this.$http
+        .put(`/valid/paten/${id}`, {
+          is_verified: 2,
+        })
+        .then((response) => {
+          this.renderData();
+          let self = this;
+          setTimeout(function () {
+            self.dialogOverlay = false;
+            self.$toast.success("Data Berhasil Divalidasi");
+          }, 10 * 10 * 10);
+        })
+        .catch((error) => {
+          if (error) {
+            this.dialogOverlay = false;
+            this.renderData();
+          }
+        });
+    },
+    tolak(id) {
+      this.dialogOverlay = true;
+      this.$http
+        .put(`/valid/paten/${id}`, {
+          is_verified: 3,
+        })
+        .then((response) => {
+          this.renderData();
+          let self = this;
+          setTimeout(function () {
+            self.dialogOverlay = false;
+            self.$toast.success("Data Berhasil Ditolak");
+          }, 10 * 10 * 10);
+        })
+        .catch((error) => {
+          if (error) {
+            this.dialogOverlay = false;
+            this.renderData();
+          }
+        });
+    },
+    KelurahanSelected(kelurahan) {
+      this.filterKelurahan = null;
+      if (kelurahan) {
+        this.filterKelurahan = kelurahan.name;
+      }
+      this.renderData();
+    },
+    statusSelected(status) {
+      this.status = "";
+      this.filterStatus = null;
+      if (status) {
+        this.status = status;
+        this.filterStatus = status.value;
+      }
+      this.renderData();
+    },
+    dateSelected() {
+      if (this.user.role == "User") {
+        if (this.date) {
+          this.downloadDisabled = false;
+        } else {
+          this.downloadDisabled = true;
+        }
+      } else {
+        if (this.kecamatan.value) {
+          this.downloadDisabled = false;
+        }
+        if (this.date == "") {
+          this.downloadDisabled = true;
+        }
+      }
+    },
+  },
+};
 </script>
 
 <style scoped>
-  .v-data-table > .v-data-table__wrapper > table > tbody > tr > td {
-    font-size: 17px;
-    margin: auto;
-    white-space: nowrap;
-  }
+.v-data-table > .v-data-table__wrapper > table > tbody > tr > td {
+  font-size: 17px;
+  margin: auto;
+  white-space: nowrap;
+}
 
-  tbody td {
-    text-align: center;
-    border-style: solid;
-    border-width: 2px;
-    border-color: #d7d0d0;
-  }
-  thead tr th {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell,
-      "Open Sans", "Helvetica Neue", sans-serif;
-    font-weight: bold;
-    color: black !important;
-    font-size: 10pt !important;
-    text-align: center !important;
-    border-style: solid;
-    border-width: 2px;
-    border-color: #d7d0d0;
-  }
-  thead td {
-    color: black !important;
-    font-weight: bold;
-    text-align: center;
-    border-style: solid;
-    border-width: 2px;
-    border-color: #d7d0d0;
-    font-weight: bold;
-  }
-  .v-menu__content {
-    border-radius: 8px;
-    border: 1px solid #c4c4c4;
-    outline-style: inherit;
-    outline-color: white;
-    box-shadow: none;
+tbody td {
+  text-align: center;
+  border-style: solid;
+  border-width: 2px;
+  border-color: #d7d0d0;
+}
+thead tr th {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu,
+    Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+  font-weight: bold;
+  color: black !important;
+  font-size: 10pt !important;
+  text-align: center !important;
+  border-style: solid;
+  border-width: 2px;
+  border-color: #d7d0d0;
+}
+thead td {
+  color: black !important;
+  font-weight: bold;
+  text-align: center;
+  border-style: solid;
+  border-width: 2px;
+  border-color: #d7d0d0;
+  font-weight: bold;
+}
+.v-menu__content {
+  border-radius: 8px;
+  border: 1px solid #c4c4c4;
+  outline-style: inherit;
+  outline-color: white;
+  box-shadow: none;
 
-    outline-color: #e8eff2;
-  }
-  .v-sheet.v-list {
-    background: #e8eff2;
-  }
+  outline-color: #e8eff2;
+}
+.v-sheet.v-list {
+  background: #e8eff2;
+}
 </style>

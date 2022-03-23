@@ -541,7 +541,7 @@
     </v-app-bar>
 
     <!-- LURAH -->
-    <v-app-bar class="appbar" color="white" flat v-if="user.role == 'Lurah'">
+    <v-app-bar class="appbar" color="white" flat v-if="user.role == 'Lurr'">
       <v-app-bar-nav-icon @click="toggleDrawer()" />
 
       <v-spacer />
