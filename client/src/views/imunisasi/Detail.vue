@@ -1,6 +1,7 @@
 <template>
   <div class="regist">
     <h1 class="mb-10">Edit Data Imunisasi</h1>
+    {{ this.imunisasi }}
     <div class="row">
       <div class="col mx-auto" style="font-size: 17pt">
         <div class="form-group row">

@@ -1,5 +1,9 @@
 <template>
-  <div id="app" style="margin-left: 25px; margin-right: 25px" v-if="this.user.role == 'Admin'">
+  <div
+    id="app"
+    style="margin-left: 25px; margin-right: 25px"
+    v-if="this.user.role == 'Admin'"
+  >
     <!-- FOR ALL DEVICE -->
     <v-container>
       <b-row>
@@ -103,26 +107,30 @@
         {{ item.waktu | moment("dddd / DD - MMMM - YYYY") }}
       </template>
       <template v-slot:[`item.actions`]="{ item }">
-        <v-menu offset-y>
+        <v-tooltip bottom>
           <template v-slot:activator="{ on, attrs }">
-            <v-btn v-bind="attrs" v-on="on" icon>
-              <v-icon dark>mdi-dots-horizontal</v-icon>
-            </v-btn>
-          </template>
-          <v-list>
-            <v-list-item
+            <v-btn
+              v-bind="attrs"
+              v-on="on"
+              icon
               :to="{
                 path: `/informasi/update/${item.id}`,
               }"
               link
             >
-              <v-list-item-title class="text-center">Edit</v-list-item-title>
-            </v-list-item>
-            <v-list-item @click="hapusDialog(item)" link>
-              <v-list-item-title class="text-center">Hapus</v-list-item-title>
-            </v-list-item>
-          </v-list>
-        </v-menu>
+              <v-icon small>mdi-pencil</v-icon>
+            </v-btn>
+          </template>
+          <span>Edit Data</span>
+        </v-tooltip>
+        <v-tooltip bottom>
+          <template v-slot:activator="{ on, attrs }">
+            <v-btn v-bind="attrs" v-on="on" icon link @click="hapusDialog(item)">
+              <v-icon small>mdi-delete</v-icon>
+            </v-btn>
+          </template>
+          <span>Hapus Data</span>
+        </v-tooltip>
       </template>
     </v-data-table>
     <b-modal v-model="dialog" centered no-close-on-backdrop @ok="hapusData(idData)">
@@ -154,7 +162,11 @@
         <v-card color="primary" dark class="text-center">
           <v-card-text>
             Mohon tunggu sebentar......
-            <v-progress-linear indeterminate color="white" class="mb-0"></v-progress-linear>
+            <v-progress-linear
+              indeterminate
+              color="white"
+              class="mb-0"
+            ></v-progress-linear>
           </v-card-text>
         </v-card>
       </div>
@@ -163,241 +175,241 @@
 </template>
 
 <script>
-  import { mapGetters } from "vuex";
-  import KecamatanSelected from "../../components/SelectKecamatanInformasi.vue";
+import { mapGetters } from "vuex";
+import KecamatanSelected from "../../components/SelectKecamatanInformasi.vue";
 
-  export default {
-    components: { KecamatanSelected },
-    data() {
-      return {
-        informasi: [],
-        search: "",
-        date_filter: "",
-        dialog: false,
-        kec: "",
-        kecamatan: "",
-        info: "",
-        idData: "",
-        waktu: "",
-        dialogOverlay: false,
-        date: "",
-        firstLoad: true,
-        isLoading: true,
-        kecamatan: [],
-        table: [
-          {
-            text: "Kecamatan",
-            value: "nama_instansi",
-          },
-          {
-            text: "Informasi",
-            value: "informasi",
-          },
-          {
-            text: "Waktu",
-            value: "waktu",
-          },
-          {
-            value: "actions",
-            sortable: false,
-          },
-        ],
-      };
-    },
-    watch: {
-      search: {
-        handler: function (val) {
-          this.renderData(val);
+export default {
+  components: { KecamatanSelected },
+  data() {
+    return {
+      informasi: [],
+      search: "",
+      date_filter: "",
+      dialog: false,
+      kec: "",
+      kecamatan: "",
+      info: "",
+      idData: "",
+      waktu: "",
+      dialogOverlay: false,
+      date: "",
+      firstLoad: true,
+      isLoading: true,
+      kecamatan: [],
+      table: [
+        {
+          text: "Kecamatan",
+          value: "nama_instansi",
         },
-        deep: true,
+        {
+          text: "Informasi",
+          value: "informasi",
+        },
+        {
+          text: "Waktu",
+          value: "waktu",
+        },
+        {
+          value: "actions",
+          sortable: false,
+        },
+      ],
+    };
+  },
+  watch: {
+    search: {
+      handler: function (val) {
+        this.renderData(val);
       },
-      overlay(val) {
-        val &&
-          setTimeout(() => {
-            this.overlay = false;
-          }, 1000);
-      },
+      deep: true,
     },
-    created() {
+    overlay(val) {
+      val &&
+        setTimeout(() => {
+          this.overlay = false;
+        }, 1000);
+    },
+  },
+  created() {
+    this.renderData();
+  },
+  watch: {
+    clearable: {
+      handler: function (val) {
+        this.renderData("");
+      },
+      deep: true,
+    },
+  },
+  computed: {
+    ...mapGetters({
+      user: "auth/user",
+    }),
+    format_date() {
+      if (this.date) return this.$moment(this.date).format("DD - MMMM - YYYY");
+    },
+  },
+  methods: {
+    renderData(search) {
+      this.isLoading = true;
+
+      let waktu = "";
+      if (this.date) {
+        waktu = this.date;
+      } else {
+        waktu = null;
+      }
+
+      this.$http
+        .get("/informasi/all", {
+          params: {
+            instansi_id: this.kecamatan.value,
+            waktu,
+          },
+        })
+        .then((response) => {
+          this.informasi = response.data.data;
+          this.firstLoad = false;
+          this.isLoading = false;
+        })
+        .catch((error) => {
+          this.firstLoad = false;
+          this.isLoading = false;
+        });
+    },
+    hapusDialog(item) {
+      this.dialog = true;
+      this.idData = item.id;
+      this.kec = item.nama_instansi;
+      this.info = item.informasi;
+      this.waktu = this.$moment(item.waktu).format("dddd, DD - MMMM - YYYY");
+    },
+    hapusData(idData) {
+      this.dialogOverlay = true;
+      this.firstLoad = true;
+      this.$http
+        .delete("/informasi/" + idData)
+        .then((response) => {
+          let self = this;
+          setTimeout(function () {
+            self.dialog = false;
+            self.renderData();
+            self.$toast.success("Data Berhasil Dihapus");
+            self.dialogOverlay = false;
+          }, 10 * 10 * 10);
+        })
+        .catch((error) => {
+          console.log(error);
+          console.log("gagal");
+        });
+    },
+    kecamatanSelected(kecamatan) {
+      this.kecamatan = "";
+      this.filterKecamatan = null;
+      this.date_filter = false;
+      if (kecamatan) {
+        this.kecamatan = kecamatan;
+        this.filterKecamatan = kecamatan.id;
+      } else {
+        this.downloadDisabled = true;
+        this.kelurahanDisabled = true;
+      }
+      if (this.date && this.kecamatan) {
+        this.downloadDisabled = false;
+      } else {
+        this.downloadDisabled = true;
+      }
       this.renderData();
     },
-    watch: {
-      clearable: {
-        handler: function (val) {
-          this.renderData("");
-        },
-        deep: true,
-      },
-    },
-    computed: {
-      ...mapGetters({
-        user: "auth/user",
-      }),
-      format_date() {
-        if (this.date) return this.$moment(this.date).format("DD - MMMM - YYYY");
-      },
-    },
-    methods: {
-      renderData(search) {
-        this.isLoading = true;
-
-        let waktu = "";
-        if (this.date) {
-          waktu = this.date;
-        } else {
-          waktu = null;
-        }
-
-        this.$http
-          .get("/informasi/all", {
-            params: {
-              instansi_id: this.kecamatan.value,
-              waktu,
-            },
-          })
-          .then((response) => {
-            this.informasi = response.data.data;
-            this.firstLoad = false;
-            this.isLoading = false;
-          })
-          .catch((error) => {
-            this.firstLoad = false;
-            this.isLoading = false;
-          });
-      },
-      hapusDialog(item) {
-        this.dialog = true;
-        this.idData = item.id;
-        this.kec = item.nama_instansi;
-        this.info = item.informasi;
-        this.waktu = this.$moment(item.waktu).format("dddd, DD - MMMM - YYYY");
-      },
-      hapusData(idData) {
-        this.dialogOverlay = true;
-        this.firstLoad = true;
-        this.$http
-          .delete("/informasi/" + idData)
-          .then((response) => {
-            let self = this;
-            setTimeout(function () {
-              self.dialog = false;
-              self.renderData();
-              self.$toast.success("Data Berhasil Dihapus");
-              self.dialogOverlay = false;
-            }, 10 * 10 * 10);
-          })
-          .catch((error) => {
-            console.log(error);
-            console.log("gagal");
-          });
-      },
-      kecamatanSelected(kecamatan) {
-        this.kecamatan = "";
-        this.filterKecamatan = null;
-        this.date_filter = false;
-        if (kecamatan) {
-          this.kecamatan = kecamatan;
-          this.filterKecamatan = kecamatan.id;
-        } else {
-          this.downloadDisabled = true;
-          this.kelurahanDisabled = true;
-        }
-        if (this.date && this.kecamatan) {
-          this.downloadDisabled = false;
-        } else {
-          this.downloadDisabled = true;
-        }
-        this.renderData();
-      },
-    },
-  };
+  },
+};
 </script>
 
 <style scoped lang="scss">
-  .helper {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell,
-      "Open Sans", "Helvetica Neue", sans-serif;
-    padding-left: 80px;
-    padding-right: 50px;
-  }
-  .search {
-    padding-left: 100px;
-    padding-right: 50px;
-    margin-top: 50px;
-  }
-  .search2 {
-    margin-top: 150px;
-    margin-right: 150px;
-    box-sizing: content-box;
-    width: 150px;
-  }
-  .v-menu__content {
-    border-radius: 8px;
-    border: 1px solid #c4c4c4;
-    outline-style: inherit;
-    outline-color: white;
-    box-shadow: none;
+.helper {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu,
+    Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+  padding-left: 80px;
+  padding-right: 50px;
+}
+.search {
+  padding-left: 100px;
+  padding-right: 50px;
+  margin-top: 50px;
+}
+.search2 {
+  margin-top: 150px;
+  margin-right: 150px;
+  box-sizing: content-box;
+  width: 150px;
+}
+.v-menu__content {
+  border-radius: 8px;
+  border: 1px solid #c4c4c4;
+  outline-style: inherit;
+  outline-color: white;
+  box-shadow: none;
 
-    outline-color: #e8eff2;
+  outline-color: #e8eff2;
+}
+.v-sheet.v-list {
+  background: #e8eff2;
+}
+.mobile {
+  color: #333;
+}
+
+@media screen and (max-width: 768px) {
+  .mobile table.v-table tr {
+    max-width: 100%;
+    position: relative;
+    display: block;
   }
-  .v-sheet.v-list {
-    background: #e8eff2;
-  }
-  .mobile {
-    color: #333;
+
+  .mobile table.v-table tr:nth-child(odd) {
+    border-left: 6px solid deeppink;
   }
 
-  @media screen and (max-width: 768px) {
-    .mobile table.v-table tr {
-      max-width: 100%;
-      position: relative;
-      display: block;
-    }
-
-    .mobile table.v-table tr:nth-child(odd) {
-      border-left: 6px solid deeppink;
-    }
-
-    .mobile table.v-table tr:nth-child(even) {
-      border-left: 6px solid cyan;
-    }
-
-    .mobile table.v-table tr td {
-      display: flex;
-      width: 100%;
-      border-bottom: 1px solid #f5f5f5;
-      height: auto;
-      padding: 10px;
-    }
-
-    .mobile table.v-table tr td ul li:before {
-      content: attr(data-label);
-      padding-right: 0.5em;
-      text-align: left;
-      display: block;
-      color: #999;
-    }
-    .v-datatable__actions__select {
-      width: 50%;
-      margin: 0px;
-      justify-content: flex-start;
-    }
-    .mobile .theme--light.v-table tbody tr:hover:not(.v-datatable__expand-row) {
-      background: transparent;
-    }
+  .mobile table.v-table tr:nth-child(even) {
+    border-left: 6px solid cyan;
   }
-  .flex-content {
-    padding: 0;
-    margin: 0;
-    list-style: none;
+
+  .mobile table.v-table tr td {
     display: flex;
-    flex-wrap: wrap;
     width: 100%;
+    border-bottom: 1px solid #f5f5f5;
+    height: auto;
+    padding: 10px;
   }
 
-  .flex-item {
-    padding: 5px;
-    width: 50%;
-    height: 60px;
+  .mobile table.v-table tr td ul li:before {
+    content: attr(data-label);
+    padding-right: 0.5em;
+    text-align: left;
+    display: block;
+    color: #999;
   }
+  .v-datatable__actions__select {
+    width: 50%;
+    margin: 0px;
+    justify-content: flex-start;
+  }
+  .mobile .theme--light.v-table tbody tr:hover:not(.v-datatable__expand-row) {
+    background: transparent;
+  }
+}
+.flex-content {
+  padding: 0;
+  margin: 0;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  width: 100%;
+}
+
+.flex-item {
+  padding: 5px;
+  width: 50%;
+  height: 60px;
+}
 </style>

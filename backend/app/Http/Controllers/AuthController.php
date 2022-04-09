@@ -231,9 +231,10 @@ class AuthController extends Controller
     {
         $instansi_id = $request->input('instansi_id');
         $role = $request->input('role');
+        $kelurahan = $request->input('kelurahan');
 
     
-       if($request->filled('instansi_id','role')) {
+       if($request->filled('instansi_id','role','kelurahan')) {
            $instansi = User::select('users.id','users.instansi_id','users.name','users.username','users.email','users.role','kelurahan.nama_kelurahan')
            ->leftJoin('kelurahan','kelurahan.id','users.kelurahan_id')
            ->when($instansi_id, function ($query, $instansi_id) {
@@ -242,6 +243,9 @@ class AuthController extends Controller
            ->when($role, function ($query, $role) {
                return $query->where('users.role', $role);
            })
+           ->when($kelurahan, function ($query, $role) {
+            return $query->where('kelurahan.nama_kelurahan', $role);
+             })
            ->orderBy('users.role','ASC')
            ->paginate(10);
            
@@ -250,6 +254,9 @@ class AuthController extends Controller
         ->leftJoin('kelurahan','kelurahan.id','users.kelurahan_id')
         ->when($instansi_id, function ($query, $instansi_id) {
             return $query->where('users.instansi_id', $instansi_id);
+        })
+        ->when($kelurahan, function ($query, $role) {
+            return $query->where('kelurahan.nama_kelurahan', $role);
         })
         ->where(
             function($query) {

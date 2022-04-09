@@ -84,26 +84,30 @@
         <div v-else>{{ item.role }}</div>
       </template>
       <template v-slot:[`item.actions`]="{ item }">
-        <v-menu offset-y>
+        <v-tooltip bottom>
           <template v-slot:activator="{ on, attrs }">
-            <v-btn v-bind="attrs" v-on="on" icon>
-              <v-icon dark>mdi-dots-horizontal</v-icon>
+            <v-btn
+              v-bind="attrs"
+              v-on="on"
+              icon
+              :to="{
+                path: `/user/update/${item.id}`,
+              }"
+              link
+            >
+              <v-icon small>mdi-pencil</v-icon>
             </v-btn>
           </template>
-          <v-list>
-            <template class="menu">
-              <v-list-item
-                :to="{
-                  path: `/user/update/${item.id}`,
-                }"
-                link
-              >
-                Edit
-              </v-list-item>
-              <v-list-item @click="hapusDialog(item)" link> Hapus </v-list-item>
-            </template>
-          </v-list>
-        </v-menu>
+          <span>Edit Data</span>
+        </v-tooltip>
+        <v-tooltip bottom>
+          <template v-slot:activator="{ on, attrs }">
+            <v-btn v-bind="attrs" v-on="on" icon link @click="hapusDialog(item)">
+              <v-icon small>mdi-delete</v-icon>
+            </v-btn>
+          </template>
+          <span>Hapus Data</span>
+        </v-tooltip>
       </template>
     </v-data-table>
     <b-modal v-model="dialog" centered no-close-on-backdrop @ok="hapusData(idData)">

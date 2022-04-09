@@ -308,28 +308,38 @@
               <td v-if="item.is_verified == 3">Ditolak</td>
 
               <td>
-                <v-menu offset-y v-if="item.is_verified == 3">
-                  <template v-slot:activator="{ on, attrs }">
-                    <v-btn v-bind="attrs" v-on="on" icon>
-                      <v-icon dark>mdi-dots-horizontal</v-icon>
-                    </v-btn>
-                  </template>
-                  <v-list>
-                    <template class="menu">
-                      <v-list-item
+                <div v-if="item.is_verified == 3" class="text-right">
+                  <v-tooltip bottom>
+                    <template v-slot:activator="{ on, attrs }">
+                      <v-btn
+                        v-bind="attrs"
+                        v-on="on"
+                        icon
                         :to="{
                           path: `/kependudukan/update/${item.id}`,
                         }"
                         link
                       >
-                        <v-list-item-title class="text-center">Edit</v-list-item-title>
-                      </v-list-item>
-                      <v-list-item @click="hapusDialog(item)" link>
-                        <v-list-item-title class="text-center">Hapus</v-list-item-title>
-                      </v-list-item>
+                        <v-icon small>mdi-pencil</v-icon>
+                      </v-btn>
                     </template>
-                  </v-list>
-                </v-menu>
+                    <span>Edit Data</span>
+                  </v-tooltip>
+                  <v-tooltip bottom>
+                    <template v-slot:activator="{ on, attrs }">
+                      <v-btn
+                        v-bind="attrs"
+                        v-on="on"
+                        icon
+                        @click="hapusDialog(item)"
+                        link
+                      >
+                        <v-icon small>mdi-delete</v-icon>
+                      </v-btn>
+                    </template>
+                    <span>Hapus Data</span>
+                  </v-tooltip>
+                </div>
               </td>
             </tr>
           </tbody>

@@ -374,23 +374,36 @@
               <td v-if="item.is_verified == 1">Menunggu Validasi</td>
               <td v-if="item.is_verified == 2">Sudah Divalidasi</td>
               <td>
-                <v-menu offset-y v-if="item.is_verified == 1">
-                  <template v-slot:activator="{ on, attrs }">
-                    <v-btn v-bind="attrs" v-on="on" icon>
-                      <v-icon dark>mdi-dots-horizontal</v-icon>
-                    </v-btn>
-                  </template>
-                  <v-list>
-                    <v-list-item link @click="dialogValid(item)">
-                      <v-list-item-title class="text-center">Validasi</v-list-item-title>
-                    </v-list-item>
-                    <v-list-item link @click="dialogTolak(item)">
-                      <v-list-item-title style="text-align: center">
-                        Tolak
-                      </v-list-item-title>
-                    </v-list-item>
-                  </v-list>
-                </v-menu>
+                <div v-if="item.is_verified == 1" class="text-right">
+                  <v-tooltip bottom>
+                    <template v-slot:activator="{ on, attrs }">
+                      <v-btn
+                        v-bind="attrs"
+                        v-on="on"
+                        icon
+                        link
+                        @click="dialogValid(item)"
+                      >
+                        <v-icon small>mdi-checkbox-marked-circle</v-icon>
+                      </v-btn>
+                    </template>
+                    <span>Validasi Data</span>
+                  </v-tooltip>
+                  <v-tooltip bottom>
+                    <template v-slot:activator="{ on, attrs }">
+                      <v-btn
+                        v-bind="attrs"
+                        v-on="on"
+                        icon
+                        link
+                        @click="dialogTolak(item)"
+                      >
+                        <v-icon small>mdi-close-circle</v-icon>
+                      </v-btn>
+                    </template>
+                    <span>Tolak Data</span>
+                  </v-tooltip>
+                </div>
               </td>
             </tr>
           </tbody>

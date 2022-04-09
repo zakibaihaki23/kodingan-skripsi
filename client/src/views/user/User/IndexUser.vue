@@ -33,8 +33,8 @@
     </v-container>
     <v-divider class="d-flex d-none d-sm-block" style="margin-right: 40px"></v-divider>
     <br />
-    <b-row style="margin-top: 1px">
-      <b-col cols="12" lg="4">
+    <b-row style="margin-top: 1px" cols-lg="5" cols-md="1">
+      <b-col>
         <div>
           <v-autocomplete
             v-show="!firstLoad"
@@ -56,6 +56,16 @@
           </v-autocomplete>
         </div>
       </b-col>
+      <b-col lg="3">
+        <KelurahanSelected
+          v-show="!firstLoad"
+          v-model="kelurahan"
+          @selected="KelurahanSelected"
+        >
+        </KelurahanSelected>
+      </b-col>
+      <b-col lg="1"></b-col>
+      <b-col></b-col>
     </b-row>
 
     <v-skeleton-loader
@@ -78,26 +88,32 @@
         <div v-if="item.role == 'Lurr'">Lurah</div>
       </template>
       <template v-slot:[`item.actions`]="{ item }">
-        <v-menu offset-y>
-          <template v-slot:activator="{ on, attrs }">
-            <v-btn v-bind="attrs" v-on="on" icon>
-              <v-icon dark>mdi-dots-horizontal</v-icon>
-            </v-btn>
-          </template>
-          <v-list>
-            <template class="menu">
-              <v-list-item
+        <div>
+          <v-tooltip bottom>
+            <template v-slot:activator="{ on, attrs }">
+              <v-btn
+                v-bind="attrs"
+                v-on="on"
+                icon
                 :to="{
                   path: `/user/update/${item.id}`,
                 }"
                 link
               >
-                Edit
-              </v-list-item>
-              <v-list-item @click="hapusDialog(item)" link> Hapus </v-list-item>
+                <v-icon small>mdi-pencil</v-icon>
+              </v-btn>
             </template>
-          </v-list>
-        </v-menu>
+            <span>Edit Data</span>
+          </v-tooltip>
+          <v-tooltip bottom>
+            <template v-slot:activator="{ on, attrs }">
+              <v-btn v-bind="attrs" v-on="on" icon link @click="hapusDialog(item)">
+                <v-icon small>mdi-delete</v-icon>
+              </v-btn>
+            </template>
+            <span>Hapus Data</span>
+          </v-tooltip>
+        </div>
       </template>
     </v-data-table>
     <div class="mt-5">
@@ -168,8 +184,10 @@
 
 <script>
 import { mapGetters } from "vuex";
+import KelurahanSelected from "../../../components/SelectKelurahan.vue";
 
 export default {
+  components: { KelurahanSelected },
   data() {
     return {
       dialog: false,
@@ -185,7 +203,7 @@ export default {
       role: "",
       kelurahan: "",
       search: "",
-      kecamatan: [],
+      kelurahan: [],
       data: [],
       pagination: {
         current_page: 1,
@@ -265,12 +283,20 @@ export default {
       this.renderData();
     },
     renderData(search) {
+      let kelurahan = "";
+      if (this.filterKelurahan || this.filterKelurahan == 0) {
+        kelurahan = this.filterKelurahan;
+      } else {
+        kelurahan = null;
+      }
+
       this.isLoading = true;
       this.$http
         .get("/user-camat", {
           params: {
             instansi_id: this.user.instansi_id,
             role: this.role.value,
+            kelurahan,
           },
         })
         .then((response) => {
@@ -313,21 +339,10 @@ export default {
           this.dialogOverlay = false;
         });
     },
-    kecamatanSelected(kecamatan) {
-      this.kecamatan = "";
-      this.filterKecamatan = null;
-      this.date_filter = false;
-      if (kecamatan) {
-        this.kecamatan = kecamatan;
-        this.filterKecamatan = kecamatan.id;
-      } else {
-        this.downloadDisabled = true;
-        this.kelurahanDisabled = true;
-      }
-      if (this.date && this.kecamatan) {
-        this.downloadDisabled = false;
-      } else {
-        this.downloadDisabled = true;
+    KelurahanSelected(kelurahan) {
+      this.filterKelurahan = null;
+      if (kelurahan) {
+        this.filterKelurahan = kelurahan.name;
       }
       this.renderData();
     },
